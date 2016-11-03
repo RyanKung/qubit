@@ -1,0 +1,10 @@
+from typing import NamedTuple
+from typing import NewType
+
+__all__ = ['json', 'varchar',
+           'boolean', 'Table']
+
+json = NewType('json', dict)
+varchar = NewType('varchar', str)
+boolean = NewType('boolean', bool)
+Table = NamedTuple
