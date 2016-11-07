@@ -24,20 +24,14 @@ CREATE TABLE spout(
        body text,
        closure json default '{}',
        created_at timestamp default now(),
-       active boolean default True
+       active boolean default True,
+       rate integer default 1
 );
 
-CREATE TABLE qutrit(
-       id serial primary key,
-       name varchar(200) default 'lambda',
-       operator text,
-       created_at timestamp default now(),
-       active boolean default True
-);
 
 CREATE TABLE qubit(
        id serial primary key,
-       spout integer,
+       qutrit integer,
        name varchar(200) default 'lambda',
        mappers integer ARRAY,
        reducer integer default 0,

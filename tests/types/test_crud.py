@@ -13,7 +13,7 @@ def test_mapper():
     mid = Mapper.create(**data)
     mapper = Mapper.get_raw(mid)
     assert isinstance(mapper, Mapper.prototype)
-    m_fn = Mapper.load(mapper)
+    m_fn = Mapper.activate(mapper)
     assert m_fn(1) == 2
 
 
@@ -25,5 +25,5 @@ def test_reducer():
     mid = Reducer.create(**data)
     reducer = Reducer.get_raw(mid)
     assert isinstance(reducer, Reducer.prototype)
-    m_fn = Reducer.load(reducer)
+    m_fn = Reducer.activate(reducer)
     assert m_fn(1, 2) == 3
