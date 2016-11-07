@@ -1,31 +1,34 @@
 from qubit.io.postgres import types
 from qubit.io.postgres import QuerySet
 
-__all__ = ['MapReducer']
+__all__ = ['Mapper']
 
 mapper_table = types.Table('mapper', [
     ('name', types.varchar),
     ('side_effect', types.boolean),
     ('closure', types.json),
-    ('body', types.json)
-])
-
-reducer_table = types.Table('mapper', [
-    ('name', types.varchar),
-    ('side_effect', types.boolean),
-    ('closure', types.json),
-    ('body', types.json)
+    ('body', types.text)
 ])
 
 
-def MapReducer(object):
-    mapper = QuerySet(mapper_table)
-    reducer = QuerySet(reducer_table)
+class Mapper(object):
+    manager = QuerySet(mapper_table)
 
     @classmethod
-    def create_mapper(self, *args, **kwargs):
-        return mapper.insert(*args, **kwargs)
+    def create(cls, name, body, closure={}, side_effect=0):
+        return cls.manager.insert(name=name,
+                                  body=body,
+                                  closure=closure,
+                                  side_effect=side_effect)
 
     @classmethod
-    def create_reducer(self, *args, **kwargs):
-        return reducer.insert(*args, **kwargs)
+    def get_raw(cls, mid):
+        return cls.manager.get(mid)
+
+    @staticmethod
+    def load_mapper(mapper: dict):
+        pass
+
+    @classmethod
+    def delete(cls, mid):
+        return cls.mapper.delete(id=mid)

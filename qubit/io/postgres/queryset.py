@@ -5,18 +5,18 @@ __all__ = ['QuerySet']
 
 
 def query(sql):
-    res = conn.execute(sql)
-    return bool(res) and [utils.utf8_dict(r) for r in res]
+    res = conn.prepare(sql)()
+    return res
 
 
 def update(sql):
-    res = conn.execute(sql)
-    return bool(res)
+    conn.execute(sql)
+    return True
 
 
 def insert(sql):
-    res_id, status = conn.execute(sql)
-    return False if status < 0 else str(res_id)
+    res = conn.prepare(sql)()[0]
+    return res[0] if len(res) == 1 else res
 
 
 class QuerySet(object):
@@ -29,7 +29,7 @@ class QuerySet(object):
         'orderby_decr': 'ORDER BY {field} DECR',
         'filter_with_orderby': "SELECT {fields} from {table} WHERE {rule} ORDER BY {sort_key} LIMIT {size} OFFSET {offset}",
         'filter_with_orderby_decr': "SELECT {fields} from {table} WHERE {rule} ORDER BY {sort_key} LIMIT {size} OFFSET {offset}",
-        'insert': 'INSERT INTO {table} ({keys}) VALUES ({values})',
+        'insert': 'INSERT INTO {table} ({keys}) VALUES ({values}) RETURNING id;',
         'replace': 'REPLACE INTO {table} ({keys}) VALUES ({values})',
         'delete': "DELETE FROM {table} WHERE {rules}",
         'update': "UPDATE {table} SET {key_value_pairs} WHERE {rules}",
@@ -65,7 +65,7 @@ class QuerySet(object):
             'fields': utils.concat(map(utils.wrap_key, self.fields)),
             'id': oid
         }))
-        return res[0] if res else None
+        return dict(zip(self.fields, res[0])) if res else None
 
     def search(self, key, value, start, limit, filters=''):
         return query(self._sql['search'].format(**{

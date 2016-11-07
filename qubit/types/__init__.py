@@ -1,3 +1,4 @@
-from .mapreduce import MapReducer
+from .mapper import Mapper
+from .reducer import Reducer
 
-__all__ = ['MapReducer']
+__all__ = ['Mapper', 'Reducer']

@@ -7,4 +7,6 @@ __all__ = ['json', 'varchar',
 json = NewType('json', dict)
 varchar = NewType('varchar', str)
 boolean = NewType('boolean', bool)
+text = NewType('text', str)
+
 Table = NamedTuple
