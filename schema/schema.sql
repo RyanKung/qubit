@@ -21,15 +21,34 @@ CREATE TABLE reducer(
 CREATE TABLE spout(
        id serial primary key,
        name varchar(200) default 'lambda',
-       spout text,
+       body text,
        closure json default '{}',
        created_at timestamp default now(),
        active boolean default True
 );
 
+CREATE TABLE qutrit(
+       id serial primary key,
+       name varchar(200) default 'lambda',
+       operator text,
+       created_at timestamp default now(),
+       active boolean default True
+);
+
 CREATE TABLE qubit(
+       id serial primary key,
+       spout integer,
+       name varchar(200) default 'lambda',
+       mappers integer ARRAY,
+       reducer integer default 0,
+       closure json default '{}',
+       created_at timestamp default now(),
+       active boolean default True
+);
+
+CREATE TABLE states(
        timestamp timestamp primary key default now(),
-       spout integer references spout(id),
+       qubit integer,
        name varchar(200) default '',
        datum json default '{}',
        tags text default ''

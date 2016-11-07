@@ -27,8 +27,10 @@ class QuerySet(object):
         'count_on_rule': 'SELECT COUNT({field}) FROM {table} WHERE {rule}',
         'orderby': 'ORDER BY {field}',
         'orderby_decr': 'ORDER BY {field} DECR',
-        'filter_with_orderby': "SELECT {fields} from {table} WHERE {rule} ORDER BY {sort_key} LIMIT {size} OFFSET {offset}",
-        'filter_with_orderby_decr': "SELECT {fields} from {table} WHERE {rule} ORDER BY {sort_key} LIMIT {size} OFFSET {offset}",
+        'filter_with_orderby': "SELECT {fields} from {table} WHERE {rule} ORDER BY {sort_key} LIMIT {size} OFFSET {offset};",
+        'filter_with_orderby_decr': "SELECT {fields} from {table} WHERE {rule} ORDER BY {sort_key} LIMIT {size} OFFSET {offset};",
+        'filter_in': "SELECT {fields} FROM {table} WHERE {key} IN ({targets});",
+        'filter_in_range': "SELECT {fields} FROM {table} WHERE {key} <= {end} and {key} >= {start};",
         'insert': 'INSERT INTO {table} ({keys}) VALUES ({values}) RETURNING id;',
         'replace': 'REPLACE INTO {table} ({keys}) VALUES ({values})',
         'delete': "DELETE FROM {table} WHERE {rules}",
@@ -39,7 +41,6 @@ class QuerySet(object):
         'incr': "UPDATE {table} SET {key}={key}+'{num}' WHERE id='{id}'",
         'decr': "UPDATE {table} SET {key}={key}-'{num}' WHERE id='{id}'",
         'search': "SELECT {fields} FROM {table} WHERE {extra} {key} LIKE '%{value}%' LIMIT {size} OFFSET {offset}",
-        'filter_in': "SELECT {fields} FROM {table} WHERE {key} IN ({targets});",
         'insert_or_update': "INSERT INTO {table} ({keys}) VALUES ({values}) ON DUPLICATE KEY UPDATE {key_value_pairs};"
     }
 
@@ -102,6 +103,15 @@ class QuerySet(object):
             'fields': utils.concat(map(utils.wrap_key, fields or self.fields)),
             'key': key,
             'targets': utils.concat(map(utils.wrap_value, targets))
+        }))
+
+    def find_in_range(self, key, targets, start, end, fields=[]) -> dict:
+        return query(self._sql['filter_in_range'].format(**{
+            'table': self.tablename,
+            'fields': utils.concat(map(utils.wrap_key, fields or self.fields)),
+            'key': key,
+            'start': start,
+            'end': end
         }))
 
     def count(self, field):
