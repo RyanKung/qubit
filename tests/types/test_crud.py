@@ -1,5 +1,6 @@
 from qubit.types import Mapper
 from qubit.types import Reducer
+from qubit.types import Spout
 
 
 def test_mapper():
@@ -27,3 +28,13 @@ def test_reducer():
     assert isinstance(reducer, Reducer.prototype)
     m_fn = Reducer.activate(reducer)
     assert m_fn(1, 2) == 3
+
+
+def test_spout():
+    data = {
+        'name': 'tester',
+        'body': 'print("spout")',
+        'closure': {},
+        'rate': 1
+    }
+    Spout.create(**data)

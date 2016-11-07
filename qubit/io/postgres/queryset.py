@@ -53,7 +53,7 @@ class QuerySet(object):
         if not isinstance(data, dict):
             return utils.escape(str(data.encode('utf8')))
         if not all(f in self.fields for f in data.keys()):
-            raise Exception("Unknew Fields", data.keys())
+            raise Exception("Unknew Fields", self.fields, data.keys())
         try:
             res = {k: utils.escape(v) for k, v in data.items()}
             return res
@@ -95,7 +95,7 @@ class QuerySet(object):
             }) or ''
 
         }))
-        return res
+        return [dict(zip(self.fields, r)) for r in res]
 
     def find_in(self, key, targets, fields=[]) -> dict:
         return query(self._sql['filter_in'].format(**{
@@ -106,13 +106,14 @@ class QuerySet(object):
         }))
 
     def find_in_range(self, key, targets, start, end, fields=[]) -> dict:
-        return query(self._sql['filter_in_range'].format(**{
+        res = query(self._sql['filter_in_range'].format(**{
             'table': self.tablename,
             'fields': utils.concat(map(utils.wrap_key, fields or self.fields)),
             'key': key,
             'start': start,
             'end': end
         }))
+        return [dict(zip(self.fields, r)) for r in res]
 
     def count(self, field):
         field = utils.escape(field) or '*'
@@ -132,7 +133,7 @@ class QuerySet(object):
 
     def filter(self, limit=100, offset=0, sort_key='', *args, **kwargs):
         data = self.format(kwargs)
-        return query(self._sql['filter'].format(**{
+        res = query(self._sql['filter'].format(**{
             'table': self.tablename,
             'rule': utils.get_and_seg(data),
             'size': str(int(limit)),
@@ -142,6 +143,7 @@ class QuerySet(object):
                 'field': sort_key
             }) or ''
         }))
+        return [dict(zip(self.fields, r)) for r in res]
 
     def sortby(self, sort_key='id', offset=0, limit=100, extra="", decr=False, *args, **kwargs):
         data = self.format(kwargs)
