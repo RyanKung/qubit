@@ -1,5 +1,3 @@
-CREATE SCHEMA qubit;
-
 CREATE TABLE mapper(
        id serial primary key,
        name varchar(200) default 'lambda',

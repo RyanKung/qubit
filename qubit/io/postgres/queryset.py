@@ -5,22 +5,29 @@ __all__ = ['QuerySet']
 
 
 def query(sql):
+    cur = conn.cursor()
     try:
-        res = conn.prepare(sql)()
+        cur.execute(sql)
+        conn.commit()
+        res = cur.fetchall()
         return res
     except Exception as e:
-        print('fucking', sql)
         raise(e)
 
 
 def update(sql):
-    res = conn.perpare(sql)()
-    return res
+    cur = conn.cursor()
+    cur.execute(sql)
+    conn.commit()
+    return
 
 
 def insert(sql):
-    res = conn.prepare(sql)()[0]
-    return res[0] if len(res) == 1 else res
+    cur = conn.cursor()
+    cur.execute(sql)
+    conn.commit()
+    res = cur.fetchone()
+    return res if len(res) > 1 else res[0]
 
 
 class QuerySet(object):

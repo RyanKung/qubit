@@ -9,6 +9,8 @@ def execute_file(filename: str, conn: Connection=conn) -> Connection:
     Execute a SQL file
     '''
     with open(filename, 'r') as f:
+        cur = conn.cursor()
         data = ''.join(map(lambda l: l.strip(), f.readlines()))
-        [conn.execute(q) or print(q) for q in data.split(';') if q]
+        [cur.execute(q) or print(q) for q in data.split(';') if q]
+        conn.commit()
         return conn

@@ -14,7 +14,6 @@ class Function(object):
 
     @classmethod
     def format(cls, raw: dict):
-        raw.update({'closure': json.loads(raw['closure'])})
         return cls.prototype(**raw)
 
     @classmethod

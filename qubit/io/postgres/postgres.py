@@ -1,9 +1,14 @@
 from functools import partial
-import postgresql
+try:
+    import psycopg2
+except:
+    from psycopg2cffi import compat
+    compat.register()
+    import psycopg2
 from qubit.config import PGSQL_PARAM
 
 __all__ = ['connection', 'new_connection']
 
-connection = postgresql.open(**PGSQL_PARAM)
+connection = psycopg2.connect(**PGSQL_PARAM)
 # for creat a new connection
-new_connection = partial(postgresql.open, **PGSQL_PARAM)
+new_connection = partial(psycopg2.connect, **PGSQL_PARAM)

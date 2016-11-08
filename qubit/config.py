@@ -3,9 +3,6 @@ __all__ = ['PGSQL_PARAM', 'MQ_BROKER', 'REDIS_BACKEND']
 PGSQL_PARAM = dict(user='ryan',
                    host='127.0.0.1',
                    database='qubit',
-                   settings={
-                       'search_path': 'qubit',
-                   },
                    port=5432)
 
 MQ_PARAMS = {"host": "127.0.0.1", "port": 5672}
