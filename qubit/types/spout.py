@@ -26,7 +26,7 @@ class Spout(Function):
                 map(cls.format, cls.manager.filter(active=True))))
 
     @staticmethod
-    @partial(period_task, name='spout', period=0.1)
+    @partial(period_task, name='spout')
     @queue.task(filter=task_method)
     def activate_period_task():
         return Spout.activate_all()

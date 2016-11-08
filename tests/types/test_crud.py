@@ -31,9 +31,13 @@ def test_reducer():
 
 
 def test_spout():
+    code = '''
+    import os
+    print(os.path)
+    '''
     data = {
         'name': 'tester',
-        'body': 'print("spout")',
+        'body': code,
         'closure': {},
         'rate': 1
     }

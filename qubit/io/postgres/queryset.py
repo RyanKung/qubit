@@ -5,13 +5,17 @@ __all__ = ['QuerySet']
 
 
 def query(sql):
-    res = conn.prepare(sql)()
-    return res
+    try:
+        res = conn.prepare(sql)()
+        return res
+    except Exception as e:
+        print('fucking', sql)
+        raise(e)
 
 
 def update(sql):
-    conn.execute(sql)
-    return True
+    res = conn.perpare(sql)()
+    return res
 
 
 def insert(sql):
@@ -22,7 +26,7 @@ def insert(sql):
 class QuerySet(object):
     _sql = {
         'get_list': 'SELECT {fields} from {table} {extra} LIMIT {size} OFFSET {offset}',
-        'filter': 'SELECT {fields} from {table} WHERE {rule} {extra} LIMIT {size} OFFSET {offset}',
+        'filter': 'SELECT {fields} from {table} WHERE {rule} LIMIT {size} OFFSET {offset}',
         'count': 'SELECT COUNT({field}) FROM {table}',
         'count_on_rule': 'SELECT COUNT({field}) FROM {table} WHERE {rule}',
         'orderby': 'ORDER BY {field}',
@@ -138,10 +142,7 @@ class QuerySet(object):
             'rule': utils.get_and_seg(data),
             'size': str(int(limit)),
             'fields': utils.concat(map(utils.wrap_key, self.fields)),
-            'offset': str(int(offset)),
-            'extra': sort_key and self._sql['orderby'].format(**{
-                'field': sort_key
-            }) or ''
+            'offset': str(int(offset))
         }))
         return [dict(zip(self.fields, r)) for r in res]
 
