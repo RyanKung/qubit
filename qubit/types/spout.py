@@ -3,9 +3,10 @@ from qubit.io.postgres import types
 from qubit.io.postgres import QuerySet
 from qubit.io.celery import queue
 from qubit.io.celery import period_task
+from qubit.io.celery import task_method
 from qubit.types.function import Function
 
-__all__ = ['Spout', 'activate_period_task']
+__all__ = ['Spout']
 
 
 class Spout(Function):
@@ -24,8 +25,8 @@ class Spout(Function):
             map(cls.activate,
                 map(cls.format, cls.manager.filter(active=True))))
 
-
-@partial(period_task, name='spout')
-@queue.task
-def activate_period_task():
-    return Spout.activate_all()
+    @staticmethod
+    @partial(period_task, name='spout', period=0.1)
+    @queue.task(filter=task_method)
+    def activate_period_task():
+        return Spout.activate_all()

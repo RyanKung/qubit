@@ -2,9 +2,10 @@ import os
 from typing import Callable
 from celery import Celery
 from celery import Task
+from .utils import task_method
 from .types import PeriodTask
 
-__all__ = ['queue', 'period_task']
+__all__ = ['queue', 'period_task', 'task_method']
 
 
 class Entanglement(Task):
@@ -15,6 +16,8 @@ queue = Celery()
 
 
 def period_task(fn: Callable, period=1, name='lambda'):
+    if isinstance(fn, task_method):
+        fn = fn.task
     if not period_task.__dict__.get('tasks'):
         period_task.__dict__['tasks'] = []
     period_task.__dict__['tasks'].append(
