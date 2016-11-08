@@ -1,18 +1,17 @@
+from functools import lru_cache
 from . import utils
 from .postgres import connection as conn
-
 __all__ = ['QuerySet']
 
 
+@lru_cache(maxsize=10)
 def query(sql):
-    cur = conn.cursor()
-    try:
-        cur.execute(sql)
-        conn.commit()
-        res = cur.fetchall()
-        return res
-    except Exception as e:
-        raise(e)
+    with conn:
+        with conn.cursor() as cur:
+            cur.execute(sql)
+            conn.commit()
+            res = cur.fetchall()
+            return res
 
 
 def update(sql):
