@@ -2,4 +2,6 @@
 *.py~
 .cache
 .#*
+*.log
+celerybeat-schedule
 
