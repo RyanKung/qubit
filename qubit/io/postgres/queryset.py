@@ -6,25 +6,21 @@ __all__ = ['QuerySet']
 
 @lru_cache(maxsize=10)
 def query(sql):
-    with conn:
-        with conn.cursor() as cur:
-            cur.execute(sql)
-            conn.commit()
-            res = cur.fetchall()
-            return res
+    cur = conn.cursor()
+    cur.execute(sql)
+    res = cur.fetchall()
+    return res
 
 
 def update(sql):
     cur = conn.cursor()
     cur.execute(sql)
-    conn.commit()
     return
 
 
 def insert(sql):
     cur = conn.cursor()
     cur.execute(sql)
-    conn.commit()
     res = cur.fetchone()
     return res if len(res) > 1 else res[0]
 
@@ -63,7 +59,7 @@ class QuerySet(object):
         if not isinstance(data, dict):
             return utils.escape(str(data.encode('utf8')))
         if not all(f in self.fields for f in data.keys()):
-            raise Exception("Unknew Fields", self.fields, data.keys())
+            raise Exception("Unknew Fields", set(data.keys()) - set(self.fields))
         try:
             res = {k: utils.escape(v) for k, v in data.items()}
             return res

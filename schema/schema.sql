@@ -29,19 +29,19 @@ CREATE TABLE spout(
 
 CREATE TABLE qubit(
        id serial primary key,
-       qutrit integer,
-       name varchar(200) default 'lambda',
+       name varchar(200),
+       entangle varchar(200),
        mappers integer ARRAY,
        reducer integer default 0,
        closure json default '{}',
        created_at timestamp default now(),
-       active boolean default True
+       flying boolean default True
 );
 
 CREATE TABLE states(
+       id serial,
        timestamp timestamp primary key default now(),
        qubit integer,
-       name varchar(200) default '',
        datum json default '{}',
        tags text default ''
 );

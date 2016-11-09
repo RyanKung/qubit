@@ -1,10 +1,12 @@
 from functools import partial
+import datetime
 from qubit.io.postgres import types
 from qubit.io.postgres import QuerySet
 from qubit.io.celery import queue
 from qubit.io.celery import period_task
 from qubit.io.celery import task_method
 from qubit.types.function import Function
+from qubit.types.qubit import Qubit
 
 __all__ = ['Spout']
 
@@ -21,12 +23,24 @@ class Spout(Function):
 
     @classmethod
     def activate_all(cls):
-        return list(
-            map(cls.activate,
-                map(cls.format, cls.manager.filter(active=True))))
+        list(map(cls.measure,
+                 map(cls.format, cls.manager.filter(active=True))))
+
+    @classmethod
+    def measure(cls, spout):
+        data = dict(datum=cls.activate(spout),
+                    time=datetime.datetime.now())
+
+        sig_name = '%s:%s' % (cls.__name__, spout.name)
+        qubits = Qubit.get_flying(sig_name)
+        for qubit in qubits:
+            partial(Qubit.store_status,
+                    data=data,
+                    sender=None,
+                    qid=qubit.id)()
 
     @staticmethod
-    @partial(period_task, name='spout', period=0.01)
+    @partial(period_task, name='spout', period=1000)
     @queue.task(filter=task_method)
     def activate_period_task():
         return Spout.activate_all()

@@ -15,13 +15,13 @@ os.environ['CELERY_CONFIG_MODULE'] = 'qubit.io.celery.config'
 queue = Celery()
 
 
-def period_task(fn: Callable, period=2, name='lambda'):
+def period_task(fn: Callable, period=2000, name='lambda'):
     if isinstance(fn, task_method):
         fn = fn.task
     if not period_task.__dict__.get('tasks'):
         period_task.__dict__['tasks'] = []
     period_task.__dict__['tasks'].append(
-        PeriodTask(period, fn, name)
+        PeriodTask(period / 1000, fn, name)
     )
     return fn
 

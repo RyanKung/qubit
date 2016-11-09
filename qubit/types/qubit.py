@@ -1,43 +1,72 @@
 import json
+from functools import partial
 from datetime import datetime
+from blinker import signal
 from qubit.io.postgres import types
 from qubit.io.postgres import QuerySet
-from qubit.types.function import Function
 
 __all__ = ['Qubit', 'Status']
 
 
-class Qubit(Function):
+class Qubit(object):
 
-    prototype = types.Table('spout', [
+    prototype = types.Table('qubit', [
+        ('id', types.integer),
         ('name', types.varchar),
-        ('body', types.text),
+        ('entangle', types.varchar),
+        ('mappers', types.array),
+        ('reducer', types.integer),
         ('closure', types.json),
-        ('active', types.boolean)
+        ('flying', types.boolean)
     ])
     manager = QuerySet(prototype)
 
     @classmethod
-    def create(cls, name, body, closure={}, active=1):
-        return cls.manager.insert(name=name,
-                                  body=body,
-                                  closure=json.dumps(closure),
-                                  active=active)
+    def create(cls, name, entangle, flying=True,
+               reducer=0, mappers=[], closure={}):
+        qid = cls.manager.insert(name=name,
+                                 entangle=entangle,
+                                 closure=json.dumps(closure),
+                                 flying=flying,
+                                 reducer=reducer,
+                                 mappers=str(mappers).replace(
+                                     '[', '{').replace(']', '}'))
+        return qid
 
     @classmethod
-    def measure(cls):
-        cls.manager.filter(active=True)
-        pass
+    def get(cls, qid):
+        return cls.prototype(**cls.manager.get(qid))
 
     @classmethod
-    def entangle(cls, event):
-        pass
+    def measure(cls, qid):
+        qubit = cls.get(qid)
+        sig = signal(qubit.entangle)
+        fn = partial(cls.store_status, qid=qid)
+        sig.connect(fn)
+        assert id(fn) in sig.receivers.keys()
+
+    @classmethod
+    def get_flying(cls, entangle):
+        return list(map(lambda x: cls.prototype(**x), cls.manager.filter(
+            entangle=entangle,
+            flying=True)))
+
+    @classmethod
+    def store_status(cls, sender, data, qid, tags=[]):
+        print('sotring')
+        Status.create(qubit=qid,
+                      datum=json.dumps(data.get('datum')),
+                      timestamp=data.get('timestamp', datetime.now()),
+                      tags=tags)
+
+    @classmethod
+    def entangle(cls, qid, event):
+        cls.manager.update
 
 
 class Status(object):
-    prototype = types.Table('status', [
-        ('spout', types.integer),
-        ('name', types.varchar),
+    prototype = types.Table('states', [
+        ('qubit', types.integer),
         ('datum', types.json),
         ('tags', types.text),
         ('timestamp', types.timestamp)
@@ -46,9 +75,8 @@ class Status(object):
     manager = QuerySet(prototype)
 
     @classmethod
-    def create(cls, spout, name, datum, timestamp=datetime.now(), tags=[]):
-        return cls.manager.create(spout=spout,
-                                  name=name,
+    def create(cls, qubit, datum, timestamp=datetime.now(), tags=[]):
+        return cls.manager.insert(qubit=qubit,
                                   datum=datum,
                                   timestamp=timestamp,
                                   tags=tags)

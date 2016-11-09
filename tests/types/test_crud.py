@@ -1,7 +1,7 @@
 from qubit.types import Mapper
 from qubit.types import Reducer
 from qubit.types import Spout
-
+from qubit.types import Qubit
 
 def test_mapper():
     data = {
@@ -31,7 +31,7 @@ def test_reducer():
 
 
 def test_spout():
-    code = 'print("spout")'
+    code = '1'
     data = {
         'name': 'tester',
         'body': code,
@@ -39,3 +39,15 @@ def test_spout():
         'rate': 1
     }
     Spout.create(**data)
+
+
+def test_qubit():
+    data = {
+        'name': 'tester',
+        'entangle': 'Spout:tester',
+        'mappers': [1],
+        'reducer': 1,
+        'closure': {},
+        'flying': True
+    }
+    Qubit.create(**data)
