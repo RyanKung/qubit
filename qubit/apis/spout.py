@@ -13,14 +13,15 @@ __all__ = ['spout_api']
 @wrapper
 def spout_api(name=None):
     def create():
-        data = request.json
-        return Spout.create(**data)
+        return Spout.create(**request.json)
 
     def push():
-        pass
+        spout = Spout.get_via_name(name=name)
+        data = Spout.data(**request.json)
+        Spout.measure(spout, data)
 
     def fetch():
-        return Spout.get_via_name(name=name)
+        return Spout.get_via_name(name=name)._asdict()
 
     def update():
         pass

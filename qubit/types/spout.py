@@ -1,5 +1,7 @@
+from functools import lru_cache as cache
 from functools import partial
 import datetime
+from collections import namedtuple
 from qubit.io.postgres import types
 from qubit.io.postgres import QuerySet
 from qubit.io.celery import queue
@@ -19,6 +21,7 @@ class Spout(Function):
         ('active', types.boolean),
         ('rate', types.integer)
     ])
+    data = namedtuple('data', ['datum', 'ts'])
     manager = QuerySet(prototype)
 
     @classmethod
@@ -27,9 +30,10 @@ class Spout(Function):
                  map(cls.format, cls.manager.filter(active=True))))
 
     @classmethod
-    def measure(cls, spout):
-        data = dict(datum=cls.activate(spout),
-                    time=datetime.datetime.now())
+    def measure(cls, spout, data=None):
+        if not data:
+            data = cls.data(datum=cls.activate(spout),
+                            ts=datetime.datetime.now())
 
         sig_name = '%s:%s' % (cls.__name__, spout.name)
         qubits = Qubit.get_flying(sig_name)
@@ -38,6 +42,7 @@ class Spout(Function):
                     data=data,
                     sender=None,
                     qid=qubit.id)()
+        return 'Done'
 
     @staticmethod
     @partial(period_task, name='spout', period=1)
@@ -46,5 +51,6 @@ class Spout(Function):
         return Spout.activate_all()
 
     @classmethod
+    @cache(100)
     def get_via_name(cls, name):
-        return cls.manager.get_by(name=name)
+        return cls.format(cls.manager.get_by(name=name))

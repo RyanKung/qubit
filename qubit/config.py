@@ -1,8 +1,11 @@
-__all__ = ['PGSQL_PARAM', 'MQ_BROKER', 'REDIS_BACKEND']
+import os
 
+__all__ = ['PGSQL_PARAM', 'MQ_BROKER', 'REDIS_BACKEND']
+os.environ['PGOPTIONS'] = '-c statement_timeout=1000'
 PGSQL_PARAM = dict(user='ryan',
                    host='127.0.0.1',
                    database='qubit',
+                   connect_timeout=3,
                    port=5432)
 
 MQ_PARAMS = {"host": "127.0.0.1", "port": 5672}

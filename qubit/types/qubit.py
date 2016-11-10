@@ -55,8 +55,8 @@ class Qubit(object):
     def store_status(cls, sender, data, qid, tags=[]):
         print('sotring')
         Status.create(qubit=qid,
-                      datum=json.dumps(data.get('datum')),
-                      timestamp=data.get('timestamp', datetime.now()),
+                      datum=json.dumps(data.datum),
+                      timestamp=data.ts,
                       tags=tags)
 
     @classmethod

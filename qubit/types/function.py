@@ -1,4 +1,5 @@
 import json
+from functools import lru_cache as cache
 
 __all__ = ['Function']
 
@@ -19,6 +20,7 @@ class Function(object):
         return cls.prototype(**raw)
 
     @classmethod
+    @cache(100)
     def get_raw(cls, mid):
         return cls.format(cls.manager.get(mid))
 
