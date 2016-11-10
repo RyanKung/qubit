@@ -40,7 +40,11 @@ class Spout(Function):
                     qid=qubit.id)()
 
     @staticmethod
-    @partial(period_task, name='spout', period=1000)
+    @partial(period_task, name='spout', period=1)
     @queue.task(filter=task_method)
     def activate_period_task():
         return Spout.activate_all()
+
+    @classmethod
+    def get_via_name(cls, name):
+        return cls.manager.get_by(name=name)

@@ -1,11 +1,10 @@
-from functools import lru_cache
 from . import utils
 from .postgres import connection as conn
 __all__ = ['QuerySet']
 
 
-@lru_cache(maxsize=10)
 def query(sql):
+    print(sql)
     cur = conn.cursor()
     cur.execute(sql)
     res = cur.fetchall()
@@ -13,12 +12,14 @@ def query(sql):
 
 
 def update(sql):
+    print(sql)
     cur = conn.cursor()
     cur.execute(sql)
     return
 
 
 def insert(sql):
+    print(sql)
     cur = conn.cursor()
     cur.execute(sql)
     res = cur.fetchone()
@@ -73,6 +74,17 @@ class QuerySet(object):
             'id': oid
         }))
         return dict(zip(self.fields, res[0])) if res else None
+
+    def get_by(self, *args, **kwargs):
+        data = self.format(kwargs)
+        res = query(self._sql['filter'].format(**{
+            'table': self.tablename,
+            'rule': utils.get_and_seg(data),
+            'size': '1',
+            'offset': '0',
+            'fields': utils.concat(map(utils.wrap_key, self.fields)),
+        }))
+        return dict(zip(self.fields, res[0]))
 
     def search(self, key, value, start, limit, filters=''):
         return query(self._sql['search'].format(**{

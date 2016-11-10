@@ -6,4 +6,5 @@ def main() -> None:
     app.run(host, port, debug=True, use_reloader=False)
 
 if __name__ == '__main__':
+    print(app.url_map)
     main()
