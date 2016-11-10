@@ -36,12 +36,8 @@ class Spout(Function):
                             ts=datetime.datetime.now())
         sig_name = '%s:%s' % (cls.__name__, spout.name)
         qubits = Qubit.get_flying(sig_name)
-        for qubit in qubits:
-            partial(Qubit.store_status,
-                    data=data,
-                    sender=None,
-                    qid=qubit.id)()
-        return 'Done'
+        list(map(partial(Qubit.measure, data=data), qubits))
+        return True
 
     @staticmethod
     @partial(period_task, name='spout', period=1)

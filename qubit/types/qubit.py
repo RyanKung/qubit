@@ -1,7 +1,6 @@
 import json
 from functools import partial
 from datetime import datetime
-from blinker import signal
 from qubit.io.postgres import types
 from qubit.io.postgres import QuerySet
 
@@ -31,19 +30,11 @@ class Qubit(object):
                                  reducer=reducer,
                                  mappers=str(mappers).replace(
                                      '[', '{').replace(']', '}'))
-        return qid
+        return dict(id=qid)
 
     @classmethod
     def get(cls, qid):
         return cls.prototype(**cls.manager.get(qid))
-
-    @classmethod
-    def measure(cls, qid):
-        qubit = cls.get(qid)
-        sig = signal(qubit.entangle)
-        fn = partial(cls.store_status, qid=qid)
-        sig.connect(fn)
-        assert id(fn) in sig.receivers.keys()
 
     @classmethod
     def get_flying(cls, entangle):
@@ -52,16 +43,24 @@ class Qubit(object):
             flying=True)))
 
     @classmethod
-    def store_status(cls, sender, data, qid, tags=[]):
-        print('sotring')
-        Status.create(qubit=qid,
+    def measure(cls, qubit, data):
+        Status.create(qubit=qubit.id,
                       datum=json.dumps(data.datum),
                       timestamp=data.ts,
-                      tags=tags)
+                      tags=[])
+        sig_name = '%s:%s' % (cls.__name__, qubit.id)
+        qubits = Qubit.get_flying(sig_name)
+        list(map(partial(Qubit.measure, data=data), qubits))
+        return True
 
     @classmethod
-    def entangle(cls, qid, event):
-        cls.manager.update
+    def entangle(cls, qid1, qid2):
+        sig_name = '%s:%s' % (cls.__name__, qid2)
+        return cls.manager.update(qid1, entangle=sig_name)
+
+    @classmethod
+    def get_status(cls, qid):
+        return Status.get_by(qid)
 
 
 class Status(object):
@@ -76,13 +75,18 @@ class Status(object):
 
     @classmethod
     def create(cls, qubit, datum, timestamp=datetime.now(), tags=[]):
-        return cls.manager.insert(qubit=qubit,
-                                  datum=datum,
-                                  timestamp=timestamp,
-                                  tags=tags)
+        return dict(id=cls.manager.insert(qubit=qubit,
+                                          datum=datum,
+                                          timestamp=timestamp,
+                                          tags=tags))
 
     @classmethod
     def select(cls, sid, start, end):
-        return cls.manager.find_in_range(spout=sid,
+        return cls.manager.find_in_range(qubit=sid,
+                                         key='timestamp',
                                          start=start,
                                          end=end)
+
+    @classmethod
+    def get_via_qid(cls, qid):
+        return cls.manager.get_by(qubit=qid)

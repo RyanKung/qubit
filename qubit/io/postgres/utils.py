@@ -16,3 +16,7 @@ def escape(x: str) -> str:
 
 def get_and_seg(d: dict) -> str:
     return ' and '.join("%s='%s'" % (str(k), str(v)) for k, v in d.items())
+
+
+def get_pairs(dct):
+    return ' , '.join("%s='%s'" % (str(k), str(v)) for k, v in dct.items())

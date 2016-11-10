@@ -4,7 +4,6 @@ __all__ = ['QuerySet']
 
 
 def query(sql):
-    print(sql)
     cur = conn.cursor()
     cur.execute(sql)
     res = cur.fetchall()
@@ -15,11 +14,11 @@ def update(sql):
     print(sql)
     cur = conn.cursor()
     cur.execute(sql)
-    return
+    res = cur.fetchall()
+    return res if len(res) > 1 else res[0]
 
 
 def insert(sql):
-    print(sql)
     cur = conn.cursor()
     cur.execute(sql)
     res = cur.fetchone()
@@ -37,16 +36,17 @@ class QuerySet(object):
         'filter_with_orderby': "SELECT {fields} from {table} WHERE {rule} ORDER BY {sort_key} LIMIT {size} OFFSET {offset};",
         'filter_with_orderby_decr': "SELECT {fields} from {table} WHERE {rule} ORDER BY {sort_key} LIMIT {size} OFFSET {offset};",
         'filter_in': "SELECT {fields} FROM {table} WHERE {key} IN ({targets});",
-        'filter_in_range': "SELECT {fields} FROM {table} WHERE {key} <= {end} and {key} >= {start};",
+        'filter_in_range': "SELECT {fields} FROM {table} WHERE {rule} and {key} <= {end} and {key} >= {start};",
+        'find_in_range': "SELECT {fields} FROM {table} WHERE {key} <= {end} and {key} >= {start};",
         'insert': 'INSERT INTO {table} ({keys}) VALUES ({values}) RETURNING id;',
         'replace': 'REPLACE INTO {table} ({keys}) VALUES ({values})',
         'delete': "DELETE FROM {table} WHERE {rules}",
-        'update': "UPDATE {table} SET {key_value_pairs} WHERE {rules}",
+        'update': "UPDATE {table} SET {key_value_pairs} WHERE {rules} RETURNING id",
         'get_via_id': "SELECT {fields} from {table} WHERE id='{id}'",
-        'update_via_id': "UPDATE {table} SET {key_value_pairs} WHERE id='{id}'",
+        'update_via_id': "UPDATE {table} SET {key_value_pairs} WHERE id='{id}' RETURNING id",
         'delete_via_id': "DELETE FROM {table} WHERE id='{id}'",
-        'incr': "UPDATE {table} SET {key}={key}+'{num}' WHERE id='{id}'",
-        'decr': "UPDATE {table} SET {key}={key}-'{num}' WHERE id='{id}'",
+        'incr': "UPDATE {table} SET {key}={key}+'{num}' WHERE id='{id}' RETURNING id",
+        'decr': "UPDATE {table} SET {key}={key}-'{num}' WHERE id='{id}' RETURNING id",
         'search': "SELECT {fields} FROM {table} WHERE {extra} {key} LIKE '%{value}%' LIMIT {size} OFFSET {offset}",
         'insert_or_update': "INSERT INTO {table} ({keys}) VALUES ({values}) ON DUPLICATE KEY UPDATE {key_value_pairs};"
     }
@@ -123,13 +123,15 @@ class QuerySet(object):
             'targets': utils.concat(map(utils.wrap_value, targets))
         }))
 
-    def find_in_range(self, key, targets, start, end, fields=[]) -> dict:
+    def find_in_range(self, key, start, end, fields=[], *args, **kwargs) -> dict:
+        data = self.format(kwargs)
         res = query(self._sql['filter_in_range'].format(**{
             'table': self.tablename,
             'fields': utils.concat(map(utils.wrap_key, fields or self.fields)),
             'key': key,
-            'start': start,
-            'end': end
+            'rule': utils.get_and_seg(data),
+            'start': utils.wrap_value(start),
+            'end': utils.wrap_value(end)
         }))
         return [dict(zip(self.fields, r)) for r in res]
 

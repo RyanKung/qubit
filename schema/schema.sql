@@ -40,8 +40,9 @@ CREATE TABLE qubit(
 
 CREATE TABLE states(
        id serial,
-       timestamp timestamp primary key default now(),
+       timestamp timestamp default now(),
        qubit integer,
        datum json default '{}',
-       tags text default ''
+       tags text default '',
+       primary key (qubit, timestamp)
 );
