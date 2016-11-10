@@ -1,6 +1,5 @@
-from .spout import spout_api
-from .qubit import qubit_api, entangle
-from .status import status_api
+from . import spout
+from . import qubit
+from . import status
 
-__all__ = ['spout_api', 'qubit_api',
-           'status_api', 'entangle']
+__all__ = ['spout', 'qubit', 'status']
