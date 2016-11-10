@@ -34,7 +34,6 @@ class Spout(Function):
         if not data:
             data = cls.data(datum=cls.activate(spout),
                             ts=datetime.datetime.now())
-
         sig_name = '%s:%s' % (cls.__name__, spout.name)
         qubits = Qubit.get_flying(sig_name)
         for qubit in qubits:

@@ -18,7 +18,7 @@ CREATE TABLE reducer(
 
 CREATE TABLE spout(
        id serial primary key,
-       name varchar(200) default 'lambda',
+       name varchar(200) unique,
        body text,
        closure json default '{}',
        created_at timestamp default now(),
