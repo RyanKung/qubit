@@ -1,8 +1,10 @@
 import json
-from functools import partial
+from functools import partial, reduce
 from datetime import datetime
 from qubit.io.postgres import types
 from qubit.io.postgres import QuerySet
+from qubit.types.mapper import Mapper
+from qubit.types.reducer import Reducer
 
 __all__ = ['Qubit', 'Status']
 
@@ -41,6 +43,29 @@ class Qubit(object):
         return list(map(lambda x: cls.prototype(**x), cls.manager.filter(
             entangle=entangle,
             flying=True)))
+
+    @classmethod
+    def get_mappers(cls, qubit):
+        if not qubit.mappter:
+            return []
+        return list(map(Mapper.get, qubit.mappers))
+
+    @classmethod
+    def get_reducer(cls, qubit):
+        if not qubit.reducer:
+            return None
+        return Reducer.get(qubit.reducer)
+
+    @classmethod
+    def mapreduce(cls, qubit):
+        mappers = qubit.get_mappers(qubit)
+        reducer = qubit.get_reducer(qubit)
+        datum = qubit.datum
+        if mappers:
+            datum = list(reduce(lambda x, y: map(y, x), mappers, qubit.datum))
+        if reducer:
+            datum = reduce(reducer, datum)
+        return datum
 
     @classmethod
     def measure(cls, qubit, data):

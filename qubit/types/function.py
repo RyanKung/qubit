@@ -20,7 +20,6 @@ class Function(object):
         return cls.prototype(**raw)
 
     @classmethod
-    @cache(100)
     def get_raw(cls, mid):
         return cls.format(cls.manager.get(mid))
 
@@ -28,6 +27,10 @@ class Function(object):
     def activate(cls, func):
         return eval(func.body,
                     dict(func.closure, **{cls.__name__: cls}))
+
+    @classmethod
+    def get(cls, mid):
+        return cls.activate(cls.get_raw(mid))
 
     @classmethod
     def delete(cls, mid):

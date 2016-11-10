@@ -58,16 +58,13 @@ def test_crud():
     assert res['result'] == 'ok'
     res = json.loads(get('/qubit/spout/tester/'))
     assert res['result'] == 'ok'
-    # create qubit
     qid = create_qubit('Spout:tester')
 
-    # feed spout
     feed_random_data()
     feed_random_data()
     feed_random_data()
 
     assert get_hours_data(qid) == 3
-    # test entangle
     qid2 = create_qubit('none', 'another')
     entangle(qid2, qid)
 
