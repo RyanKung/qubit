@@ -3,5 +3,8 @@
 .cache
 .#*
 *.log
+*.egg-info
+build/*
+dist/*
 celerybeat-schedule
 
