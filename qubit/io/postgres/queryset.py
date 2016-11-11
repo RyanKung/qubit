@@ -42,6 +42,7 @@ class QuerySet(object):
         'replace': 'REPLACE INTO {table} ({keys}) VALUES ({values})',
         'delete': "DELETE FROM {table} WHERE {rules}",
         'update': "UPDATE {table} SET {key_value_pairs} WHERE {rules} RETURNING id",
+        'append_array': "UPDATE {table} SET {key} = {key} || '{value}' WHERE {rules} RETURNING id",
         'get_via_id': "SELECT {fields} from {table} WHERE id='{id}'",
         'update_via_id': "UPDATE {table} SET {key_value_pairs} WHERE id='{id}' RETURNING id",
         'delete_via_id': "DELETE FROM {table} WHERE id='{id}'",
@@ -201,6 +202,14 @@ class QuerySet(object):
             'id': oid,
             'table': self.tablename,
             'key_value_pairs': pairs
+        }))
+
+    def append_array(self, oid, key, value):
+        return update(self._sql['append_array'].format(**{
+            'id': oid,
+            'table': self.tablename,
+            'key': key,
+            'value': value
         }))
 
     def insert_or_update(self, *args, **kwargs) -> dict:

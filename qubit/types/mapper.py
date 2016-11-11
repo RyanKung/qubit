@@ -7,6 +7,7 @@ __all__ = ['Mapper']
 
 class Mapper(Function):
     prototype = types.Table('mapper', [
+        ('id', types.integer),
         ('name', types.varchar),
         ('side_effect', types.boolean),
         ('closure', types.json),

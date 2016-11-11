@@ -1,5 +1,4 @@
 import json
-from functools import lru_cache as cache
 
 __all__ = ['Function']
 

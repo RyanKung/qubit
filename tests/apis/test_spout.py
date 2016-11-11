@@ -45,6 +45,37 @@ def feed_random_data(spout='tester'):
     assert res['result'] == 'ok'
 
 
+def create_mapper(name='new mapper'):
+    data = {
+        'name': name,
+        'body': 'lambda x: a + x',
+        'closure': {
+            'a': 1
+        }
+    }
+    resp = request(path='/qubit/mapper/',
+                   data=json.dumps(data), method='POST')
+    print(resp)
+    res = json.loads(resp)
+    assert res['result'] == 'ok'
+    return res['id']
+
+
+def create_reducer():
+    data = {
+        'name': 'test_qubit',
+        'entangle': 'Spout:tester',
+        'mappers': [1],
+        'reducer': 1,
+        'closure': {},
+        'flying': True
+    }
+    res = json.loads(request(path='/qubit/reducer/',
+                             data=json.dumps(data), method='POST'))
+    assert res['result'] == 'ok'
+    return res['id']
+
+
 def test_crud():
     code = '1'
     data = {
@@ -73,3 +104,4 @@ def test_crud():
     feed_random_data()
     assert get_hours_data(qid2) == 3
     assert get_hours_data(qid) == 6
+    mapper = create_mapper()

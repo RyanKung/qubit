@@ -7,6 +7,7 @@ __all__ = ['Reducer']
 
 class Reducer(Function):
     prototype = types.Table('reducer', [
+        ('id', types.integer),
         ('name', types.varchar),
         ('side_effect', types.boolean),
         ('closure', types.json),

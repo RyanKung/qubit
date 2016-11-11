@@ -10,7 +10,6 @@ __all__ = ['Qubit', 'Status']
 
 
 class Qubit(object):
-
     prototype = types.Table('qubit', [
         ('id', types.integer),
         ('name', types.varchar),
@@ -32,7 +31,7 @@ class Qubit(object):
                                  reducer=reducer,
                                  mappers=str(mappers).replace(
                                      '[', '{').replace(']', '}'))
-        return dict(id=qid)
+        return qid
 
     @classmethod
     def get(cls, qid):
@@ -51,10 +50,18 @@ class Qubit(object):
         return list(map(Mapper.get, qubit.mappers))
 
     @classmethod
+    def add_mapper(cls, qubit_id, mapper_id):
+        return cls.manager.append_array(qubit_id, mapper=mapper_id)
+
+    @classmethod
     def get_reducer(cls, qubit):
         if not qubit.reducer:
             return None
         return Reducer.get(qubit.reducer)
+
+    @classmethod
+    def add_reducer(cls, qubit_id, reducer_id):
+        return cls.manager.update(qubit_id, reducer=reducer_id)
 
     @classmethod
     def mapreduce(cls, qubit):

@@ -5,7 +5,7 @@ from .utils import resp_wrapper as wrapper
 from .utils import jsonize
 
 
-__all__ = ['qubit_api', 'entangle']
+__all__ = ['qubit_api', 'entangle', 'add_mapper', 'add_reducer']
 
 
 @app.route('/qubit/<id>/', methods=['GET', 'DELETE'])
@@ -14,7 +14,7 @@ __all__ = ['qubit_api', 'entangle']
 @wrapper
 def qubit_api(id=None):
     def create():
-        return Qubit.create(**request.json)
+        return dict(id=Qubit.create(**request.json))
 
     def fetch():
         return Qubit.get(id=id)._asdict()
@@ -34,3 +34,17 @@ def qubit_api(id=None):
 def entangle(qid):
     data = request.json
     return Qubit.entangle(qid, data['id'])
+
+
+@app.route('/qubit/<qid>/mapper/<mid>/', methods=['PUT'])
+@jsonize
+@wrapper
+def add_mapper(qid, mid):
+    return Qubit.add_mapper(qid, mid)
+
+
+@app.route('/qubit/<qid>/reducer/<rid>/', methods=['PUT'])
+@jsonize
+@wrapper
+def add_reducer(qid, rid):
+    return Qubit.add_reducer(qid, rid)
