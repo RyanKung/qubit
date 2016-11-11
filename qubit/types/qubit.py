@@ -45,7 +45,7 @@ class Qubit(object):
 
     @classmethod
     def get_mappers(cls, qubit):
-        if not qubit.mappter:
+        if not qubit.mappers:
             return []
         return list(map(Mapper.get, qubit.mappers))
 
@@ -65,20 +65,21 @@ class Qubit(object):
         return cls.manager.update(qubit_id, reducer=reducer_id)
 
     @classmethod
-    def mapreduce(cls, qubit):
-        mappers = qubit.get_mappers(qubit)
-        reducer = qubit.get_reducer(qubit)
-        datum = qubit.datum
+    def mapreduce(cls, qubit, data):
+        mappers = cls.get_mappers(qubit)
+        reducer = cls.get_reducer(qubit)
+        datum = data.datum
         if mappers:
-            datum = list(reduce(lambda x, y: map(y, x), mappers, qubit.datum))
+            datum = reduce(lambda x, y: y(x), mappers, datum)
         if reducer:
             datum = reduce(reducer, datum)
         return datum
 
     @classmethod
     def measure(cls, qubit, data):
+        datum = cls.mapreduce(qubit, data)
         Status.create(qubit=qubit.id,
-                      datum=json.dumps(data.datum),
+                      datum=json.dumps(datum),
                       timestamp=data.ts,
                       tags=[])
         sig_name = '%s:%s' % (cls.__name__, qubit.id)
@@ -114,11 +115,20 @@ class Status(object):
                                           tags=tags))
 
     @classmethod
+    def format(cls, s: dict):
+        return cls.prototype(
+            qubit=s['qubit'],
+            datum=s['datum'],
+            tags=s.get('tags'),
+            timestamp=s['timestamp'])
+
+    @classmethod
     def select(cls, sid, start, end):
-        return cls.manager.find_in_range(qubit=sid,
-                                         key='timestamp',
-                                         start=start,
-                                         end=end)
+        res = cls.manager.find_in_range(qubit=sid,
+                                        key='timestamp',
+                                        start=start,
+                                        end=end)
+        return list(map(cls.format, res))
 
     @classmethod
     def get_via_qid(cls, qid):

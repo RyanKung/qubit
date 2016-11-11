@@ -30,7 +30,7 @@ def get_hours_data(qid):
     start = end - delta
     res = json.loads(get(path='/qubit/%s/from/%s/to/%s/' % (
         qid, str(start), str(end))))
-    return len(res['data'])
+    return res['data']
 
 
 def feed_random_data(spout='tester'):
@@ -48,7 +48,7 @@ def feed_random_data(spout='tester'):
 def create_mapper(name='new mapper'):
     data = {
         'name': name,
-        'body': 'lambda x: a + x',
+        'body': 'lambda x: dict(x, added=True)',
         'closure': {
             'a': 1
         }
@@ -62,17 +62,16 @@ def create_mapper(name='new mapper'):
 
 
 def add_mapper(mid, qid):
-    resp = request(path='/qubit/%s/mapper/%s/' % (mid, qid), method='PUT')
+    resp = request(path='/qubit/%s/mapper/%s/' % (qid, mid), method='PUT')
     res = json.loads(resp)
     assert res['result'] == 'ok'
-    return res
 
 
 def add_reducer(rid, qid):
-    resp = request(path='/qubit/%s/reducer/%s/' % (rid, qid), method='PUT')
+    resp = request(path='/qubit/%s/reducer/%s/' % (qid, rid), method='PUT')
     res = json.loads(resp)
     assert res['result'] == 'ok'
-    return res
+    return res['id']
 
 
 def create_reducer():
@@ -109,14 +108,22 @@ def test_crud():
     feed_random_data()
     feed_random_data()
 
-    assert get_hours_data(qid) == 3
+    assert len(get_hours_data(qid)) == 3
     qid2 = create_qubit('none', 'another')
     entangle(qid2, qid)
 
     feed_random_data()
     feed_random_data()
     feed_random_data()
-    assert get_hours_data(qid2) == 3
-    assert get_hours_data(qid) == 6
+    assert len(get_hours_data(qid2)) == 3
+    assert len(get_hours_data(qid)) == 6
     mid = create_mapper()
     add_mapper(mid, qid2)
+    feed_random_data()
+    feed_random_data()
+    feed_random_data()
+    res1 = get_hours_data(qid2)
+    res2 = get_hours_data(qid)
+    assert len(res1) == 6
+    assert len(res2) == 9
+    assert 'added' in res1[-1]['datum'].keys()
