@@ -51,7 +51,8 @@ class Qubit(object):
 
     @classmethod
     def add_mapper(cls, qubit_id, mapper_id):
-        return cls.manager.append_array(qubit_id, mapper=mapper_id)
+        return cls.manager.append_array(qubit_id, key='mappers',
+                                        value=mapper_id)
 
     @classmethod
     def get_reducer(cls, qubit):

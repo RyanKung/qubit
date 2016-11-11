@@ -42,7 +42,7 @@ class QuerySet(object):
         'replace': 'REPLACE INTO {table} ({keys}) VALUES ({values})',
         'delete': "DELETE FROM {table} WHERE {rules}",
         'update': "UPDATE {table} SET {key_value_pairs} WHERE {rules} RETURNING id",
-        'append_array': "UPDATE {table} SET {key} = {key} || '{value}' WHERE {rules} RETURNING id",
+        'append_array': "UPDATE {table} SET {key} = array_append({key}, {value}) WHERE id='{id}' RETURNING id",
         'get_via_id': "SELECT {fields} from {table} WHERE id='{id}'",
         'update_via_id': "UPDATE {table} SET {key_value_pairs} WHERE id='{id}' RETURNING id",
         'delete_via_id': "DELETE FROM {table} WHERE id='{id}'",

@@ -61,6 +61,20 @@ def create_mapper(name='new mapper'):
     return res['id']
 
 
+def add_mapper(mid, qid):
+    resp = request(path='/qubit/%s/mapper/%s/' % (mid, qid), method='PUT')
+    res = json.loads(resp)
+    assert res['result'] == 'ok'
+    return res
+
+
+def add_reducer(rid, qid):
+    resp = request(path='/qubit/%s/reducer/%s/' % (rid, qid), method='PUT')
+    res = json.loads(resp)
+    assert res['result'] == 'ok'
+    return res
+
+
 def create_reducer():
     data = {
         'name': 'test_qubit',
@@ -104,4 +118,5 @@ def test_crud():
     feed_random_data()
     assert get_hours_data(qid2) == 3
     assert get_hours_data(qid) == 6
-    mapper = create_mapper()
+    mid = create_mapper()
+    add_mapper(mid, qid2)
