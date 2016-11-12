@@ -24,8 +24,9 @@ class Function(object):
 
     @classmethod
     def activate(cls, func):
-        return eval(func.body,
-                    dict(func.closure, **{cls.__name__: cls}))
+        return eval(func.body, dict(func.closure,
+                                    **{cls.__name__: cls,
+                                       '__import__': None}))
 
     @classmethod
     def get(cls, mid):
