@@ -1,3 +1,6 @@
 Flask==0.11.1
-py-postgresql==1.1.0
-pytest==3.0.3
+celery==4.0.0
+psycopg2cffi==2.7.5
+pulsar==1.5.4
+pwsgi==0.1.6
+redis==2.10.5
