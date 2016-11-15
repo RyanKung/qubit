@@ -6,37 +6,41 @@ __all__ = ['QuerySet']
 
 def query(sql):
     print('sql', sql)
-    with pool.getconn() as conn:
-        cur = conn.cursor()
-        cur.execute(sql)
-        res = cur.fetchall()
-        print('res', res)
+    conn = pool.getconn()
+    conn.set_session(autocommit=True)
+    cur = conn.cursor()
+    cur.execute(sql)
+    res = cur.fetchall()
+    print('res', res)
+    pool.putconn(conn)
     return res
 
 
 def update(sql):
     print('sql', sql)
-    with pool.getconn() as conn:
-        conn.set_session(autocommit=True)
-        cur = conn.cursor()
-        cur.execute(sql)
-        res = cur.fetchall()
-        if not res:
-            return False
+    conn = pool.getconn()
+    conn.set_session(autocommit=True)
+    cur = conn.cursor()
+    cur.execute(sql)
+    res = cur.fetchall()
+    if not res:
+        return False
     print('res', res)
+    pool.putconn(conn)
     return res if len(res) > 1 else res[0]
 
 
 def insert(sql):
     print('sql', sql)
-    with pool.getconn() as conn:
-        conn.set_session(autocommit=True)
-        cur = conn.cursor()
-        cur.execute(sql)
-        res = cur.fetchone()
-        if not res:
-            return False
+    conn = pool.getconn()
+    conn.set_session(autocommit=True)
+    cur = conn.cursor()
+    cur.execute(sql)
+    res = cur.fetchone()
+    if not res:
+        return False
     print('res', res)
+    pool.putconn(conn)
     return res if len(res) > 1 else res[0]
 
 

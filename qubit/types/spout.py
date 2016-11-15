@@ -54,10 +54,10 @@ class Spout(object):
 
     @classmethod
     def measure(cls, spout, data=None):
-        # ms = str(time.time()).split('.')[-1]
-        # if not(int(ms) % int(spout.rate)):
-        #     return
         if not data:
+            ms = str(time.time()).split('.')[-1]
+            if not(int(ms) % int(spout.rate)):
+                return
             data = cls.get_status(spout)
         sig_name = '%s:%s' % (cls.__name__, spout.name)
         qubits = map(lambda x: x._asdict(), Qubit.get_flying(sig_name))

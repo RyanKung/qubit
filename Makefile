@@ -1,6 +1,6 @@
 default: worker
 worker:
-	celery -A qubit.wsgiapp.queue worker -l info --workdir ./ -E -c 5
+	celery -A qubit.wsgiapp.queue worker -l info --workdir ./ -E -c 1
 beat:
 	celery -A qubit.wsgiapp.queue beat -l info --workdir ./
 upload:

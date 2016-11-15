@@ -1,5 +1,4 @@
 import json
-from types import FunctionType
 from functools import lru_cache
 from qubit.io.postgres import types
 from qubit.io.postgres import QuerySet
@@ -21,15 +20,18 @@ class Function(object):
             closure = cls.closure_manager.insert(closure=json.dumps({}))
         if closure:
             closure = cls.closure_manager.insert(closure=json.dumps(closure))
-
         return cls.manager.insert(name=name,
                                   body=body,
+                                  side_effect=side_effect,
                                   closure=closure,
                                   *args, **kwargs)
 
     @classmethod
     def get_closure(cls, ins):
-        return cls.closure_manager.get(ins.closure) or {}
+        if ins.side_effect:
+            return cls.closure_manager.get(ins.closure)['closure']
+        else:
+            return {}
 
     @classmethod
     def format(cls, raw: dict):
@@ -38,14 +40,14 @@ class Function(object):
         return cls.prototype(**raw)
 
     @classmethod
-    @lru_cache(100)
     def get_raw(cls, mid):
         return cls.format(cls.manager.get(mid))
 
     @classmethod
     def activate(cls, func):
-        code = eval(func.body, {'__import__': cls.__import__}).__code__
-        return FunctionType(code, cls.get_closure(func), func.name)
+        glo = dict(cls.get_closure(func),
+                   **{'__import__': cls.__import__})
+        return eval(func.body, glo)
 
     @classmethod
     def __import__(cls, s: str):

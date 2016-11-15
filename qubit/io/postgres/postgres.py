@@ -12,4 +12,4 @@ __all__ = ['connection', 'pool']
 
 connection = psycopg2.connect(**PGSQL_PARAM)
 # for creat a new connection
-pool = psycopg2.pool.SimpleConnectionPool(5, 50, **PGSQL_PARAM)
+pool = psycopg2.pool.ThreadedConnectionPool(1, 50, **PGSQL_PARAM)

@@ -7,7 +7,7 @@ def test_spout():
     get_depth = '(lambda m: m.HuoBi(m.access_key, m.secret_key))(__import__("pro.huobi").huobi).get_depth()'
     code = get_depth
     data = {
-        'name': 'tester',
+        'name': 'import_tester',
         'body': code,
         'rate': 1
     }

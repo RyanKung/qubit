@@ -8,6 +8,7 @@ def test_mapper():
     data = {
         'name': 'test_mapper',
         'body': 'lambda x: a + x',
+        'side_effect': True,
         'closure': {
             'a': 1
         }
