@@ -2,7 +2,7 @@ CREATE TABLE mapper(
        id serial primary key,
        name varchar(200) default 'lambda',
        side_effect bool default False,
-       closure json default '{}',
+       closure integer default 0,
        body text,
        created_at timestamp default now()
 );
@@ -11,19 +11,24 @@ CREATE TABLE reducer(
        id serial primary key,
        name varchar(200) default 'lambda',
        side_effect boolean default False,
-       closure json default '{}',
+       closure integer default 0,
        body text,
        created_at timestamp default now()
+);
+
+CREATE TABLE closure(
+    id serial primary key,
+    closure json default '{}'
 );
 
 CREATE TABLE spout(
        id serial primary key,
        name varchar(200) unique,
        body text,
-       closure json default '{}',
        created_at timestamp default now(),
        active boolean default True,
-       rate integer default 1
+       rate integer default 1,
+       flying boolean default False
 );
 
 
@@ -33,7 +38,6 @@ CREATE TABLE qubit(
        entangle varchar(200),
        mappers integer ARRAY,
        reducer integer default 0,
-       closure json default '{}',
        created_at timestamp default now(),
        flying boolean default True
 );

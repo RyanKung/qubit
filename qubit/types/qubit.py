@@ -3,10 +3,21 @@ from functools import partial, reduce
 from datetime import datetime
 from qubit.io.postgres import types
 from qubit.io.postgres import QuerySet
+from qubit.io.celery import Entanglement
+from qubit.io.celery import queue
+from qubit.io.celery import task_method
 from qubit.types.mapper import Mapper
 from qubit.types.reducer import Reducer
+from qubit.types.utils import ts_data
 
 __all__ = ['Qubit', 'Status']
+
+
+class QubitEntanglement(Entanglement):
+    abstract = True
+
+    def on_success(self, res, task_id, args, kwargs):
+        pass
 
 
 class Qubit(object):
@@ -16,17 +27,15 @@ class Qubit(object):
         ('entangle', types.varchar),
         ('mappers', types.array),
         ('reducer', types.integer),
-        ('closure', types.json),
         ('flying', types.boolean)
     ])
     manager = QuerySet(prototype)
 
     @classmethod
     def create(cls, name, entangle, flying=True,
-               reducer=0, mappers=[], closure={}):
+               reducer=0, mappers=[]):
         qid = cls.manager.insert(name=name,
                                  entangle=entangle,
-                                 closure=json.dumps(closure),
                                  flying=flying,
                                  reducer=reducer,
                                  mappers=str(mappers).replace(
@@ -39,9 +48,11 @@ class Qubit(object):
 
     @classmethod
     def get_flying(cls, entangle):
-        return list(map(lambda x: cls.prototype(**x), cls.manager.filter(
-            entangle=entangle,
-            flying=True)))
+        qubits = cls.manager.filter(entangle=entangle,
+                                    flying=True)
+        if not qubits:
+            return []
+        return list(map(lambda x: cls.prototype(**x), qubits))
 
     @classmethod
     def get_mappers(cls, qubit):
@@ -75,16 +86,25 @@ class Qubit(object):
             datum = reduce(reducer, datum)
         return datum
 
-    @classmethod
-    def measure(cls, qubit, data):
-        datum = cls.mapreduce(qubit, data)
+    @staticmethod
+    @queue.task(filter=task_method, base=QubitEntanglement)
+    def measure(qubit, data):
+        if isinstance(qubit, dict):
+            qubit = Qubit.prototype(**qubit)
+        if isinstance(data, dict):
+            data = ts_data(**data)
+
+        datum = Qubit.mapreduce(qubit, data)
         Status.create(qubit=qubit.id,
                       datum=json.dumps(datum),
                       timestamp=data.ts,
                       tags=[])
-        sig_name = '%s:%s' % (cls.__name__, qubit.id)
+        sig_name = '%s:%s' % ('Qubit', qubit.id)
         qubits = Qubit.get_flying(sig_name)
-        list(map(partial(Qubit.measure, data=data), qubits))
+        if not qubits:
+            return False
+        qubits = map(lambda x: x._asdict(), qubits)
+        list(map(partial(Qubit.measure.task.delay, data=data._asdict()), qubits))
         return True
 
     @classmethod

@@ -2,7 +2,7 @@ import os
 
 __all__ = ['PGSQL_PARAM', 'MQ_BROKER', 'REDIS_BACKEND', 'STATIC_PATH', 'STATIC_URL']
 
-os.environ['PGOPTIONS'] = '-c statement_timeout=1000'
+os.environ['PGOPTIONS'] = '-c statement_timeout=10000'
 PGSQL_PARAM = dict(user='ryan',
                    host='127.0.0.1',
                    database='qubit',
@@ -14,5 +14,5 @@ REDIS_PARMAS = {"host": "127.0.0.1", "port": 6379}
 REDIS_BACKEND = "redis://%s:%s" % (REDIS_PARMAS['host'], REDIS_PARMAS['port'])
 MQ_BROKER = "amqp://%s:%s//" % (MQ_PARAMS['host'], MQ_PARAMS['port'])
 
-STATIC_PATH = 'static/dict'
+STATIC_PATH = 'static/dist'
 STATIC_URL = '/static'

@@ -5,7 +5,7 @@ from celery import Task
 from .utils import task_method
 from .types import PeriodTask
 
-__all__ = ['queue', 'period_task', 'task_method']
+__all__ = ['queue', 'period_task', 'task_method', 'Entanglement']
 
 
 class Entanglement(Task):

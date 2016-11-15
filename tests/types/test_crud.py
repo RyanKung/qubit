@@ -36,7 +36,6 @@ def test_spout():
     data = {
         'name': 'test_spout',
         'body': code,
-        'closure': {},
         'rate': 1
     }
     Spout.create(**data)
@@ -48,7 +47,6 @@ def test_qubit():
         'entangle': 'Spout:tester',
         'mappers': [1],
         'reducer': 1,
-        'closure': {},
         'flying': True
     }
     Qubit.create(**data)

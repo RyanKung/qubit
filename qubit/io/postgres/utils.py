@@ -11,6 +11,8 @@ def concat(xs: list) -> str:
 
 
 def escape(x: str) -> str:
+    x = str(x)
+    x.replace("'", '"')
     return x
 
 

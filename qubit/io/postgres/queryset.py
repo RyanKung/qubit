@@ -1,27 +1,42 @@
 from . import utils
-from .postgres import connection as conn
+from .postgres import pool
+
 __all__ = ['QuerySet']
 
 
 def query(sql):
-    cur = conn.cursor()
-    cur.execute(sql)
-    res = cur.fetchall()
+    print('sql', sql)
+    with pool.getconn() as conn:
+        cur = conn.cursor()
+        cur.execute(sql)
+        res = cur.fetchall()
+        print('res', res)
     return res
 
 
 def update(sql):
-    print(sql)
-    cur = conn.cursor()
-    cur.execute(sql)
-    res = cur.fetchall()
+    print('sql', sql)
+    with pool.getconn() as conn:
+        conn.set_session(autocommit=True)
+        cur = conn.cursor()
+        cur.execute(sql)
+        res = cur.fetchall()
+        if not res:
+            return False
+    print('res', res)
     return res if len(res) > 1 else res[0]
 
 
 def insert(sql):
-    cur = conn.cursor()
-    cur.execute(sql)
-    res = cur.fetchone()
+    print('sql', sql)
+    with pool.getconn() as conn:
+        conn.set_session(autocommit=True)
+        cur = conn.cursor()
+        cur.execute(sql)
+        res = cur.fetchone()
+        if not res:
+            return False
+    print('res', res)
     return res if len(res) > 1 else res[0]
 
 
@@ -74,7 +89,7 @@ class QuerySet(object):
             'fields': utils.concat(map(utils.wrap_key, self.fields)),
             'id': oid
         }))
-        return dict(zip(self.fields, res[0])) if res else None
+        return res and dict(zip(self.fields, res[0])) if res else None
 
     def get_by(self, *args, **kwargs):
         data = self.format(kwargs)
@@ -85,7 +100,7 @@ class QuerySet(object):
             'offset': '0',
             'fields': utils.concat(map(utils.wrap_key, self.fields)),
         }))
-        return dict(zip(self.fields, res[0]))
+        return res and dict(zip(self.fields, res[0]))
 
     def search(self, key, value, start, limit, filters=''):
         return query(self._sql['search'].format(**{
@@ -102,7 +117,7 @@ class QuerySet(object):
         if isinstance(sort_key, list):
             sort_key = utils.concat(map(utils.set_desc, sort_key))
         else:
-            sort_key = utils.sort_key and utils.set_desc(sort_key) or ''
+            sort_key = sort_key and utils.set_desc(sort_key) or ''
 
         res = query(self._sql['get_list'].format(**{
             'table': self.tablename,
