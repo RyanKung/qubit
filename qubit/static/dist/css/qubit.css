@@ -1,0 +1,81 @@
+* {
+  border: 0px;
+  border-style: solid;
+  font-size: 14px; }
+
+body {
+  padding: 50px 100px;
+  background: #eee; }
+
+section.card {
+  padding: 20px 50px;
+  background: #fff;
+  display: block;
+  width: 900px;
+  margin: 0 auto 10px auto;
+  border-radius: 5px; }
+  section.card .hd {
+    font-size: 20px;
+    padding-bottom: 10px;
+    text-align: center;
+    font-weight: 400; }
+  section.card .ft {
+    padding: 10px;
+    margin-bottom: 50px; }
+
+fieldset.block {
+  display: block; }
+
+nav {
+  padding: 10px; }
+  nav li {
+    display: inline-block;
+    padding: 10px;
+    font-size: 20px; }
+
+fieldset {
+  padding: 10px;
+  display: inline-block; }
+
+fieldset.long input {
+  width: 300px; }
+
+input {
+  padding: 10px;
+  margin: 5px 10px 5px 0;
+  border-width: 1px;
+  display: inline-block;
+  border-color: #999;
+  border-radius: 5px; }
+
+textarea {
+  border-radius: 5px;
+  padding: 10px;
+  display: block;
+  border-width: 1px;
+  min-width: 600px;
+  height: 300px; }
+
+label {
+  padding: 15px 0 0;
+  font-size: 15px; }
+
+select {
+  padding: 10px;
+  border-radius: 5px;
+  border-color: #999;
+  border-width: 1px;
+  margin: 5px;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  appearance: none; }
+
+table {
+  margin: 20px 0;
+  padding: 30px;
+  background-color: #fffeee; }
+  table tr {
+    padding: 5px; }
+  table td {
+    border-width: 1px;
+    padding: 5px; }

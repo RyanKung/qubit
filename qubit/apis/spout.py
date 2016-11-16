@@ -39,7 +39,8 @@ def spout_api(name=None):
     return {
         'GET': fetch,
         'PUT': push,
-        'POST': create
+        'POST': create,
+        'DELETE': delete
     }.get(request.method)()
 
 

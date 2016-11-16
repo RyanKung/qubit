@@ -76,6 +76,18 @@ class Qubit(object):
         return cls.manager.update(qubit_id, reducer=reducer_id)
 
     @classmethod
+    def delete(cls, qubit_id):
+        return cls.manager.delete(qubit_id)
+
+    @classmethod
+    def delete_mapper(cls, qubit_id, mapper_id):
+        pass
+
+    @classmethod
+    def delete_reducer(cls, qubit_id, reducer_id):
+        pass
+
+    @classmethod
     def mapreduce(cls, qubit, data):
         mappers = cls.get_mappers(qubit)
         reducer = cls.get_reducer(qubit)

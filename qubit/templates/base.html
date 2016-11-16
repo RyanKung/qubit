@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Qubit Lab">
+    <meta name="author" content="Ryan Kung">
+    <link href="/static/img/favicon.ico" rel="bookmark" type="image/x-icon" />
+    <link href="/static/img/favicon.ico" rel="icon" type="image/x-icon" />
+    <link href="/static/img/favicon.ico" rel="shortcut icon" type="image/x-icon" /> 
+    {% block title %}
+    <title>Le ShadowFax</title>
+    {% endblock %}
+    <link type="text/css" rel="stylesheet" href="/static/css/qubit.css" />
+    {% block extra_css %}{% endblock %}
+    {% block head_js %}{% endblock %}
+  </head>
+  <body>
+    <header class="header">
+      {% block header %}
+      {% include 'top_nav.html' %}
+      {% endblock %}
+    </header>
+    <section class="content">
+    {% block content %}
+    {% endblock%}
+    </section>
+    <footer class="footer">
+      {% block footer %}
+      {% endblock %}
+    </footer>
+    <dialog class="dialog"></dialog>
+    {% block tail_js %}
+    <script src="/static/js/qubit.js"></script>
+    {% endblock %}
+  </body>
+</html>
