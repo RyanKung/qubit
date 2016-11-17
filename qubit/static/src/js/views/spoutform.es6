@@ -31,8 +31,6 @@ export class SpoutForm extends React.Component {
     }
     series($dom) {
         let resp = this.toDict($dom.serializeArray())
-        let closure = ($('.closure', $dom).val())
-        resp.closure = JSON.parse(closure)
         console.log(resp)
         return JSON.stringify(resp)
     }
@@ -48,8 +46,14 @@ export class SpoutForm extends React.Component {
                 <fieldset>
                   <input placeholder="name" name="name" />
                   <input placeholder='rate (ms)' name='rate' type='number' />
-                  <input placeholder='flying' name='flying' type='number' />
                 </fieldset>
+                <fieldset>
+                  <label>
+                    <span>flying</span>
+                    <input placeholder='flying' name='flying' type='checkbox' />
+                    </label>
+                </fieldset>
+
                 <fieldset className="long">
                   <label>body</label>
                   <textarea name="body" placeholder="body"></textarea>

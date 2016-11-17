@@ -33770,8 +33770,6 @@
 	        key: 'series',
 	        value: function series($dom) {
 	            var resp = this.toDict($dom.serializeArray());
-	            var closure = (0, _jquery2.default)('.closure', $dom).val();
-	            resp.closure = JSON.parse(closure);
 	            console.log(resp);
 	            return JSON.stringify(resp);
 	        }
@@ -33801,8 +33799,21 @@
 	                        'fieldset',
 	                        null,
 	                        _react2.default.createElement('input', { placeholder: 'name', name: 'name' }),
-	                        _react2.default.createElement('input', { placeholder: 'rate (ms)', name: 'rate', type: 'number' }),
-	                        _react2.default.createElement('input', { placeholder: 'flying', name: 'flying', type: 'number' })
+	                        _react2.default.createElement('input', { placeholder: 'rate (ms)', name: 'rate', type: 'number' })
+	                    ),
+	                    _react2.default.createElement(
+	                        'fieldset',
+	                        null,
+	                        _react2.default.createElement(
+	                            'label',
+	                            null,
+	                            _react2.default.createElement(
+	                                'span',
+	                                null,
+	                                'flying'
+	                            ),
+	                            _react2.default.createElement('input', { placeholder: 'flying', name: 'flying', type: 'checkbox' })
+	                        )
 	                    ),
 	                    _react2.default.createElement(
 	                        'fieldset',
@@ -33944,11 +33955,15 @@
 	        key: 'componentWillMount',
 	        value: function componentWillMount() {
 	            this.getData();
+	            this.setState({
+	                last: {},
+	                data: []
+	            });
 	        }
 	    }, {
 	        key: 'getData',
 	        value: function getData() {
-	            self = this;
+	            var self = this;
 	            _jquery2.default.getJSON('/qubit/spout/', {}, function (data) {
 	                self.setState({
 	                    data: data.data
@@ -33957,17 +33972,22 @@
 	        }
 	    }, {
 	        key: 'getLast',
-	        value: function getLast(name) {
-	            self = this;
+	        value: function getLast(e) {
+	            var self = this;
+	            var name = (0, _jquery2.default)(e.target).attr('name');
 	            _jquery2.default.get('/qubit/spout/' + name + '/last/', {}, function (data) {
+	                var last = self.state.last;
+	                last[name] = JSON.stringify(data);
 	                self.setState({
-	                    last: data.data
+	                    last: last
 	                });
 	            });
 	        }
 	    }, {
 	        key: 'render',
 	        value: function render() {
+	            var self = this;
+	            console.log(self);
 	            return _react2.default.createElement(
 	                'section',
 	                { className: 'spoutlist card' },
@@ -33986,7 +34006,7 @@
 	                    this.state && this.state.data.map(function (data, i) {
 	                        return _react2.default.createElement(
 	                            'div',
-	                            { className: 'spout cell', key: data.id },
+	                            { className: 'spout cell', key: i },
 	                            _react2.default.createElement(
 	                                'div',
 	                                { className: 'hd' },
@@ -34020,13 +34040,14 @@
 	                                { className: 'ft' },
 	                                _react2.default.createElement(
 	                                    'span',
-	                                    { click: this.getLast.bind(this, data.name) },
+	                                    { name: data.name,
+	                                        onClick: self.getLast.bind(self) },
 	                                    'get last'
 	                                ),
 	                                _react2.default.createElement(
 	                                    'div',
 	                                    null,
-	                                    this.state && this.state.last
+	                                    self.state && self.state.last[data.name]
 	                                )
 	                            )
 	                        );
