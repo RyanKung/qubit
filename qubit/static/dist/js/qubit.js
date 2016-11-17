@@ -67,6 +67,8 @@
 	        _reactDom2.default.render(mainView, document.querySelector('.content .bd'));
 	}
 
+	var ws = new WebSocket("ws://127.0.0.1:8060/qubit/eventsocket/");
+
 /***/ },
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
@@ -33739,7 +33741,6 @@
 	    _createClass(SpoutForm, [{
 	        key: 'componentWillMount',
 	        value: function componentWillMount() {
-	            console.log('init');
 	            this.setState({
 	                result: false,
 	                hint: ''
@@ -33984,6 +33985,18 @@
 	            });
 	        }
 	    }, {
+	        key: 'delete',
+	        value: function _delete(e) {
+	            var self = this;
+	            var name = (0, _jquery2.default)(e.target).attr('name');
+	            _jquery2.default.ajax({ url: '/qubit/spout/' + name + '/',
+	                data: {},
+	                method: 'delete',
+	                success: function success(data) {
+	                    self.getData();
+	                } });
+	        }
+	    }, {
 	        key: 'render',
 	        value: function render() {
 	            var self = this;
@@ -34039,10 +34052,16 @@
 	                                'div',
 	                                { className: 'ft' },
 	                                _react2.default.createElement(
-	                                    'span',
+	                                    'button',
 	                                    { name: data.name,
 	                                        onClick: self.getLast.bind(self) },
 	                                    'get last'
+	                                ),
+	                                _react2.default.createElement(
+	                                    'button',
+	                                    { name: data.name,
+	                                        onClick: self.delete.bind(self) },
+	                                    'delete'
 	                                ),
 	                                _react2.default.createElement(
 	                                    'div',

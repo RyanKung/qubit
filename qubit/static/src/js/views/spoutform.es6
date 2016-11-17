@@ -6,7 +6,6 @@ import Form from 'libs/ajaxform'
 
 export class SpoutForm extends React.Component {
     componentWillMount() {
-        console.log('init')
         this.setState({
             result: false,
             hint: ''

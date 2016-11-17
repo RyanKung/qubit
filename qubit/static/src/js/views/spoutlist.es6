@@ -29,6 +29,16 @@ export class SpoutList extends React.Component {
             })
         })
     }
+    delete(e) {
+        var self = this
+        var name = $(e.target).attr('name')
+        $.ajax({url: '/qubit/spout/' + name + '/',
+                data: {},
+                method: 'delete',
+                success: function(data) {
+                    self.getData()
+                }})
+    }
     render () {
         var self = this
         console.log(self)
@@ -48,8 +58,10 @@ export class SpoutList extends React.Component {
                             <detail>{data.body}</detail>
                           </div>
                           <div className='ft'>
-                            <span name={data.name}
-                                  onClick={self.getLast.bind(self)}>get last</span>
+                            <button name={data.name}
+                                    onClick={self.getLast.bind(self)}>get last</button>
+                            <button name={data.name}
+                                    onClick={self.delete.bind(self)}>delete</button>
                             <div>
                               {self.state && self.state.last[data.name]}
                             </div>

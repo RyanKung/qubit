@@ -34,7 +34,7 @@ def spout_api(name=None):
         return Spout.update(name=name, **request.json)
 
     def delete():
-        return Spout.manager.delete(name=name)
+        return Spout.manager.delete_by(name=name)
 
     return {
         'GET': fetch,

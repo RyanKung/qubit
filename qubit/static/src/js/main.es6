@@ -11,3 +11,4 @@ if (typeof window !== 'undefined') {
     ReactDOM.render(mainView, document.querySelector('.content .bd'))
 }
 
+var ws = new WebSocket("ws://127.0.0.1:8060/qubit/eventsocket/");
