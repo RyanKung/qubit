@@ -41,9 +41,12 @@ class Spout(object):
 
     @classmethod
     def activate_all(cls):
-        list(map(cls.measure,
-                 map(cls.format,
-                     cls.manager.filter(active=True, flying=True))))
+        list(map(cls.measure, cls.get_all_flying()))
+
+    @classmethod
+    @cache(5000)
+    def get_all_flying(cls):
+        return list(map(cls.format, cls.manager.filter(active=True, flying=True)))
 
     @classmethod
     def activate(cls, spout):
