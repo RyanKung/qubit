@@ -16,11 +16,6 @@ CREATE TABLE reducer(
        created_at timestamp default now()
 );
 
-CREATE TABLE closure(
-    id serial primary key,
-    closure json default '{}'
-);
-
 CREATE TABLE spout(
        id serial primary key,
        name varchar(200) unique,
@@ -44,9 +39,9 @@ CREATE TABLE qubit(
 
 CREATE TABLE states(
        id serial,
-       timestamp timestamp default now(),
+       ts timestamp default now(),
        qubit integer,
        datum json default '{}',
        tags text default '',
-       primary key (qubit, timestamp)
+       primary key (qubit, ts)
 );

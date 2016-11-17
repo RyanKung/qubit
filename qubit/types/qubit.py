@@ -6,11 +6,12 @@ from qubit.io.postgres import QuerySet
 from qubit.io.celery import Entanglement
 from qubit.io.celery import queue
 from qubit.io.celery import task_method
+from qubit.io.redis import kv_client as kv
 from qubit.types.mapper import Mapper
 from qubit.types.reducer import Reducer
 from qubit.types.utils import ts_data
 
-__all__ = ['Qubit', 'Status']
+__all__ = ['Qubit', 'States']
 
 
 class QubitEntanglement(Entanglement):
@@ -88,28 +89,41 @@ class Qubit(object):
         pass
 
     @classmethod
+    def set_current(cls, qubit, ts_data):
+        data = json.dumps(ts_data._asdict())
+        key = 'qubit:%s:state' % qubit.id
+        kv.set(key, data)
+        return True
+
+    @classmethod
+    def get_current(cls, qubit):
+        key = 'qubit:%s:state' % qubit.id
+        data = kv.get(key)
+        return ts_data(**json.loads(data))
+
+    @classmethod
     def mapreduce(cls, qubit, data):
         mappers = cls.get_mappers(qubit)
         reducer = cls.get_reducer(qubit)
-        datum = data.datum
+        latest = cls.get_current(qubit)
         if mappers:
-            datum = reduce(lambda x, y: y(x), mappers, datum)
+            data = reduce(lambda x, y: y(x), mappers, (data, latest))
         if reducer:
-            datum = reduce(reducer, datum)
-        return datum
+            data = reduce(reducer, data)
+        return data
 
     @staticmethod
     @queue.task(filter=task_method, base=QubitEntanglement)
-    def measure(qubit, data):
+    def measure(qubit, data):    # S_q1(t1) = MR(S_q1(t0), S_q0(t1))
         if isinstance(qubit, dict):
             qubit = Qubit.prototype(**qubit)
         if isinstance(data, dict):
             data = ts_data(**data)
 
-        datum = Qubit.mapreduce(qubit, data)
-        Status.create(qubit=qubit.id,
-                      datum=json.dumps(datum),
-                      timestamp=data.ts,
+        data = Qubit.mapreduce(qubit, data)
+        States.create(qubit=qubit.id,
+                      datum=json.dumps(data.datum),
+                      ts=data.ts,
                       tags=[])
         sig_name = '%s:%s' % ('Qubit', qubit.id)
         qubits = Qubit.get_flying(sig_name)
@@ -126,15 +140,15 @@ class Qubit(object):
 
     @classmethod
     def get_status(cls, qid):
-        return Status.get_by(qid)
+        return States.get_by(qid)
 
 
-class Status(object):
+class States(object):
     prototype = types.Table('states', [
         ('qubit', types.integer),
         ('datum', types.json),
         ('tags', types.text),
-        ('timestamp', types.timestamp)
+        ('ts', types.timestamp)
     ])
 
     manager = QuerySet(prototype)
@@ -143,7 +157,7 @@ class Status(object):
     def create(cls, qubit, datum, timestamp=datetime.now(), tags=[]):
         return dict(id=cls.manager.insert(qubit=qubit,
                                           datum=datum,
-                                          timestamp=timestamp,
+                                          ts=timestamp,
                                           tags=tags))
 
     @classmethod
@@ -152,12 +166,12 @@ class Status(object):
             qubit=s['qubit'],
             datum=s['datum'],
             tags=s.get('tags'),
-            timestamp=s['timestamp'])
+            ts=s['ts'])
 
     @classmethod
     def select(cls, sid, start, end):
         res = cls.manager.find_in_range(qubit=sid,
-                                        key='timestamp',
+                                        key='ts',
                                         start=start,
                                         end=end)
         return list(map(cls.format, res))

@@ -7,17 +7,14 @@ from qubit.types import Qubit
 def test_mapper():
     data = {
         'name': 'test_mapper',
-        'body': 'lambda x: a + x',
-        'side_effect': True,
-        'closure': {
-            'a': 1
-        }
+        'body': 'lambda x: x[0]',
+        'side_effect': True
     }
     mid = Mapper.create(**data)
     mapper = Mapper.get_raw(mid)
     assert isinstance(mapper, Mapper.prototype)
     m_fn = Mapper.activate(mapper)
-    assert m_fn(1) == 2
+    assert m_fn([1, 2]) == 1
 
 
 def test_reducer():

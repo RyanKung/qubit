@@ -1,37 +1,13 @@
-import json
-from functools import lru_cache
-from qubit.io.postgres import types
-from qubit.io.postgres import QuerySet
-
-
 __all__ = ['Function']
 
 
 class Function(object):
-    closure = types.Table('closure', [
-        ('id', types.integer),
-        ('closure', types.json)
-    ])
-    closure_manager = QuerySet(closure)
-
     @classmethod
-    def create(cls, name, body, side_effect=False, closure=0, *args, **kwargs):
-        if side_effect and not closure:
-            closure = cls.closure_manager.insert(closure=json.dumps({}))
-        if closure:
-            closure = cls.closure_manager.insert(closure=json.dumps(closure))
+    def create(cls, name, body, side_effect=False, *args, **kwargs):
         return cls.manager.insert(name=name,
                                   body=body,
                                   side_effect=side_effect,
-                                  closure=closure,
                                   *args, **kwargs)
-
-    @classmethod
-    def get_closure(cls, ins):
-        if ins.side_effect:
-            return cls.closure_manager.get(ins.closure)['closure']
-        else:
-            return {}
 
     @classmethod
     def format(cls, raw: dict):
@@ -45,8 +21,7 @@ class Function(object):
 
     @classmethod
     def activate(cls, func):
-        glo = dict(cls.get_closure(func),
-                   **{'__import__': cls.__import__})
+        glo = {'__import__': cls.__import__}
         return eval(func.body, glo)
 
     @classmethod

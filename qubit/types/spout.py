@@ -30,6 +30,10 @@ class Spout(object):
                                   *args, **kwargs)
 
     @classmethod
+    def update(cls, name, data):
+        return cls.manager.update_by(rule={'name': name}, **data)
+
+    @classmethod
     def format(cls, raw: dict):
         if not raw:
             return None
@@ -53,7 +57,7 @@ class Spout(object):
             raise NotImplementedError
 
     @classmethod
-    def measure(cls, spout, data=None):
+    def measure(cls, spout, data=None):  # S_q1(t1) = MR(S_q1(t0), S_q0(t1))
         if not data:
             ms = str(time.time()).split('.')[-1]
             if not(int(ms) % int(spout.rate)):

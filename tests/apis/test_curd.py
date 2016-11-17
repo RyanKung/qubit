@@ -50,9 +50,6 @@ def create_mapper(name='new mapper'):
     data = {
         'name': name,
         'body': 'lambda x: dict(x, added=True)',
-        'closure': {
-            'a': 1
-        }
     }
     resp = request(path='/qubit/mapper/',
                    data=json.dumps(data), method='POST')
@@ -81,7 +78,6 @@ def create_reducer():
         'entangle': 'Spout:tester',
         'mappers': [1],
         'reducer': 1,
-        'closure': {},
         'flying': True
     }
     res = json.loads(request(path='/qubit/reducer/',
