@@ -49,7 +49,7 @@ def feed_random_data(spout='tester'):
 def create_mapper(name='new mapper'):
     data = {
         'name': name,
-        'body': 'lambda x: dict(x, added=True)',
+        'body': 'lambda x: dict(pre=x[1], next=x[1])',
     }
     resp = request(path='/qubit/mapper/',
                    data=json.dumps(data), method='POST')
@@ -121,4 +121,5 @@ def test_crud():
     res2 = get_hours_data(qid)
     assert len(res1) == 6
     assert len(res2) == 9
-    assert 'added' in res1[-1]['datum'].keys()
+    assert 'next' in res1[-1]['datum'].keys()
+    assert 'pre' in res1[-1]['datum'].keys()

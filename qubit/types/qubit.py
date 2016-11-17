@@ -9,7 +9,7 @@ from qubit.io.celery import task_method
 from qubit.io.redis import kv_client as kv
 from qubit.types.mapper import Mapper
 from qubit.types.reducer import Reducer
-from qubit.types.utils import ts_data
+from qubit.types.utils import ts_data, empty_ts_data
 
 __all__ = ['Qubit', 'States']
 
@@ -99,6 +99,8 @@ class Qubit(object):
     def get_current(cls, qubit):
         key = 'qubit:%s:state' % qubit.id
         data = kv.get(key)
+        if not data:
+            return empty_ts_data
         return ts_data(**json.loads(data))
 
     @classmethod
@@ -107,7 +109,7 @@ class Qubit(object):
         reducer = cls.get_reducer(qubit)
         latest = cls.get_current(qubit)
         if mappers:
-            data = reduce(lambda x, y: y(x), mappers, (data, latest))
+            data = reduce(lambda x, y: y(x), mappers, [data, latest])
         if reducer:
             data = reduce(reducer, data)
         return data
@@ -120,9 +122,9 @@ class Qubit(object):
         if isinstance(data, dict):
             data = ts_data(**data)
 
-        data = Qubit.mapreduce(qubit, data)
+        datum = Qubit.mapreduce(qubit, data)
         States.create(qubit=qubit.id,
-                      datum=json.dumps(data.datum),
+                      datum=json.dumps(datum),
                       ts=data.ts,
                       tags=[])
         sig_name = '%s:%s' % ('Qubit', qubit.id)
@@ -154,10 +156,10 @@ class States(object):
     manager = QuerySet(prototype)
 
     @classmethod
-    def create(cls, qubit, datum, timestamp=datetime.now(), tags=[]):
+    def create(cls, qubit, datum, ts=datetime.now(), tags=[]):
         return dict(id=cls.manager.insert(qubit=qubit,
                                           datum=datum,
-                                          ts=timestamp,
+                                          ts=ts,
                                           tags=tags))
 
     @classmethod
