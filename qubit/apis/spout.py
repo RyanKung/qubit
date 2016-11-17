@@ -27,7 +27,7 @@ def spout_api(name=None):
         if name:
             data = Spout.get_via_name(name=name)._asdict()
         else:
-            data = Spout.get_list()
+            data = Spout.manager.get_list()
         return data
 
     def update():

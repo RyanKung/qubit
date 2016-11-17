@@ -47,22 +47,18 @@ export class SpoutForm extends React.Component {
                     method='post'>
                 <fieldset>
                   <input placeholder="name" name="name" />
-                  <input placeholder='rate' name='rate' />
+                  <input placeholder='rate (ms)' name='rate' type='number' />
+                  <input placeholder='flying' name='flying' type='number' />
                 </fieldset>
                 <fieldset className="long">
                   <label>body</label>
                   <textarea name="body" placeholder="body"></textarea>
                 </fieldset>
-                <fieldset className="long">
-                  <label>closure</label>
-                  <textarea name="closure" className='closure'
-                            placeholder="closure"></textarea>
-                </fieldset>
-
                 <fieldset className="submit block">
                   <input name="submit" type="submit" value="submmit" />
                 </fieldset>
               </Form>
+
               <div className="ft">
                 <em>{this.state.hint}</em>
                 <div>{this.state.result}</div>

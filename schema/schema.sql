@@ -2,7 +2,6 @@ CREATE TABLE mapper(
        id serial primary key,
        name varchar(200) default 'lambda',
        side_effect bool default False,
-       closure integer default 0,
        body text,
        created_at timestamp default now()
 );
@@ -11,7 +10,6 @@ CREATE TABLE reducer(
        id serial primary key,
        name varchar(200) default 'lambda',
        side_effect boolean default False,
-       closure integer default 0,
        body text,
        created_at timestamp default now()
 );

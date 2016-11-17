@@ -14,6 +14,14 @@ export class SpoutList extends React.Component {
             })
         })
     }
+    getLast(name) {
+        self = this
+        $.get('/qubit/spout/' + name + '/last/', {}, function(data) {
+            self.setState({
+                last: data.data
+            })
+        })
+    }
     render () {
         return (
             <section className="spoutlist card">
@@ -21,9 +29,21 @@ export class SpoutList extends React.Component {
               <div className="bd">
                 {this.state && this.state.data.map(function(data, i) {
                     return (
-                        <div key={i}>
-                          <label>{data.name}</label>
-                          <div>{data.body}</div>
+                        <div className="spout cell" key={data.id}>
+                          <div className="hd">
+                            <label>{data.name}</label>
+                          </div>
+                          <div className='bd'>
+                            <span>{data.fly}</span>
+                            <span>{data.created_at}</span>
+                            <detail>{data.body}</detail>
+                          </div>
+                          <div className='ft'>
+                            <span click={this.getLast.bind(this, data.name)}>get last</span>
+                            <div>
+                              {this.state && this.state.last}
+                            </div>
+                          </div>
                         </div>
                     )
               })}
