@@ -1,4 +1,3 @@
-from functools import lru_cache as cache
 from functools import partial
 import datetime
 import time
@@ -7,6 +6,8 @@ from qubit.io.postgres import QuerySet
 from qubit.io.celery import queue
 from qubit.io.celery import period_task
 from qubit.io.celery import task_method
+from qubit.io.redis import kv_client as kv
+from qubit.io.redis import cache
 from qubit.types.qubit import Qubit
 from qubit.types.utils import ts_data as ts_data
 
@@ -24,9 +25,11 @@ class Spout(object):
     manager = QuerySet(prototype)
 
     @classmethod
-    def create(cls, name, body, *args, **kwargs):
+    def create(cls, name, body, flying=False, *args, **kwargs):
+        flying and kv.delete('spout:all_flying_cache')  # clear cache
         return cls.manager.insert(name=name,
                                   body=body,
+                                  flying=flying,
                                   *args, **kwargs)
 
     @classmethod
@@ -41,12 +44,13 @@ class Spout(object):
 
     @classmethod
     def activate_all(cls):
-        list(map(cls.measure, cls.get_all_flying()))
+        cached = kv.get('spout:all_flying_cache')
+        return cached or list(map(cls.measure, cls.get_all_flying()))
 
     @classmethod
-    @cache(5000)
     def get_all_flying(cls):
-        return list(map(cls.format, cls.manager.filter(active=True, flying=True)))
+        data = list(map(cls.format, cls.manager.filter(active=True, flying=True)))
+        return data
 
     @classmethod
     def activate(cls, spout):
@@ -68,7 +72,8 @@ class Spout(object):
             data = cls.get_status(spout)
         sig_name = '%s:%s' % (cls.__name__, spout.name)
         qubits = map(lambda x: x._asdict(), Qubit.get_flying(sig_name))
-        res = list(map(partial(Qubit.measure.task.delay, data=data._asdict()), qubits))
+        res = list(map(partial(Qubit.measure.task.delay,
+                               data=data._asdict()), qubits))
         return res
 
     @staticmethod
@@ -78,7 +83,7 @@ class Spout(object):
         return Spout.activate_all()
 
     @classmethod
-    @cache(100)
+    @cache(ttl=10000, flag='spout')
     def get_via_name(cls, name):
         return cls.format(cls.manager.get_by(name=name))
 
