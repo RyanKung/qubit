@@ -2,6 +2,7 @@
 *.py~
 .cache
 .#*
+.ipynb*
 *.log
 *.egg-info
 build/*
