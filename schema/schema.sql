@@ -11,7 +11,7 @@ CREATE TABLE reducer(
        name varchar(200) default 'lambda',
        side_effect boolean default False,
        body text,
-       created_at timestamp default now()
+       created_at timestamp default now(),
 );
 
 CREATE TABLE spout(

@@ -10,6 +10,7 @@ class Reducer(Function):
         ('id', types.integer),
         ('name', types.varchar),
         ('side_effect', types.boolean),
-        ('body', types.text)
+        ('body', types.text),
+        ('depth', types.integer)
     ])
     manager = QuerySet(prototype)

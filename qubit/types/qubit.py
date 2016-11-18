@@ -6,7 +6,7 @@ from qubit.io.postgres import QuerySet
 from qubit.io.celery import Entanglement
 from qubit.io.celery import queue
 from qubit.io.celery import task_method
-from qubit.io.redis import kv_client as kv
+from qubit.io.redis import client as kv
 from qubit.types.mapper import Mapper
 from qubit.types.reducer import Reducer
 from qubit.types.utils import ts_data, empty_ts_data

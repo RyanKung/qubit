@@ -68,8 +68,10 @@
 	if (typeof window !== 'undefined') {
 	        _reactDom2.default.render(mainView, document.querySelector('.content .bd'));
 	}
-
-	var ws = new WebSocket("ws://127.0.0.1:8060/qubit/eventsocket/");
+	var ws = new WebSocket("ws://" + window.location.host + "/qubit/subscribe/");
+	ws.onmessage = function (msg) {
+	        console.log(msg);
+	};
 
 /***/ },
 /* 1 */

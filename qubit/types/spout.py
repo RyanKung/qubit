@@ -6,7 +6,7 @@ from qubit.io.postgres import QuerySet
 from qubit.io.celery import queue
 from qubit.io.celery import period_task
 from qubit.io.celery import task_method
-from qubit.io.redis import kv_client as kv
+from qubit.io.redis import client
 from qubit.io.redis import cache
 from qubit.types.qubit import Qubit
 from qubit.types.utils import ts_data as ts_data
@@ -26,7 +26,7 @@ class Spout(object):
 
     @classmethod
     def create(cls, name, body, flying=False, *args, **kwargs):
-        flying and kv.delete('spout:all_flying_cache')  # clear cache
+        flying and client.delete('spout:all_flying_cache')  # clear cache
         return cls.manager.insert(name=name,
                                   body=body,
                                   flying=flying,
@@ -44,16 +44,17 @@ class Spout(object):
 
     @classmethod
     def activate_all(cls):
-        cached = kv.get('spout:all_flying_cache')
-        return cached or list(map(cls.measure, cls.get_all_flying()))
+        return list(map(cls.measure, cls.get_all_flying()))
 
     @classmethod
     def get_all_flying(cls):
-        data = list(map(cls.format, cls.manager.filter(active=True, flying=True)))
-        return data
+        cached = client.get('spout:all_flying_cache')
+        client.publish('eventsocket', 'spout:checking')
+        return cached or list(map(cls.format, cls.manager.filter(active=True, flying=True)))
 
     @classmethod
     def activate(cls, spout):
+        client.publish('eventsocket', 'spout:active:%s' % spout.name)
         return eval(spout.body, {'__import__': cls.__import__})
 
     @classmethod
@@ -77,7 +78,7 @@ class Spout(object):
         return res
 
     @staticmethod
-    @partial(period_task, name='spout', period=1)
+    @partial(period_task, name='spout', period=1000)
     @queue.task(filter=task_method)
     def activate_period_task():
         return Spout.activate_all()
@@ -89,6 +90,7 @@ class Spout(object):
 
     @classmethod
     def get_status(cls, spout):
+        print('getstatus')
         data = ts_data(datum=cls.activate(spout),
                        ts=datetime.datetime.now())
         return data
