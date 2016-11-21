@@ -14,7 +14,8 @@ export class SpoutList extends React.Component {
             }
         })
         this.setState({
-            last: {}
+            last: {},
+            data: []
         })
         this.getData()
     }

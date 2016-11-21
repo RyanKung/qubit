@@ -34006,7 +34006,8 @@
 	                }
 	            });
 	            this.setState({
-	                last: {}
+	                last: {},
+	                data: []
 	            });
 	            this.getData();
 	        }
@@ -34147,7 +34148,7 @@
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	exports.socketStream = exports.clickStream = exports.keyUpStream = exports.bus = undefined;
+	exports.socketStream = exports.clickStream = exports.keyUpStream = undefined;
 
 	var _jquery = __webpack_require__(35);
 
@@ -34159,7 +34160,9 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	var bus = exports.bus = new _baconjs2.default.Bus();
+	var ws = new WebSocket("ws://" + window.location.host + "/qubit/subscribe/");
+	var reader = new FileReader();
+
 	_jquery2.default.fn.asEventStream = _baconjs2.default.$.asEventStream;
 	var keyUpStream = exports.keyUpStream = (0, _jquery2.default)(document).asEventStream('keyup').map(function (e) {
 	    return e.keyCode;
@@ -34168,13 +34171,15 @@
 	    return e.target.className;
 	});
 	var socketStream = exports.socketStream = new _baconjs2.default.Bus();
-	var ws = new WebSocket("ws://" + window.location.host + "/qubit/subscribe/");
-	var reader = new FileReader();
+
 	ws.onmessage = function (msg) {
 	    reader.addEventListener("loadend", function () {
 	        socketStream.push(reader.result);
 	    });
 	    reader.readAsText(msg.data);
+	};
+	window.onbeforeunload = function (e) {
+	    ws.close();
 	};
 
 /***/ },
