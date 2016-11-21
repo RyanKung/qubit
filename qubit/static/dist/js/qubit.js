@@ -83,12 +83,26 @@
 	    }
 
 	    _createClass(MainView, [{
+	        key: 'componentWillMount',
+	        value: function componentWillMount() {
+	            this.setState({
+	                'nav': 'spout'
+	            });
+	        }
+	    }, {
+	        key: 'renderViews',
+	        value: function renderViews() {
+	            return {
+	                'spout': _react2.default.createElement(_spout.SpoutView, null)
+	            }[this.state.nav];
+	        }
+	    }, {
 	        key: 'render',
 	        value: function render() {
 	            return _react2.default.createElement(
 	                'div',
 	                null,
-	                _react2.default.createElement(_spout.SpoutView, null)
+	                this.renderViews()
 	            );
 	        }
 	    }]);
