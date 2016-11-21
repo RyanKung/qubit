@@ -1,21 +1,14 @@
-CREATE TABLE spout(
-       id serial primary key,
-       name varchar(200) unique,
-       body text,
-       created_at timestamp default now(),
-       active boolean default True,
-       rate integer default 1,
-       flying boolean default False
-);
-
 CREATE TABLE qubit(
        id serial primary key,
        name varchar(200),
+       rate integer default 1,
+       body text,
        entangle varchar(200),
        mappers integer ARRAY,
        reducer integer default 0,
        created_at timestamp default now(),
-       flying boolean default True
+       flying boolean default True,
+       comment text
 );
 
 CREATE TABLE states(

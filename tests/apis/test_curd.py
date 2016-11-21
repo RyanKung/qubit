@@ -53,6 +53,6 @@ def test_crud():
         'body': code,
         'rate': 1
     }
-    res = json.loads(request(path='/qubit/spout/',
+    res = json.loads(request(path='/qubit/',
                              data=json.dumps(data), method='POST'))
     assert res['result'] == 'ok'

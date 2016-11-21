@@ -1,14 +1,4 @@
-from qubit.types import Spout
 from qubit.types import Qubit
-
-def test_spout():
-    code = '1'
-    data = {
-        'name': 'test_spout',
-        'body': code,
-        'rate': 1
-    }
-    Spout.create(**data)
 
 
 def test_qubit():
