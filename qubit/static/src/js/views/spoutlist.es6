@@ -1,14 +1,22 @@
 import React from 'react'
 import $ from 'jquery'
 import ReactDOM from 'react-dom'
+import Modal from 'react-modal'
+import { SpoutForm } from 'views/spoutform'
+import { socketStream } from 'bus'
 
 export class SpoutList extends React.Component {
     componentWillMount() {
-        this.getData()
-        this.setState({
-            last: {},
-            data: []
+        var self = this
+        socketStream.onValue(function(value){
+            if (value == 'newSpout') {
+                self.getData()
+            }
         })
+        this.setState({
+            last: {}
+        })
+        this.getData()
     }
     getData() {
         var self = this
@@ -19,6 +27,7 @@ export class SpoutList extends React.Component {
         })
     }
     getLast(e) {
+
         var self = this
         var name = $(e.target).attr('name')
         $.get('/qubit/spout/' + name + '/last/', {}, function(data) {
@@ -38,6 +47,13 @@ export class SpoutList extends React.Component {
                 success: function(data) {
                     self.getData()
                 }})
+    }
+    renderForm() {
+        return (
+            <Modal>
+              <SpoutForm></SpoutForm>
+            </Modal>
+        )
     }
     render () {
         var self = this

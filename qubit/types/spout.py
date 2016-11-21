@@ -44,18 +44,23 @@ class Spout(object):
 
     @classmethod
     def activate_all(cls):
-        return list(map(cls.measure, cls.get_all_flying()))
+        return list(map(
+            cls.measure, cls.get_all_flying()))
 
     @classmethod
     def get_all_flying(cls):
         cached = client.get('spout:all_flying_cache')
         client.publish('eventsocket', 'spout:checking')
-        return cached or list(map(cls.format, cls.manager.filter(active=True, flying=True)))
+        return cached or list(map(
+            cls.format,
+            cls.manager.filter(active=True, flying=True)))
 
     @classmethod
     def activate(cls, spout):
-        client.publish('eventsocket', 'spout:active:%s' % spout.name)
-        return eval(spout.body, {'__import__': cls.__import__})
+        client.publish('eventsocket',
+                       'spout:active:%s' % spout.name)
+        return eval(spout.body,
+                    {'__import__': cls.__import__})
 
     @classmethod
     def __import__(cls, s: str):
@@ -73,8 +78,18 @@ class Spout(object):
             data = cls.get_status(spout)
         sig_name = '%s:%s' % (cls.__name__, spout.name)
         qubits = map(lambda x: x._asdict(), Qubit.get_flying(sig_name))
-        res = list(map(partial(Qubit.measure.task.delay,
-                               data=data._asdict()), qubits))
+        res = list(map(partial(
+            Qubit.measure.task.delay,
+            data=data._asdict()), qubits))
+        return res
+
+    @classmethod
+    def trigger(cls, spout, data):
+        sig_name = '%s:%s' % (cls.__name__, spout.name)
+        qubits = map(lambda x: x._asdict(), Qubit.get_flying(sig_name))
+        res = list(map(partial(
+            Qubit.measure.task.delay,
+            data=isinstance(data, dict) and data or data._asdict()), qubits))
         return res
 
     @staticmethod
@@ -86,11 +101,13 @@ class Spout(object):
     @classmethod
     @cache(ttl=10000, flag='spout')
     def get_via_name(cls, name):
-        return cls.format(cls.manager.get_by(name=name))
+        return cls.format(
+            cls.manager.get_by(name=name))
 
     @classmethod
     def get_status(cls, spout):
         print('getstatus')
-        data = ts_data(datum=cls.activate(spout),
-                       ts=datetime.datetime.now())
+        data = ts_data(
+            datum=cls.activate(spout),
+            ts=datetime.datetime.now())
         return data

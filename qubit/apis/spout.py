@@ -52,3 +52,13 @@ def spout_data(name):
     res = Spout.get_status(spout)._asdict()
     res['ts'] = str(res['ts'])
     return res
+
+
+@app.route('/qubit/eval/', methods=['GET'])
+@jsonize
+@wrapper
+def test(name):
+    spout = Spout.get_via_name(name)
+    res = Spout.get_status(spout)._asdict()
+    res['ts'] = str(res['ts'])
+    return res

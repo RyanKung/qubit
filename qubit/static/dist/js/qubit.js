@@ -68,10 +68,6 @@
 	if (typeof window !== 'undefined') {
 	        _reactDom2.default.render(mainView, document.querySelector('.content .bd'));
 	}
-	var ws = new WebSocket("ws://" + window.location.host + "/qubit/subscribe/");
-	ws.onmessage = function (msg) {
-	        console.log(msg);
-	};
 
 /***/ },
 /* 1 */
@@ -124,16 +120,53 @@
 	    }
 
 	    _createClass(SpoutView, [{
+	        key: 'componentWillMount',
+	        value: function componentWillMount() {
+	            this.setState({});
+	        }
+	    }, {
 	        key: 'render',
 	        value: function render() {
 	            return _react2.default.createElement(
 	                'section',
 	                { className: 'spout' },
-	                _react2.default.createElement('div', { className: 'hd' }),
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: 'hd' },
+	                    _react2.default.createElement(
+	                        'button',
+	                        { className: 'new', onClick: this.openForm.bind(this) },
+	                        '+'
+	                    )
+	                ),
 	                _react2.default.createElement('div', { className: 'bd' }),
 	                _react2.default.createElement(_spoutlist.SpoutList, null),
-	                _react2.default.createElement(_spoutform.SpoutForm, null)
+	                _react2.default.createElement(_spoutform.SpoutForm, null),
+	                _react2.default.createElement(
+	                    _reactModal2.default,
+	                    { isOpen: this.state.modal_open },
+	                    _react2.default.createElement(_spoutform.SpoutForm, { submit: this.closeForm.bind(this) })
+	                )
 	            );
+	        }
+	    }, {
+	        key: 'openForm',
+	        value: function openForm() {
+	            this.setState({
+	                modal_open: true
+	            });
+	        }
+	    }, {
+	        key: 'onSuccessAdded',
+	        value: function onSuccessAdded() {
+	            this.closeForm();
+	        }
+	    }, {
+	        key: 'closeForm',
+	        value: function closeForm() {
+	            this.setState({
+	                modal_open: false
+	            });
 	        }
 	    }]);
 
@@ -33752,13 +33785,13 @@
 	        }
 	    }, {
 	        key: 'success',
-	        value: function success(res, e) {
+	        value: function success(res, e, cb) {
 	            if (res.result == "ok") {
 	                console.log(res.data);
 	                this.setState({
 	                    result: 'successed! spout id: ' + res.data
 	                });
-	                window.alert(this.state.result);
+	                this.props.submit && this.props.submit(this.data);
 	            } else {
 	                window.alert('failed to post data');
 	            }
@@ -33775,7 +33808,6 @@
 	        key: 'series',
 	        value: function series($dom) {
 	            var resp = this.toDict($dom.serializeArray());
-	            console.log(resp);
 	            return JSON.stringify(resp);
 	        }
 	    }, {
@@ -33939,6 +33971,14 @@
 
 	var _reactDom2 = _interopRequireDefault(_reactDom);
 
+	var _reactModal = __webpack_require__(174);
+
+	var _reactModal2 = _interopRequireDefault(_reactModal);
+
+	var _spoutform = __webpack_require__(194);
+
+	var _bus = __webpack_require__(197);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -33959,11 +33999,16 @@
 	    _createClass(SpoutList, [{
 	        key: 'componentWillMount',
 	        value: function componentWillMount() {
-	            this.getData();
-	            this.setState({
-	                last: {},
-	                data: []
+	            var self = this;
+	            _bus.socketStream.onValue(function (value) {
+	                if (value == 'newSpout') {
+	                    self.getData();
+	                }
 	            });
+	            this.setState({
+	                last: {}
+	            });
+	            this.getData();
 	        }
 	    }, {
 	        key: 'getData',
@@ -33978,6 +34023,7 @@
 	    }, {
 	        key: 'getLast',
 	        value: function getLast(e) {
+
 	            var self = this;
 	            var name = (0, _jquery2.default)(e.target).attr('name');
 	            _jquery2.default.get('/qubit/spout/' + name + '/last/', {}, function (data) {
@@ -33999,6 +34045,15 @@
 	                success: function success(data) {
 	                    self.getData();
 	                } });
+	        }
+	    }, {
+	        key: 'renderForm',
+	        value: function renderForm() {
+	            return _react2.default.createElement(
+	                _reactModal2.default,
+	                null,
+	                _react2.default.createElement(_spoutform.SpoutForm, null)
+	            );
 	        }
 	    }, {
 	        key: 'render',
@@ -34090,9 +34145,9 @@
 	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
-	  value: true
+	    value: true
 	});
-	exports.clickStream = exports.keyUpStream = exports.bus = undefined;
+	exports.socketStream = exports.clickStream = exports.keyUpStream = exports.bus = undefined;
 
 	var _jquery = __webpack_require__(35);
 
@@ -34107,11 +34162,20 @@
 	var bus = exports.bus = new _baconjs2.default.Bus();
 	_jquery2.default.fn.asEventStream = _baconjs2.default.$.asEventStream;
 	var keyUpStream = exports.keyUpStream = (0, _jquery2.default)(document).asEventStream('keyup').map(function (e) {
-	  return e.keyCode;
+	    return e.keyCode;
 	});
 	var clickStream = exports.clickStream = (0, _jquery2.default)(document).asEventStream('click').map(function (e) {
-	  return e.target.className;
+	    return e.target.className;
 	});
+	var socketStream = exports.socketStream = new _baconjs2.default.Bus();
+	var ws = new WebSocket("ws://" + window.location.host + "/qubit/subscribe/");
+	var reader = new FileReader();
+	ws.onmessage = function (msg) {
+	    reader.addEventListener("loadend", function () {
+	        socketStream.push(reader.result);
+	    });
+	    reader.readAsText(msg.data);
+	};
 
 /***/ },
 /* 198 */

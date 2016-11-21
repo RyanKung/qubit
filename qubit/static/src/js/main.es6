@@ -12,5 +12,3 @@ var mainView = (
 if (typeof window !== 'undefined') {
     ReactDOM.render(mainView, document.querySelector('.content .bd'))
 }
-var ws = new WebSocket("ws://" + window.location.host + "/qubit/subscribe/");
-ws.onmessage = function(msg) {console.log(msg)}

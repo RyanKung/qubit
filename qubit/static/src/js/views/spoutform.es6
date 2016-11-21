@@ -11,13 +11,13 @@ export class SpoutForm extends React.Component {
             hint: ''
         })
     }
-    success(res, e) {
+    success(res, e, cb) {
         if (res.result == "ok") {
             console.log(res.data)
             this.setState({
                 result: 'successed! spout id: ' + res.data
             })
-            window.alert(this.state.result)
+            this.props.submit && this.props.submit(this.data)
         } else {
             window.alert('failed to post data')
         }
@@ -30,7 +30,6 @@ export class SpoutForm extends React.Component {
     }
     series($dom) {
         let resp = this.toDict($dom.serializeArray())
-        console.log(resp)
         return JSON.stringify(resp)
     }
     render() {
