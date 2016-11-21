@@ -46,46 +46,6 @@ def feed_random_data(spout='tester'):
     assert res['result'] == 'ok'
 
 
-def create_mapper(name='new mapper'):
-    data = {
-        'name': name,
-        'body': 'lambda x: dict(pre=x[1], next=x[1])',
-    }
-    resp = request(path='/qubit/mapper/',
-                   data=json.dumps(data), method='POST')
-    print(resp)
-    res = json.loads(resp)
-    assert res['result'] == 'ok'
-    return res['id']
-
-
-def add_mapper(mid, qid):
-    resp = request(path='/qubit/%s/mapper/%s/' % (qid, mid), method='PUT')
-    res = json.loads(resp)
-    assert res['result'] == 'ok'
-
-
-def add_reducer(rid, qid):
-    resp = request(path='/qubit/%s/reducer/%s/' % (qid, rid), method='PUT')
-    res = json.loads(resp)
-    assert res['result'] == 'ok'
-    return res['id']
-
-
-def create_reducer():
-    data = {
-        'name': 'test_qubit',
-        'entangle': 'Spout:tester',
-        'mappers': [1],
-        'reducer': 1,
-        'flying': True
-    }
-    res = json.loads(request(path='/qubit/reducer/',
-                             data=json.dumps(data), method='POST'))
-    assert res['result'] == 'ok'
-    return res['id']
-
-
 def test_crud():
     code = '1'
     data = {
@@ -96,30 +56,3 @@ def test_crud():
     res = json.loads(request(path='/qubit/spout/',
                              data=json.dumps(data), method='POST'))
     assert res['result'] == 'ok'
-    res = json.loads(get('/qubit/spout/tester/'))
-    assert res['result'] == 'ok'
-    qid = create_qubit('Spout:tester')
-
-    feed_random_data()
-    feed_random_data()
-    feed_random_data()
-    assert len(get_hours_data(qid)) == 3
-    qid2 = create_qubit('none', 'another')
-    entangle(qid2, qid)
-
-    feed_random_data()
-    feed_random_data()
-    feed_random_data()
-    assert len(get_hours_data(qid2)) == 3
-    assert len(get_hours_data(qid)) == 6
-    mid = create_mapper()
-    add_mapper(mid, qid2)
-    feed_random_data()
-    feed_random_data()
-    feed_random_data()
-    res1 = get_hours_data(qid2)
-    res2 = get_hours_data(qid)
-    assert len(res1) == 6
-    assert len(res2) == 9
-    assert 'next' in res1[-1]['datum'].keys()
-    assert 'pre' in res1[-1]['datum'].keys()

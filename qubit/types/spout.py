@@ -59,8 +59,9 @@ class Spout(object):
     def activate(cls, spout):
         client.publish('eventsocket',
                        'spout:active:%s' % spout.name)
-        return eval(spout.body,
-                    {'__import__': cls.__import__})
+        return exec(spout.body,
+                    {'__import__': cls.__import__,
+                     'done': partial(cls.measure, spout=spout)})
 
     @classmethod
     def __import__(cls, s: str):

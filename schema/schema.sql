@@ -1,19 +1,3 @@
-CREATE TABLE mapper(
-       id serial primary key,
-       name varchar(200) default 'lambda',
-       side_effect bool default False,
-       body text,
-       created_at timestamp default now()
-);
-
-CREATE TABLE reducer(
-       id serial primary key,
-       name varchar(200) default 'lambda',
-       side_effect boolean default False,
-       body text,
-       created_at timestamp default now(),
-);
-
 CREATE TABLE spout(
        id serial primary key,
        name varchar(200) unique,
@@ -28,16 +12,6 @@ CREATE TABLE qubit(
        id serial primary key,
        name varchar(200),
        entangle varchar(200),
-       mappers integer ARRAY,
-       reducer integer default 0,
-       created_at timestamp default now(),
-       flying boolean default True
-);
-
-CREATE TABLE qutrit(
-       id serial primary key,
-       name varchar(200),
-       entangle varchar ARRAY,
        mappers integer ARRAY,
        reducer integer default 0,
        created_at timestamp default now(),

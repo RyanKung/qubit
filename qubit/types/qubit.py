@@ -7,8 +7,6 @@ from qubit.io.celery import Entanglement
 from qubit.io.celery import queue
 from qubit.io.celery import task_method
 from qubit.io.redis import client as kv
-from qubit.types.mapper import Mapper
-from qubit.types.reducer import Reducer
 from qubit.types.utils import ts_data, empty_ts_data
 
 __all__ = ['Qubit', 'States']
@@ -26,21 +24,16 @@ class Qubit(object):
         ('id', types.integer),
         ('name', types.varchar),
         ('entangle', types.varchar),
-        ('mappers', types.array),
-        ('reducer', types.integer),
+        ('body', types.varchar),
         ('flying', types.boolean)
     ])
     manager = QuerySet(prototype)
 
     @classmethod
-    def create(cls, name, entangle, flying=True,
-               reducer=0, mappers=[]):
+    def create(cls, name, entangle, flying=True):
         qid = cls.manager.insert(name=name,
                                  entangle=entangle,
-                                 flying=flying,
-                                 reducer=reducer,
-                                 mappers=str(mappers).replace(
-                                     '[', '{').replace(']', '}'))
+                                 flying=flying)
         return qid
 
     @classmethod
@@ -56,37 +49,8 @@ class Qubit(object):
         return list(map(lambda x: cls.prototype(**x), qubits))
 
     @classmethod
-    def get_mappers(cls, qubit):
-        if not qubit.mappers:
-            return []
-        return list(map(Mapper.get, qubit.mappers))
-
-    @classmethod
-    def add_mapper(cls, qubit_id, mapper_id):
-        return cls.manager.append_array(qubit_id, key='mappers',
-                                        value=mapper_id)
-
-    @classmethod
-    def get_reducer(cls, qubit):
-        if not qubit.reducer:
-            return None
-        return Reducer.get(qubit.reducer)
-
-    @classmethod
-    def add_reducer(cls, qubit_id, reducer_id):
-        return cls.manager.update(qubit_id, reducer=reducer_id)
-
-    @classmethod
     def delete(cls, qubit_id):
         return cls.manager.delete(qubit_id)
-
-    @classmethod
-    def delete_mapper(cls, qubit_id, mapper_id):
-        pass
-
-    @classmethod
-    def delete_reducer(cls, qubit_id, reducer_id):
-        pass
 
     @classmethod
     def set_current(cls, qubit, ts_data):
@@ -103,17 +67,6 @@ class Qubit(object):
             return empty_ts_data
         return ts_data(**json.loads(str(data)))
 
-    @classmethod
-    def mapreduce(cls, qubit, data):
-        mappers = cls.get_mappers(qubit)
-        reducer = cls.get_reducer(qubit)
-        latest = cls.get_current(qubit)
-        if mappers:
-            data = reduce(lambda x, y: y(x), mappers, [data, latest])
-        if reducer:
-            data = reduce(reducer, data)
-        return data
-
     @staticmethod
     @queue.task(filter=task_method, base=QubitEntanglement)
     def measure(qubit, data):    # S_q1(t1) = MR(S_q1(t0), S_q0(t1))
@@ -121,8 +74,7 @@ class Qubit(object):
             qubit = Qubit.prototype(**qubit)
         if isinstance(data, dict):
             data = ts_data(**data)
-
-        datum = Qubit.mapreduce(qubit, data)
+        datum = data.datum
         States.create(qubit=qubit.id,
                       datum=json.dumps(datum),
                       ts=data.ts,
