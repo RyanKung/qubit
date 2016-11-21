@@ -101,7 +101,7 @@ class Qubit(object):
         data = kv.get(key)
         if not data:
             return empty_ts_data
-        return ts_data(**json.loads(data))
+        return ts_data(**json.loads(str(data)))
 
     @classmethod
     def mapreduce(cls, qubit, data):

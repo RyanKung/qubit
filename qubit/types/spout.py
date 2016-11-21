@@ -26,7 +26,7 @@ class Spout(object):
 
     @classmethod
     def create(cls, name, body, flying=False, *args, **kwargs):
-        flying and client.delete('spout:all_flying_cache')  # clear cache
+        flying and client.delete('qubit::spout:all_flying_cache')  # clear cache
         return cls.manager.insert(name=name,
                                   body=body,
                                   flying=flying,
@@ -49,7 +49,7 @@ class Spout(object):
 
     @classmethod
     def get_all_flying(cls):
-        cached = client.get('spout:all_flying_cache')
+        cached = client.get('qubit::spout:all_flying_cache')
         client.publish('eventsocket', 'spout:checking')
         return cached or list(map(
             cls.format,
@@ -100,13 +100,16 @@ class Spout(object):
 
     @classmethod
     @cache(ttl=10000, flag='spout')
+    def get_by(cls, name):
+        return cls.manager.get_by(name=name)
+
+    @classmethod
     def get_via_name(cls, name):
         return cls.format(
-            cls.manager.get_by(name=name))
+            cls.get_by(name=name))
 
     @classmethod
     def get_status(cls, spout):
-        print('getstatus')
         data = ts_data(
             datum=cls.activate(spout),
             ts=datetime.datetime.now())

@@ -46,6 +46,13 @@
 
 	'use strict';
 
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.MainView = undefined;
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 	var _spout = __webpack_require__(1);
 
 	var _react = __webpack_require__(2);
@@ -60,13 +67,37 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	var mainView = _react2.default.createElement(
-	        'div',
-	        null,
-	        _react2.default.createElement(_spout.SpoutView, null)
-	);
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var MainView = exports.MainView = function (_React$Component) {
+	    _inherits(MainView, _React$Component);
+
+	    function MainView() {
+	        _classCallCheck(this, MainView);
+
+	        return _possibleConstructorReturn(this, (MainView.__proto__ || Object.getPrototypeOf(MainView)).apply(this, arguments));
+	    }
+
+	    _createClass(MainView, [{
+	        key: 'render',
+	        value: function render() {
+	            return _react2.default.createElement(
+	                'div',
+	                null,
+	                _react2.default.createElement(_spout.SpoutView, null)
+	            );
+	        }
+	    }]);
+
+	    return MainView;
+	}(_react2.default.Component);
+
 	if (typeof window !== 'undefined') {
-	        _reactDom2.default.render(mainView, document.querySelector('.content .bd'));
+	    _reactDom2.default.render(_react2.default.createElement(MainView, null), document.querySelector('.content .bd'));
 	}
 
 /***/ },
@@ -141,7 +172,6 @@
 	                ),
 	                _react2.default.createElement('div', { className: 'bd' }),
 	                _react2.default.createElement(_spoutlist.SpoutList, null),
-	                _react2.default.createElement(_spoutform.SpoutForm, null),
 	                _react2.default.createElement(
 	                    _reactModal2.default,
 	                    { isOpen: this.state.modal_open },
@@ -34027,9 +34057,9 @@
 
 	            var self = this;
 	            var name = (0, _jquery2.default)(e.target).attr('name');
-	            _jquery2.default.get('/qubit/spout/' + name + '/last/', {}, function (data) {
+	            _jquery2.default.getJSON('/qubit/spout/' + name + '/last/', {}, function (data) {
 	                var last = self.state.last;
-	                last[name] = JSON.stringify(data);
+	                last[name] = data;
 	                self.setState({
 	                    last: last
 	                });
@@ -34054,6 +34084,41 @@
 	                _reactModal2.default,
 	                null,
 	                _react2.default.createElement(_spoutform.SpoutForm, null)
+	            );
+	        }
+	    }, {
+	        key: 'showData',
+	        value: function showData(name) {
+	            var self = this;
+	            var data = self.state && self.state.last && self.state.last[name];
+	            if (!data) {
+	                return '';
+	            }
+	            return _react2.default.createElement(
+	                'table',
+	                null,
+	                _react2.default.createElement(
+	                    'tr',
+	                    null,
+	                    Object.keys(data).map(function (d, i) {
+	                        return _react2.default.createElement(
+	                            'th',
+	                            null,
+	                            d
+	                        );
+	                    })
+	                ),
+	                _react2.default.createElement(
+	                    'tr',
+	                    null,
+	                    Object.keys(data).map(function (d, i) {
+	                        return _react2.default.createElement(
+	                            'td',
+	                            null,
+	                            JSON.stringify(data[d])
+	                        );
+	                    })
+	                )
 	            );
 	        }
 	    }, {
@@ -34126,7 +34191,7 @@
 	                                _react2.default.createElement(
 	                                    'div',
 	                                    null,
-	                                    self.state && self.state.last[data.name]
+	                                    self.showData(data.name)
 	                                )
 	                            )
 	                        );

@@ -31,9 +31,9 @@ export class SpoutList extends React.Component {
 
         var self = this
         var name = $(e.target).attr('name')
-        $.get('/qubit/spout/' + name + '/last/', {}, function(data) {
+        $.getJSON('/qubit/spout/' + name + '/last/', {}, function(data) {
             var last = self.state.last
-            last[name] = JSON.stringify(data)
+            last[name] = data
             self.setState({
                 last: last
             })
@@ -54,6 +54,25 @@ export class SpoutList extends React.Component {
             <Modal>
               <SpoutForm></SpoutForm>
             </Modal>
+        )
+    }
+    showData(name) {
+        var self = this
+        var data = self.state && self.state.last && self.state.last[name]
+        if (!data) { return '' }
+        return (
+            <table>
+              <tr>
+                {Object.keys(data).map(function(d, i) {
+                    return (<th>{d}</th>)
+                })}
+              </tr>
+              <tr>
+                {Object.keys(data).map(function(d, i) {
+                    return (<td>{JSON.stringify(data[d])}</td>)
+                })}
+              </tr>
+            </table>
         )
     }
     render () {
@@ -80,7 +99,7 @@ export class SpoutList extends React.Component {
                             <button name={data.name}
                                     onClick={self.delete.bind(self)}>delete</button>
                             <div>
-                              {self.state && self.state.last[data.name]}
+                              {self.showData(data.name)}
                             </div>
                           </div>
                         </div>

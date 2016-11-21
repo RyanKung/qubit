@@ -19,7 +19,6 @@ export class SpoutView extends React.Component {
              </div>
               <div className="bd"></div>
               <SpoutList></SpoutList>
-              <SpoutForm></SpoutForm>
               <Modal isOpen={this.state.modal_open}>
                 <SpoutForm submit={this.closeForm.bind(this)}></SpoutForm>
               </Modal>
