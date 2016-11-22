@@ -51,6 +51,7 @@ class QuerySet(object):
         'count': 'SELECT COUNT({field}) FROM {table}',
         'count_on_rule': 'SELECT COUNT({field}) FROM {table} WHERE {rule}',
         'orderby': 'ORDER BY {field}',
+        'nearby': 'select {fields} difference from {table} where {rule} and {value} > {column} limit 1',
         'orderby_decr': 'ORDER BY {field} DECR',
         'filter_with_orderby': "SELECT {fields} from {table} WHERE {rule} ORDER BY {sort_key} LIMIT {size} OFFSET {offset};",
         'filter_with_orderby_decr': "SELECT {fields} from {table} WHERE {rule} ORDER BY {sort_key} LIMIT {size} OFFSET {offset};",
@@ -86,6 +87,17 @@ class QuerySet(object):
             return res
         except:
             raise Exception("Series Failed")
+
+    def nearby(self, value, column, *args, **kwargs):
+        data = self.format(kwargs)
+        res = query(self._sql['nearby'].format(**{
+            'table': self.tablename,
+            'fields': utils.concat(map(utils.wrap_key, self.fields)),
+            'value': utils.escape(value),
+            'column': utils.escape(column),
+            'rule': utils.get_and_seg(data)
+        }))
+        return res
 
     def get(self, oid):
         res = query(self._sql['get_via_id'].format(**{

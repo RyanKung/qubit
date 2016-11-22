@@ -50,7 +50,7 @@ def test_crud():
     code = '1'
     data = {
         'name': 'tester',
-        'body': code,
+        'monad': code,
         'rate': 1
     }
     res = json.loads(request(path='/qubit/',

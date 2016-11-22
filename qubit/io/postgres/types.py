@@ -12,5 +12,4 @@ text = NewType('text', str)
 integer = NewType('integer', int)
 timestamp = NewType('timestamp', datetime.datetime)
 array = NewType('array', list)
-
 Table = NamedTuple

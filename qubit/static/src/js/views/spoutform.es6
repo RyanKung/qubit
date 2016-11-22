@@ -36,7 +36,7 @@ export class SpoutForm extends React.Component {
         return (
             <section className="card">
               <div className="hd"><h1>New Spout</h1></div>
-              <Form className="bd" action="/qubit/spout/"
+              <Form className="bd" action="/qubit/"
                     series={this.series.bind(this)}
                     contentType='application/json'
                     success={this.success.bind(this)}

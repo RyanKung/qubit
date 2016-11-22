@@ -2,12 +2,12 @@ CREATE TABLE qubit(
        id serial primary key,
        name varchar(200),
        rate integer default 1,
-       body text,
+       monad text,
        entangle varchar(200),
-       mappers integer ARRAY,
-       reducer integer default 0,
-       created_at timestamp default now(),
+       is_stem boolean default False,
+       is_spout boolean default False,
        flying boolean default True,
+       created_at timestamp default now(),
        comment text
 );
 
@@ -15,8 +15,8 @@ CREATE TABLE states(
        id serial,
        ts timestamp default now(),
        qubit integer,
-       index text default 'data',
-       datum json default '{"data": 0}',
+       index text default '',
+       datum json default '{}',
        tags text default '',
        primary key (qubit, ts)
 );
