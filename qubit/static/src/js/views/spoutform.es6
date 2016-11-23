@@ -49,13 +49,25 @@ export class SpoutForm extends React.Component {
                   <label>
                     <span>flying</span>
                     <input placeholder='flying' name='flying' type='checkbox' />
+                  </label>
+                  <label>
+                    <span>is spout</span>
+                    <input name='is_spout' type='checkbox' />
+                    </label>
+                  <label>
+                    <span>is stem</span>
+                    <input name='is_stem' type='checkbox' />
                     </label>
                 </fieldset>
-
                 <fieldset className="long">
-                  <label>body</label>
-                  <textarea name="body" placeholder="body"></textarea>
+                  <label>monad</label>
+                  <textarea name="monad" placeholder="monad"></textarea>
                 </fieldset>
+                <fieldset className="long">
+                  <label>comment</label>
+                  <textarea name="comment" placeholder="coment"></textarea>
+                </fieldset>
+
                 <fieldset className="submit block">
                   <input name="submit" type="submit" value="submmit" />
                 </fieldset>

@@ -5,4 +5,4 @@ __all__ = ['ts_data', 'empty_ts_data']
 
 ts_data = namedtuple('data', ['datum', 'ts'])
 
-empty_ts_data = ts_data(datum={}, ts=str(datetime.datetime.now()))
+empty_ts_data = lambda : ts_data(datum={}, ts=str(datetime.datetime.now()))

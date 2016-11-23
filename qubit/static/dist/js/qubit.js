@@ -33871,7 +33871,7 @@
 	                ),
 	                _react2.default.createElement(
 	                    _ajaxform2.default,
-	                    { className: 'bd', action: '/qubit/spout/',
+	                    { className: 'bd', action: '/qubit/',
 	                        series: this.series.bind(this),
 	                        contentType: 'application/json',
 	                        success: this.success.bind(this),
@@ -33894,6 +33894,26 @@
 	                                'flying'
 	                            ),
 	                            _react2.default.createElement('input', { placeholder: 'flying', name: 'flying', type: 'checkbox' })
+	                        ),
+	                        _react2.default.createElement(
+	                            'label',
+	                            null,
+	                            _react2.default.createElement(
+	                                'span',
+	                                null,
+	                                'is spout'
+	                            ),
+	                            _react2.default.createElement('input', { name: 'is_spout', type: 'checkbox' })
+	                        ),
+	                        _react2.default.createElement(
+	                            'label',
+	                            null,
+	                            _react2.default.createElement(
+	                                'span',
+	                                null,
+	                                'is stem'
+	                            ),
+	                            _react2.default.createElement('input', { name: 'is_stem', type: 'checkbox' })
 	                        )
 	                    ),
 	                    _react2.default.createElement(
@@ -33902,9 +33922,19 @@
 	                        _react2.default.createElement(
 	                            'label',
 	                            null,
-	                            'body'
+	                            'monad'
 	                        ),
-	                        _react2.default.createElement('textarea', { name: 'body', placeholder: 'body' })
+	                        _react2.default.createElement('textarea', { name: 'monad', placeholder: 'monad' })
+	                    ),
+	                    _react2.default.createElement(
+	                        'fieldset',
+	                        { className: 'long' },
+	                        _react2.default.createElement(
+	                            'label',
+	                            null,
+	                            'comment'
+	                        ),
+	                        _react2.default.createElement('textarea', { name: 'comment', placeholder: 'coment' })
 	                    ),
 	                    _react2.default.createElement(
 	                        'fieldset',
@@ -34045,7 +34075,7 @@
 	        value: function componentWillMount() {
 	            var self = this;
 	            _bus.socketStream.onValue(function (value) {
-	                if (value == 'newSpout') {
+	                if (value == 'new_stem') {
 	                    self.getData();
 	                }
 	            });
@@ -34059,7 +34089,7 @@
 	        key: 'getData',
 	        value: function getData() {
 	            var self = this;
-	            _jquery2.default.getJSON('/qubit/spout/', {}, function (data) {
+	            _jquery2.default.getJSON('/qubit/stem/', {}, function (data) {
 	                self.setState({
 	                    data: data.data
 	                });
@@ -34068,10 +34098,9 @@
 	    }, {
 	        key: 'getLast',
 	        value: function getLast(e) {
-
 	            var self = this;
 	            var name = (0, _jquery2.default)(e.target).attr('name');
-	            _jquery2.default.getJSON('/qubit/spout/' + name + '/last/', {}, function (data) {
+	            _jquery2.default.getJSON('/qubit/' + name + '/last/', {}, function (data) {
 	                var last = self.state.last;
 	                last[name] = data;
 	                self.setState({
@@ -34084,7 +34113,7 @@
 	        value: function _delete(e) {
 	            var self = this;
 	            var name = (0, _jquery2.default)(e.target).attr('name');
-	            _jquery2.default.ajax({ url: '/qubit/spout/' + name + '/',
+	            _jquery2.default.ajax({ url: '/qubit/' + name + '/',
 	                data: {},
 	                method: 'delete',
 	                success: function success(data) {
@@ -34112,26 +34141,30 @@
 	                'table',
 	                null,
 	                _react2.default.createElement(
-	                    'tr',
+	                    'tbody',
 	                    null,
-	                    Object.keys(data).map(function (d, i) {
-	                        return _react2.default.createElement(
-	                            'th',
-	                            null,
-	                            d
-	                        );
-	                    })
-	                ),
-	                _react2.default.createElement(
-	                    'tr',
-	                    null,
-	                    Object.keys(data).map(function (d, i) {
-	                        return _react2.default.createElement(
-	                            'td',
-	                            null,
-	                            JSON.stringify(data[d])
-	                        );
-	                    })
+	                    _react2.default.createElement(
+	                        'tr',
+	                        null,
+	                        Object.keys(data).map(function (d, i) {
+	                            return _react2.default.createElement(
+	                                'th',
+	                                { key: i },
+	                                d
+	                            );
+	                        })
+	                    ),
+	                    _react2.default.createElement(
+	                        'tr',
+	                        null,
+	                        Object.keys(data).map(function (d, i) {
+	                            return _react2.default.createElement(
+	                                'td',
+	                                { key: i },
+	                                JSON.stringify(data[d])
+	                            );
+	                        })
+	                    )
 	                )
 	            );
 	        }
@@ -34172,19 +34205,83 @@
 	                                'div',
 	                                { className: 'bd' },
 	                                _react2.default.createElement(
-	                                    'span',
+	                                    'ul',
 	                                    null,
-	                                    data.fly
+	                                    _react2.default.createElement(
+	                                        'li',
+	                                        null,
+	                                        _react2.default.createElement(
+	                                            'label',
+	                                            null,
+	                                            'flying: '
+	                                        ),
+	                                        _react2.default.createElement(
+	                                            'span',
+	                                            null,
+	                                            data.flying.toString()
+	                                        )
+	                                    ),
+	                                    _react2.default.createElement(
+	                                        'li',
+	                                        null,
+	                                        _react2.default.createElement(
+	                                            'label',
+	                                            null,
+	                                            'is_spout: '
+	                                        ),
+	                                        _react2.default.createElement(
+	                                            'span',
+	                                            null,
+	                                            data.is_spout.toString()
+	                                        )
+	                                    ),
+	                                    _react2.default.createElement(
+	                                        'li',
+	                                        null,
+	                                        _react2.default.createElement(
+	                                            'label',
+	                                            null,
+	                                            'is_stem: '
+	                                        ),
+	                                        _react2.default.createElement(
+	                                            'span',
+	                                            null,
+	                                            data.is_stem.toString()
+	                                        )
+	                                    ),
+	                                    _react2.default.createElement(
+	                                        'li',
+	                                        null,
+	                                        _react2.default.createElement(
+	                                            'label',
+	                                            null,
+	                                            'entangle: '
+	                                        ),
+	                                        _react2.default.createElement(
+	                                            'span',
+	                                            null,
+	                                            data.entangle
+	                                        )
+	                                    ),
+	                                    _react2.default.createElement(
+	                                        'li',
+	                                        null,
+	                                        _react2.default.createElement(
+	                                            'label',
+	                                            null,
+	                                            'created at: '
+	                                        ),
+	                                        _react2.default.createElement(
+	                                            'span',
+	                                            null,
+	                                            data.created_at
+	                                        )
+	                                    )
 	                                ),
 	                                _react2.default.createElement(
-	                                    'span',
+	                                    'pre',
 	                                    null,
-	                                    data.created_at
-	                                ),
-	                                _react2.default.createElement(
-	                                    'detail',
-	                                    null,
-	                                    data.body
+	                                    data.monad
 	                                )
 	                            ),
 	                            _react2.default.createElement(

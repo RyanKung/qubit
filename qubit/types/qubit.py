@@ -13,6 +13,9 @@ from qubit.types.utils import ts_data, empty_ts_data
 __all__ = ['Qubit', 'States']
 
 
+tell_client = partial(client.publish, 'eventsocket')
+
+
 class QubitEntanglement(Entanglement):
     abstract = True
 
@@ -28,6 +31,7 @@ class Qubit(object):
         ('is_stem', types.boolean),
         ('is_spout', types.boolean),
         ('monad', types.text),
+        ('comment', types.text),
         ('flying', types.boolean),
         ('rate', types.integer)
     ])
@@ -35,12 +39,21 @@ class Qubit(object):
 
     @classmethod
     def create(cls, name, entangle=None,
-               flying=True, *args, **kwargs):
+               flying=True, is_stem=False, is_spout=False,
+               *args, **kwargs):
         qid = cls.manager.insert(
             name=name,
             entangle=entangle,
+            is_stem=is_stem,
+            is_spout=is_spout,
             flying=flying, *args, **kwargs)
+        if qid and is_stem:
+            tell_client('new_stem')
         return qid
+
+    @staticmethod
+    def __import__(name, *args, **kwargs):
+        return __import__(name)
 
     @classmethod
     def update(cls, name, data):
@@ -51,15 +64,28 @@ class Qubit(object):
         return cls.prototype(**cls.manager.get(qid))
 
     @staticmethod
+    def exec(qubit, data):
+        qubit, data = Qubit.format(qubit, data)
+        glo = {'datum': data.datum}
+        loc = {}
+        exec(qubit.monad, glo, loc)
+        datum = loc['datum']
+        if not isinstance(datum, dict):
+            datum = dict(raw=datum)
+        return datum
+
+    @staticmethod
     @queue.task(filter=task_method,
                 base=QubitEntanglement)
     def activate(qubit, data={}):
-        client.publish('eventsocket',
-                       'qubit:active:%s' % qubit.name)
-        return exec(qubit.monad, {
-            '__import__': Qubit.__import__,
-            'qubit': qubit,
-            'data': data})
+        qubit, data = Qubit.format(qubit, data)
+        datum = Qubit.exec(qubit, data)
+        data = ts_data(datum=datum, ts=data.ts)
+        States.create(qubit=qubit.id,
+                      datum=json.dumps(datum),
+                      ts=data.ts,
+                      tags=[])
+        Qubit.set_current(qubit.name, data)
         Qubit.trigger(qubit=qubit, data=data)
 
     @classmethod
@@ -68,6 +94,7 @@ class Qubit(object):
             cls.measure, cls.get_spouts()))
 
     @classmethod
+    @cache(ttl=5000, flag='spout')
     def get_flying(cls, entangle):
         qubits = cls.manager.filter(
             entangle=entangle,
@@ -78,35 +105,36 @@ class Qubit(object):
 
     @classmethod
     def get_spouts(cls):
-        cached = client.get('qubit::all_flying_cache')
-        client.publish('eventsocket', 'spout:checking')
+        cached = client.get('qubit::spout_cache')
         return cached or list(map(
-            cls.format,
+            cls.format_qubit,
             cls.manager.filter(flying=True, is_spout=True)))
+
+    @classmethod
+    def get_stem(cls):
+        return list(map(
+            cls.format_qubit,
+            cls.manager.filter(flying=True, is_stem=True)))
 
     @classmethod
     def delete(cls, qubit_id):
         return cls.manager.delete(qubit_id)
 
     @classmethod
-    def set_current(cls, qubit, ts_data):
+    def set_current(cls, qubit_name, ts_data):
+        tell_client('qubit:%s:updated' % qubit_name)
         data = json.dumps(ts_data._asdict())
-        key = 'qubit:%s:state' % qubit.id
+        key = 'qubit:%s:state' % qubit_name
         client.set(key, data)
         return True
 
     @classmethod
-    def get_current(cls, qubit):
-        key = 'qubit:%s:state' % qubit.id
+    def get_current(cls, qubit_name):
+        key = 'qubit:%s:state' % qubit_name
         data = client.get(key)
         if not data:
-            return empty_ts_data
-        return ts_data(**json.loads(str(data)))
-
-    @classmethod
-    def get_via_name(cls, name):
-        return cls.forma_qubit(
-            cls.get_by(name=name))
+            return empty_ts_data()
+        return ts_data(**json.loads(data.decode()))
 
     @classmethod
     @cache(ttl=10000, flag='spout')
@@ -121,25 +149,25 @@ class Qubit(object):
     def format_qubit(qubit):
         if isinstance(qubit, dict):
             qubit = Qubit.prototype(**qubit)
+        if isinstance(qubit, list):
+            qubit = Qubit.prototype(**dict(zip(Qubit.prototype._fields, qubit)))
         return qubit
 
     @staticmethod
     def format_data(data):
+        if not data:
+            return empty_ts_data()
         if isinstance(data, dict):
             data = ts_data(**data)
+        if isinstance(data, list):
+            data = ts_data(**dict(zip(ts_data._fields, data)))
+
         return data
 
     @staticmethod
-    @queue.task(filter=task_method, base=QubitEntanglement)
-    def measure(qubit, data):    # S_q1(t1) = MR(S_q1(t0), S_q0(t1))
-        qubit, data = Qubit.format(qubit, data)
-        datum = data.datum
+    def measure(qubit, data={}):    # S_q1(t1) = MR(S_q1(t0), S_q0(t1))
         Qubit.activate.task.delay(
             qubit=qubit, data=data)
-        States.create(qubit=qubit.id,
-                      datum=json.dumps(datum),
-                      ts=data.ts,
-                      tags=[])
 
     @classmethod
     def trigger(cls, qubit, data):
@@ -148,7 +176,7 @@ class Qubit(object):
         if not qubits:
             return False
         res = list(map(partial(
-            Qubit.measure.task.delay,
+            Qubit.measure,
             data=isinstance(data, dict) and data or data._asdict()), qubits))
         return res
 
