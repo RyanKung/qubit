@@ -40,11 +40,5 @@ def cache(ttl=100, flag=None):
         return handler
     return wrapper
 
-
-def do_something(channel, message):
-    return print(message, channel)
-
 pubsub = store.pubsub()
-pubsub.add_client(do_something)
-ensure_future(pubsub.subscribe('mychannel', 'eventsocket'))
 clear()

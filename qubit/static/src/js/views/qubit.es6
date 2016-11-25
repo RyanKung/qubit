@@ -2,25 +2,26 @@ import React from 'react'
 import $ from 'jquery'
 import ReactDOM from 'react-dom'
 import Modal from 'react-modal'
-import { SpoutForm } from 'views/spoutform'
-import { SpoutList } from 'views/spoutlist'
+import { QubitForm } from 'views/qubitform'
+import { QubitList } from 'views/qubitlist'
 
 
-export class SpoutView extends React.Component {
+export class QubitView extends React.Component {
     componentWillMount() {
         this.setState({
         })
     }
     render () {
         return (
-            <section className="spout">
+            <section className="qubit">
               <div className="hd">
                 <button className='new' onClick={this.openForm.bind(this)}>+</button>
              </div>
               <div className="bd"></div>
-              <SpoutList></SpoutList>
+              <QubitList></QubitList>
               <Modal isOpen={this.state.modal_open}>
-                <SpoutForm submit={this.closeForm.bind(this)}></SpoutForm>
+                <QubitForm cancel={this.closeForm.bind(this)}
+                           submit={this.closeForm.bind(this)}></QubitForm>
               </Modal>
             </section>
         )

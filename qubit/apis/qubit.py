@@ -9,28 +9,28 @@ from .utils import jsonize
 __all__ = ['qubit_api', 'entangle', 'stem_api']
 
 
-@app.route('/qubit/<name>/', methods=['GET', 'DELETE'])
+@app.route('/qubit/<qid>/', methods=['GET', 'DELETE'])
 @app.route('/qubit/', methods=['POST'])
 @jsonize
 @wrapper
-def qubit_api(name=None):
+def qubit_api(qid=None):
     def create():
         return dict(id=Qubit.create(**request.json))
 
     def push():
-        qubit = Qubit.get_by(name=name)
+        qubit = Qubit.get(qid)
         data = ts_data(**request.json)
         Qubit.measure(qubit, data)
 
     def fetch():
-        res = Qubit.get_via_name(name=name)
+        res = Qubit.get(qid)
         return res and res._asdict()
 
     def update():
-        return Qubit.update(name=name, **request.json)
+        return Qubit.update(qid, **request.json)
 
     def delete():
-        return Qubit.manager.delete_by(name=name)
+        return Qubit.manager.delete(qid)
     return {
         'GET': fetch,
         'PUT': push,
@@ -51,11 +51,11 @@ def stem_api(name=None):
     }.get(request.method)()
 
 
-@app.route('/qubit/<name>/last/', methods=['GET'])
+@app.route('/qubit/<qid>/last/', methods=['GET'])
 @jsonize
 @wrapper
-def last(name):
-    return Qubit.get_current(name)
+def last(qid):
+    return Qubit.get_current(qid)
 
 
 @app.route('/qubit/entangle/<qid>/', methods=['POST'])

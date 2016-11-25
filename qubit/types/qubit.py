@@ -1,4 +1,6 @@
 import json
+import runpy
+from types import ModuleType
 from functools import partial
 from datetime import datetime
 from qubit.io.postgres import types
@@ -31,6 +33,7 @@ class Qubit(object):
         ('is_stem', types.boolean),
         ('is_spout', types.boolean),
         ('monad', types.text),
+        ('store', types.boolean),
         ('comment', types.text),
         ('flying', types.boolean),
         ('rate', types.integer)
@@ -40,7 +43,7 @@ class Qubit(object):
     @classmethod
     def create(cls, name, entangle=None,
                flying=True, is_stem=False, is_spout=False,
-               *args, **kwargs):
+               store=False, *args, **kwargs):
         qid = cls.manager.insert(
             name=name,
             entangle=entangle,
@@ -52,12 +55,17 @@ class Qubit(object):
         return qid
 
     @staticmethod
-    def __import__(name, *args, **kwargs):
-        return __import__(name)
+    def require(name, *args, **kwargs):
+        if '.py' not in name:
+            name = name + '.py'
+        module_dict = runpy.run_path(name)
+        module = ModuleType(name)
+        list(map(lambda x: setattr(module, *x), module_dict.items()))
+        return module
 
     @classmethod
-    def update(cls, name, data):
-        return cls.manager.update_by(rule={'name': name}, **data)
+    def update(cls, qid, data):
+        return cls.manager.update(qid, **data)
 
     @classmethod
     def get(cls, qid):
@@ -66,7 +74,11 @@ class Qubit(object):
     @staticmethod
     def exec(qubit, data):
         qubit, data = Qubit.format(qubit, data)
-        glo = {'datum': data.datum}
+
+        builtins = dict(__builtins__,
+                        require=Qubit.require,
+                        __import__=NotImplementedError)
+        glo = {'datum': data.datum, '__builtins__': builtins}
         loc = {}
         exec(qubit.monad, glo, loc)
         datum = loc['datum']
@@ -81,11 +93,12 @@ class Qubit(object):
         qubit, data = Qubit.format(qubit, data)
         datum = Qubit.exec(qubit, data)
         data = ts_data(datum=datum, ts=data.ts)
-        States.create(qubit=qubit.id,
-                      datum=json.dumps(datum),
-                      ts=data.ts,
-                      tags=[])
-        Qubit.set_current(qubit.name, data)
+        qubit.store and States.create(
+            qubit=qubit.id,
+            datum=json.dumps(datum),
+            ts=data.ts,
+            tags=[])
+        Qubit.set_current(qubit.id, data)
         Qubit.trigger(qubit=qubit, data=data)
 
     @classmethod
@@ -118,19 +131,19 @@ class Qubit(object):
 
     @classmethod
     def delete(cls, qubit_id):
-        return cls.manager.delete(qubit_id)
+        return cls.manager.delete(qubit_id) and States.manager.delete_by(qubit=qubit_id)
 
     @classmethod
-    def set_current(cls, qubit_name, ts_data):
-        tell_client('qubit:%s:updated' % qubit_name)
+    def set_current(cls, qid, ts_data):
         data = json.dumps(ts_data._asdict())
-        key = 'qubit:%s:state' % qubit_name
+        tell_client('qubit::updated::%s::%s' % (qid, data))
+        key = 'qubit:%s:state' % qid
         client.set(key, data)
         return True
 
     @classmethod
-    def get_current(cls, qubit_name):
-        key = 'qubit:%s:state' % qubit_name
+    def get_current(cls, qid):
+        key = 'qubit:%s:state' % qid
         data = client.get(key)
         if not data:
             return empty_ts_data()
@@ -150,7 +163,8 @@ class Qubit(object):
         if isinstance(qubit, dict):
             qubit = Qubit.prototype(**qubit)
         if isinstance(qubit, list):
-            qubit = Qubit.prototype(**dict(zip(Qubit.prototype._fields, qubit)))
+            qubit = Qubit.prototype(
+                **dict(zip(Qubit.prototype._fields, qubit)))
         return qubit
 
     @staticmethod
@@ -160,7 +174,8 @@ class Qubit(object):
         if isinstance(data, dict):
             data = ts_data(**data)
         if isinstance(data, list):
-            data = ts_data(**dict(zip(ts_data._fields, data)))
+            data = ts_data(
+                **dict(zip(ts_data._fields, data)))
 
         return data
 
@@ -171,7 +186,7 @@ class Qubit(object):
 
     @classmethod
     def trigger(cls, qubit, data):
-        sig_name = '%s:%s' % ('Qubit', qubit.name)
+        sig_name = '%s:%s' % ('Qubit', qubit.id)
         qubits = map(lambda x: x._asdict(), Qubit.get_flying(sig_name))
         if not qubits:
             return False
@@ -182,7 +197,7 @@ class Qubit(object):
 
     @classmethod
     def entangle(cls, qid1, qid2):
-        sig_name = '%s:%s' % (cls.__name__, qid2)
+        sig_name = 'Qubit:%s' % qid2
         return cls.manager.update(qid1, entangle=sig_name)
 
     @staticmethod
@@ -221,9 +236,9 @@ class States(object):
             ts=s['ts'])
 
     @classmethod
-    def select(cls, sid, start, end):
+    def select(cls, qubit, start, end):
         res = cls.manager.find_in_range(
-            qubit=sid, key='ts', end=end)
+            qubit=qubit, key='ts', end=end)
         return list(map(cls.format, res))
 
     @classmethod

@@ -1,4 +1,4 @@
-import { SpoutView } from 'views/spout'
+import { QubitView } from 'views/qubit'
 import React from 'react'
 import ReactDOM from 'react-dom';
 import { bus } from 'bus'
@@ -6,12 +6,12 @@ import { bus } from 'bus'
 export class MainView extends React.Component {
     componentWillMount() {
         this.setState({
-            'nav': 'spout'
+            'nav': 'qubit'
         })
     }
     renderViews() {
         return ({
-            'spout': <SpoutView></SpoutView>
+            'qubit': <QubitView></QubitView>
         }[this.state.nav])
     }
     render () {

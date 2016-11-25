@@ -8,7 +8,7 @@ from tests.apis import get
 def create_qubit(entangle, name='a qubit'):
     qubit_data = {
         'name': name,
-        'entangle': entangle,
+        'entangle': entangle
     }
     res = json.loads(request(path='/qubit/', data=json.dumps(qubit_data), method='POST'))
     assert res['result'] == 'ok'

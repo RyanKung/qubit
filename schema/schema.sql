@@ -7,6 +7,7 @@ CREATE TABLE qubit(
        is_stem boolean default False,
        is_spout boolean default False,
        flying boolean default True,
+       store boolean default True,
        created_at timestamp default now(),
        comment text
 );

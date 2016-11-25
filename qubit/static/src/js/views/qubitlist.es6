@@ -2,10 +2,11 @@ import React from 'react'
 import $ from 'jquery'
 import ReactDOM from 'react-dom'
 import Modal from 'react-modal'
-import { SpoutForm } from 'views/spoutform'
-import { socketStream } from 'bus'
+import { QubitForm } from 'views/qubitform'
+import { socketStream, updatedSteam } from 'bus'
+import { TSChart } from 'views/vision'
 
-export class SpoutList extends React.Component {
+export class QubitList extends React.Component {
     componentWillMount() {
         var self = this
         socketStream.onValue(function(value){
@@ -13,11 +14,25 @@ export class SpoutList extends React.Component {
                 self.getData()
             }
         })
+        updatedSteam.onValue(function(data) {
+            let last = self.state && self.state.last || {}
+            last[data.qid] = data.datum
+            self.setState({
+                last: last
+            })
+        })
         this.setState({
             last: {},
             data: []
         })
         this.getData()
+    }
+    getStates(qid) {
+        var now = (new Date()).getTime()
+        var from = now - 3600
+        $.getJSON('/qubit/state/' + qid, {
+            from: from, now: now}, function(data) {
+        })
     }
     getData() {
         var self = this
@@ -29,10 +44,10 @@ export class SpoutList extends React.Component {
     }
     getLast(e) {
         var self = this
-        var name = $(e.target).attr('name')
-        $.getJSON('/qubit/' + name + '/last/', {}, function(data) {
+        var qid = $(e.target).data('qid')
+        $.getJSON('/qubit/' + qid + '/last/', {}, function(data) {
             var last = self.state.last
-            last[name] = data
+            last[qid] = data
             self.setState({
                 last: last
             })
@@ -40,7 +55,7 @@ export class SpoutList extends React.Component {
     }
     delete(e) {
         var self = this
-        var name = $(e.target).attr('name')
+        var qid = $(e.target).data('qid')
         $.ajax({url: '/qubit/' + name + '/',
                 data: {},
                 method: 'delete',
@@ -51,13 +66,13 @@ export class SpoutList extends React.Component {
     renderForm() {
         return (
             <Modal>
-              <SpoutForm></SpoutForm>
+              <QubitForm></QubitForm>
             </Modal>
         )
     }
-    showData(name) {
+    showData(qid) {
         var self = this
-        var data = self.state && self.state.last && self.state.last[name]
+        var data = self.state && self.state.last && self.state.last[qid]
         if (!data) { return '' }
         return (
             <table>
@@ -78,16 +93,15 @@ export class SpoutList extends React.Component {
     }
     render () {
         var self = this
-        console.log(self)
         return (
-            <section className="spoutlist card">
-              <div className="hd"><h1>Spouts</h1></div>
+            <section className="qubitlist card">
+              <div className="hd"><h1>Qubits</h1></div>
               <div className="bd">
                 {this.state && this.state.data.map(function(data, i) {
                     return (
-                        <div className="spout cell" key={i}>
+                        <div className="qubit cell" key={i}>
                           <div className="hd">
-                            <label>{data.name}</label>
+                            <label>{data.name}<span>id: {data.id}</span></label>
                           </div>
                           <div className='bd'>
                             <ul>
@@ -100,12 +114,15 @@ export class SpoutList extends React.Component {
                             <pre>{data.monad}</pre>
                           </div>
                           <div className='ft'>
-                            <button name={data.name}
+                            <button data-name={data.name} data-qid={data.id}
                                     onClick={self.getLast.bind(self)}>get last</button>
-                            <button name={data.name}
+                            <button data-name={data.name} data-qid={data.id}
                                     onClick={self.delete.bind(self)}>delete</button>
-                            <div>
-                              {self.showData(data.name)}
+                            <div className="last">
+                              {self.showData(data.id)}
+                            </div>
+                            <div className="chart">
+                              <TSChart width='500' height='200'></TSChart>
                             </div>
                           </div>
                         </div>
