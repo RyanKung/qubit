@@ -66,7 +66,8 @@ class Qubit(object):
 
     @staticmethod
     def __import__(name, *args, **kwargs):
-        if name in ['os', 'sys', 'runpy']:
+        whitelist = ['functools', 'operator', 'pandas', 'itertools']
+        if name not in whitelist:
             return NotImplementedError
         return __import__(name, *args, **kwargs)
 
@@ -140,6 +141,15 @@ class Qubit(object):
     @classmethod
     def delete(cls, qubit_id):
         return cls.manager.delete(qubit_id) and States.manager.delete_by(qubit=qubit_id)
+
+    @classmethod
+    def get_spem(cls, qid):
+        qubit = cls.format_qubit(cls.get(qid))
+        kind, qid = qubit.entangle.split(':')
+        if not kind == 'spem':
+            return cls.get_Spem(qid)
+        else:
+            return qid
 
     @classmethod
     def set_current(cls, qid, ts_data):
