@@ -63,7 +63,7 @@
 
 	var _reactDom2 = _interopRequireDefault(_reactDom);
 
-	var _bus = __webpack_require__(199);
+	var _bus = __webpack_require__(200);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -50563,7 +50563,9 @@
 
 	var _qubitform = __webpack_require__(194);
 
-	var _bus = __webpack_require__(199);
+	var _qubitcell = __webpack_require__(199);
+
+	var _bus = __webpack_require__(200);
 
 	var _vision = __webpack_require__(196);
 
@@ -50717,134 +50719,7 @@
 	                    'div',
 	                    { className: 'bd' },
 	                    this.state && this.state.data.map(function (data, i) {
-	                        return _react2.default.createElement(
-	                            'div',
-	                            { className: 'qubit cell', key: i },
-	                            _react2.default.createElement(
-	                                'div',
-	                                { className: 'hd' },
-	                                _react2.default.createElement(
-	                                    'label',
-	                                    null,
-	                                    data.name,
-	                                    _react2.default.createElement(
-	                                        'span',
-	                                        null,
-	                                        'id: ',
-	                                        data.id
-	                                    )
-	                                )
-	                            ),
-	                            _react2.default.createElement(
-	                                'div',
-	                                { className: 'bd' },
-	                                _react2.default.createElement(
-	                                    'ul',
-	                                    null,
-	                                    _react2.default.createElement(
-	                                        'li',
-	                                        null,
-	                                        _react2.default.createElement(
-	                                            'label',
-	                                            null,
-	                                            'flying: '
-	                                        ),
-	                                        _react2.default.createElement(
-	                                            'span',
-	                                            null,
-	                                            data.flying.toString()
-	                                        )
-	                                    ),
-	                                    _react2.default.createElement(
-	                                        'li',
-	                                        null,
-	                                        _react2.default.createElement(
-	                                            'label',
-	                                            null,
-	                                            'is_spout: '
-	                                        ),
-	                                        _react2.default.createElement(
-	                                            'span',
-	                                            null,
-	                                            data.is_spout.toString()
-	                                        )
-	                                    ),
-	                                    _react2.default.createElement(
-	                                        'li',
-	                                        null,
-	                                        _react2.default.createElement(
-	                                            'label',
-	                                            null,
-	                                            'is_stem: '
-	                                        ),
-	                                        _react2.default.createElement(
-	                                            'span',
-	                                            null,
-	                                            data.is_stem.toString()
-	                                        )
-	                                    ),
-	                                    _react2.default.createElement(
-	                                        'li',
-	                                        null,
-	                                        _react2.default.createElement(
-	                                            'label',
-	                                            null,
-	                                            'entangle: '
-	                                        ),
-	                                        _react2.default.createElement(
-	                                            'span',
-	                                            null,
-	                                            data.entangle
-	                                        )
-	                                    ),
-	                                    _react2.default.createElement(
-	                                        'li',
-	                                        null,
-	                                        _react2.default.createElement(
-	                                            'label',
-	                                            null,
-	                                            'created at: '
-	                                        ),
-	                                        _react2.default.createElement(
-	                                            'span',
-	                                            null,
-	                                            data.created_at
-	                                        )
-	                                    )
-	                                ),
-	                                _react2.default.createElement(
-	                                    'pre',
-	                                    null,
-	                                    data.monad
-	                                )
-	                            ),
-	                            _react2.default.createElement(
-	                                'div',
-	                                { className: 'ft' },
-	                                _react2.default.createElement(
-	                                    'button',
-	                                    { 'data-name': data.name, 'data-qid': data.id,
-	                                        onClick: self.getLast.bind(self) },
-	                                    'get last'
-	                                ),
-	                                _react2.default.createElement(
-	                                    'button',
-	                                    { 'data-name': data.name, 'data-qid': data.id,
-	                                        onClick: self.delete.bind(self) },
-	                                    'delete'
-	                                ),
-	                                _react2.default.createElement(
-	                                    'div',
-	                                    { className: 'last' },
-	                                    self.showData(data.id)
-	                                ),
-	                                _react2.default.createElement(
-	                                    'div',
-	                                    { className: 'chart' },
-	                                    _react2.default.createElement(_vision.TSChart, { width: '500', height: '200' })
-	                                )
-	                            )
-	                        );
+	                        return _react2.default.createElement(_qubitcell.QubitCell, { data: data });
 	                    })
 	                )
 	            );
@@ -50861,6 +50736,191 @@
 	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.QubitCell = undefined;
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _react = __webpack_require__(2);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _jquery = __webpack_require__(35);
+
+	var _jquery2 = _interopRequireDefault(_jquery);
+
+	var _reactDom = __webpack_require__(36);
+
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+
+	var _reactModal = __webpack_require__(174);
+
+	var _reactModal2 = _interopRequireDefault(_reactModal);
+
+	var _bus = __webpack_require__(200);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var QubitCell = exports.QubitCell = function (_React$Component) {
+	  _inherits(QubitCell, _React$Component);
+
+	  function QubitCell() {
+	    _classCallCheck(this, QubitCell);
+
+	    return _possibleConstructorReturn(this, (QubitCell.__proto__ || Object.getPrototypeOf(QubitCell)).apply(this, arguments));
+	  }
+
+	  _createClass(QubitCell, [{
+	    key: 'render',
+	    value: function render() {
+	      return _react2.default.createElement(
+	        'div',
+	        { className: 'qubit cell', key: i },
+	        _react2.default.createElement(
+	          'div',
+	          { className: 'hd' },
+	          _react2.default.createElement(
+	            'label',
+	            null,
+	            this.props.data.name,
+	            _react2.default.createElement(
+	              'span',
+	              null,
+	              'id: ',
+	              this.props.data.id
+	            )
+	          )
+	        ),
+	        _react2.default.createElement(
+	          'div',
+	          { className: 'bd' },
+	          _react2.default.createElement(
+	            'ul',
+	            null,
+	            _react2.default.createElement(
+	              'li',
+	              null,
+	              _react2.default.createElement(
+	                'label',
+	                null,
+	                'flying: '
+	              ),
+	              _react2.default.createElement(
+	                'span',
+	                null,
+	                this.props.data.flying.toString()
+	              )
+	            ),
+	            _react2.default.createElement(
+	              'li',
+	              null,
+	              _react2.default.createElement(
+	                'label',
+	                null,
+	                'is_spout: '
+	              ),
+	              _react2.default.createElement(
+	                'span',
+	                null,
+	                this.props.data.is_spout.toString()
+	              )
+	            ),
+	            _react2.default.createElement(
+	              'li',
+	              null,
+	              _react2.default.createElement(
+	                'label',
+	                null,
+	                'is_stem: '
+	              ),
+	              _react2.default.createElement(
+	                'span',
+	                null,
+	                this.props.data.is_stem.toString()
+	              )
+	            ),
+	            _react2.default.createElement(
+	              'li',
+	              null,
+	              _react2.default.createElement(
+	                'label',
+	                null,
+	                'entangle: '
+	              ),
+	              _react2.default.createElement(
+	                'span',
+	                null,
+	                this.props.data.entangle
+	              )
+	            ),
+	            _react2.default.createElement(
+	              'li',
+	              null,
+	              _react2.default.createElement(
+	                'label',
+	                null,
+	                'created at: '
+	              ),
+	              _react2.default.createElement(
+	                'span',
+	                null,
+	                this.props.data.created_at
+	              )
+	            )
+	          ),
+	          _react2.default.createElement(
+	            'pre',
+	            null,
+	            this.props.data.monad
+	          )
+	        ),
+	        _react2.default.createElement(
+	          'div',
+	          { className: 'ft' },
+	          _react2.default.createElement(
+	            'button',
+	            { 'data-name': this.props.data.name, 'data-qid': this.props.data.id,
+	              onClick: self.getLast.bind(self) },
+	            'get last'
+	          ),
+	          _react2.default.createElement(
+	            'button',
+	            { 'data-name': this.props.data.name, 'data-qid': this.props.data.id,
+	              onClick: self.delete.bind(self) },
+	            'delete'
+	          ),
+	          _react2.default.createElement(
+	            'div',
+	            { className: 'last' },
+	            self.showData(this.props.data.id)
+	          ),
+	          _react2.default.createElement(
+	            'div',
+	            { className: 'chart' },
+	            _react2.default.createElement(TSChart, { width: '500', height: '200' })
+	          )
+	        )
+	      );
+	    }
+	  }]);
+
+	  return QubitCell;
+	}(_react2.default.Component);
+
+/***/ },
+/* 200 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
 	exports.updatedSteam = exports.socketStream = exports.clickStream = exports.keyUpStream = undefined;
@@ -50869,7 +50929,7 @@
 
 	var _jquery2 = _interopRequireDefault(_jquery);
 
-	var _baconjs = __webpack_require__(200);
+	var _baconjs = __webpack_require__(201);
 
 	var _baconjs2 = _interopRequireDefault(_baconjs);
 
@@ -50907,7 +50967,7 @@
 	};
 
 /***/ },
-/* 200 */
+/* 201 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(global, module) {(function() {
@@ -54284,7 +54344,7 @@
 	  return withDesc(new Bacon.Desc(this, "zip", [other]), Bacon.zipWith([this, other], f || Array));
 	};
 
-	if ("function" !== "undefined" && __webpack_require__(202) !== null && __webpack_require__(203) != null) {
+	if ("function" !== "undefined" && __webpack_require__(203) !== null && __webpack_require__(204) != null) {
 	  !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_RESULT__ = function () {
 	    return Bacon;
 	  }.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
@@ -54299,10 +54359,10 @@
 	  }
 	}).call(this);
 
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(201)(module)))
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(202)(module)))
 
 /***/ },
-/* 201 */
+/* 202 */
 /***/ function(module, exports) {
 
 	module.exports = function(module) {
@@ -54318,14 +54378,14 @@
 
 
 /***/ },
-/* 202 */
+/* 203 */
 /***/ function(module, exports) {
 
 	module.exports = function() { throw new Error("define cannot be used indirect"); };
 
 
 /***/ },
-/* 203 */
+/* 204 */
 /***/ function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(__webpack_amd_options__) {module.exports = __webpack_amd_options__;

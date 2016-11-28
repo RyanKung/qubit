@@ -2,6 +2,8 @@ default: all
 
 all:
 	celery -A qubit.wsgiapp.queue worker -l info --workdir ./ -E -c 1 -B -l error
+debug:
+	celery -A qubit.wsgiapp.queue worker -l info --workdir ./ -E -c 1 -B -l info
 worker:
 	celery -A qubit.wsgiapp.queue worker -l error --workdir ./ -E -c 1
 beat:

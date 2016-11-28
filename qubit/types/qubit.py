@@ -49,6 +49,7 @@ class Qubit(object):
             entangle=entangle,
             is_stem=is_stem,
             is_spout=is_spout,
+            store=store,
             flying=flying, *args, **kwargs)
         if qid and is_stem:
             tell_client('new_stem')
@@ -62,6 +63,12 @@ class Qubit(object):
         module = ModuleType(name)
         list(map(lambda x: setattr(module, *x), module_dict.items()))
         return module
+
+    @staticmethod
+    def __import__(name, *args, **kwargs):
+        if name in ['os', 'sys', 'runpy']:
+            return NotImplementedError
+        return __import__(name, *args, **kwargs)
 
     @classmethod
     def update(cls, qid, data):
@@ -77,7 +84,7 @@ class Qubit(object):
 
         builtins = dict(__builtins__,
                         require=Qubit.require,
-                        __import__=NotImplementedError)
+                        __import__=Qubit.__import__)
         glo = {'datum': data.datum, '__builtins__': builtins}
         loc = {}
         exec(qubit.monad, glo, loc)
@@ -93,6 +100,7 @@ class Qubit(object):
         qubit, data = Qubit.format(qubit, data)
         datum = Qubit.exec(qubit, data)
         data = ts_data(datum=datum, ts=data.ts)
+        print(qubit._asdict())
         qubit.store and States.create(
             qubit=qubit.id,
             datum=json.dumps(datum),
@@ -186,8 +194,10 @@ class Qubit(object):
 
     @classmethod
     def trigger(cls, qubit, data):
-        sig_name = '%s:%s' % ('Qubit', qubit.id)
-        qubits = map(lambda x: x._asdict(), Qubit.get_flying(sig_name))
+        qubit, data = cls.format(qubit, data)
+        name = qubit.is_stem and 'Stem' or 'Qubit'
+        sig_name = '%s:%s' % (name, qubit.id)
+        qubits = map(lambda x: cls.format_qubit(x)._asdict(), Qubit.get_flying(sig_name))
         if not qubits:
             return False
         res = list(map(partial(
@@ -236,9 +246,9 @@ class States(object):
             ts=s['ts'])
 
     @classmethod
-    def select(cls, qubit, start, end):
+    def select(cls, qid, start, end):
         res = cls.manager.find_in_range(
-            qubit=qubit, key='ts', end=end)
+            qubit=qid, key='ts', start=start, end=end)
         return list(map(cls.format, res))
 
     @classmethod

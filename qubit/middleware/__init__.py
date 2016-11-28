@@ -1,6 +1,5 @@
-from .eventsocket import EventSocket
+from .eventsocket import EventSocket, QubitSocket
 
 __all__ = ['middleware']
 
-
-middleware = [EventSocket]
+middleware = [EventSocket, QubitSocket]

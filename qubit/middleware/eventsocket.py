@@ -3,7 +3,7 @@ from pulsar.apps.wsgi import route
 from pulsar import ensure_future
 from qubit.io.redis import pubsub
 
-__all___ = ['EventSocket', 'app']
+__all___ = ['EventSocket', 'QubitSocket']
 
 
 class WebSocketRouter(ws.WebSocket):
@@ -35,5 +35,7 @@ class PubSubWS(ws.WS):
         websocket.write(message)
 
 
-EventSocket = WebSocketRouter('/qubit/subscribe',
-                              PubSubWS(pubsub, 'eventsocket/%s/'))
+QubitSocket = WebSocketRouter('/qubit/subscribe',
+                              PubSubWS(pubsub, 'qubitsocket::%s'))
+EventSocket = ws.WebSocket('/qubit/subscribe',
+                           ws.PubSubWS(pubsub, 'eventsocket'))
