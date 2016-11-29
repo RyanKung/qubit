@@ -47,7 +47,7 @@ datum = datum
 ''',
         'entangle': 'Stem:%s' % q1,
         'is_spout': False,
-        'is_stem': True,
+        'is_stem': False,
         'flying': True,
         'store': True,
         'comment': 'another qubit'

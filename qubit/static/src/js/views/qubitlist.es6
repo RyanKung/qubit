@@ -5,7 +5,6 @@ import Modal from 'react-modal'
 import { QubitForm } from 'views/qubitform'
 import { QubitCell } from 'views/qubitcell'
 import { socketStream, updatedSteam } from 'bus'
-import { TSChart } from 'views/vision'
 
 export class QubitList extends React.Component {
     componentWillMount() {
@@ -43,27 +42,6 @@ export class QubitList extends React.Component {
             })
         })
     }
-    getLast(e) {
-        var self = this
-        var qid = $(e.target).data('qid')
-        $.getJSON('/qubit/' + qid + '/last/', {}, function(data) {
-            var last = self.state.last
-            last[qid] = data
-            self.setState({
-                last: last
-            })
-        })
-    }
-    delete(e) {
-        var self = this
-        var qid = $(e.target).data('qid')
-        $.ajax({url: '/qubit/' + name + '/',
-                data: {},
-                method: 'delete',
-                success: function(data) {
-                    self.getData()
-                }})
-    }
     renderForm() {
         return (
             <Modal>
@@ -71,26 +49,8 @@ export class QubitList extends React.Component {
             </Modal>
         )
     }
-    showData(qid) {
-        var self = this
-        var data = self.state && self.state.last && self.state.last[qid]
-        if (!data) { return '' }
-        return (
-            <table>
-              <tbody>
-              <tr>
-                {Object.keys(data).map(function(d, i) {
-                    return (<th key={i}>{d}</th>)
-                })}
-              </tr>
-              <tr>
-                {Object.keys(data).map(function(d, i) {
-                    return (<td key={i}>{JSON.stringify(data[d])}</td>)
-                })}
-            </tr>
-                </tbody>
-            </table>
-        )
+    refresh() {
+        this.getData()
     }
     render () {
         var self = this
@@ -100,7 +60,7 @@ export class QubitList extends React.Component {
               <div className="bd">
                 {this.state && this.state.data.map(function(data, i) {
                     return (
-                        <QubitCell data={data}></QubitCell>
+                        <QubitCell key={i} data={data} afterDeleted={self.refresh}></QubitCell>
                     )
               })}
             </div>
