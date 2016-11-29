@@ -1,8 +1,10 @@
 import json
 import runpy
+import importlib
 from types import ModuleType
 from functools import partial
 from datetime import datetime
+from qubit.io.pulsar import async
 from qubit.io.postgres import types
 from qubit.io.postgres import QuerySet
 from qubit.io.celery import Entanglement
@@ -66,7 +68,9 @@ class Qubit(object):
 
     @staticmethod
     def __import__(name, *args, **kwargs):
-        whitelist = ['functools', 'operator', 'pandas', 'itertools']
+        whitelist = ['functools', 'operator',
+                     'psutil',
+                     'pandas', 'itertools']
         if name not in whitelist:
             return NotImplementedError
         return __import__(name, *args, **kwargs)
@@ -95,8 +99,8 @@ class Qubit(object):
         return datum
 
     @staticmethod
-    @queue.task(filter=task_method,
-                base=QubitEntanglement)
+    @queue.task(filter=task_method, base=QubitEntanglement)
+    @async
     def activate(qubit, data={}):
         qubit, data = Qubit.format(qubit, data)
         datum = Qubit.exec(qubit, data)

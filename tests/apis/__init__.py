@@ -6,7 +6,7 @@ from qubit.wsgiapp import app
 __all__ = ['client', 'request', 'get']
 
 client = werkzeug.test.Client(app)
-environ_overrides = {'REMOTE_ADDR': '127.0.0.1'}
+environ_overrides = {'REMOTE_ADDR': '127.0.0.1:8086'}
 
 
 def request(*args, **kwargs):
