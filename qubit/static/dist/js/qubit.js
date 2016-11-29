@@ -50658,7 +50658,7 @@
 	                    'div',
 	                    { className: 'bd' },
 	                    this.state && this.state.data.map(function (data, i) {
-	                        return _react2.default.createElement(_qubitcell.QubitCell, { key: i, data: data, afterDeleted: self.refresh });
+	                        return _react2.default.createElement(_qubitcell.QubitCell, { key: i, data: data, qid: data.id, afterDeleted: self.refresh });
 	                    })
 	                )
 	            );

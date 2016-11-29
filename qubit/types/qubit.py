@@ -155,7 +155,7 @@ class Qubit(object):
             return qid
         kind, qid = qubit.entangle.split(':')
         if not kind == 'stem':
-            return cls.get_Spem(qid)
+            return cls.get_spem(qid)
         else:
             return qid
 

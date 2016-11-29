@@ -60,7 +60,7 @@ export class QubitList extends React.Component {
               <div className="bd">
                 {this.state && this.state.data.map(function(data, i) {
                     return (
-                        <QubitCell key={i} data={data} afterDeleted={self.refresh}></QubitCell>
+                        <QubitCell key={i} data={data} qid={data.id} afterDeleted={self.refresh}></QubitCell>
                     )
               })}
             </div>
