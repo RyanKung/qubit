@@ -1,6 +1,5 @@
 import json
 import runpy
-import importlib
 from types import ModuleType
 from functools import partial
 from datetime import datetime
@@ -148,9 +147,14 @@ class Qubit(object):
 
     @classmethod
     def get_spem(cls, qid):
+        '''
+        Warning: A recursion calling
+        '''
         qubit = cls.format_qubit(cls.get(qid))
+        if qubit.is_stem:
+            return qid
         kind, qid = qubit.entangle.split(':')
-        if not kind == 'spem':
+        if not kind == 'stem':
             return cls.get_Spem(qid)
         else:
             return qid
@@ -158,7 +162,8 @@ class Qubit(object):
     @classmethod
     def set_current(cls, qid, ts_data):
         data = json.dumps(ts_data._asdict())
-        tell_client('qubit::updated::%s::%s' % (qid, data))
+        spem = cls.get_spem(qid)
+        tell_client('qubit::updated::%s::%s' % (spem, data))
         key = 'qubit:%s:state' % qid
         client.set(key, data)
         return True
