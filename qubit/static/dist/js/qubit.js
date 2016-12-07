@@ -50722,9 +50722,11 @@
 	        key: 'componentWillMount',
 	        value: function componentWillMount() {
 	            var self = this;
+	            var wsurl = '/qubit/subscribe/%s/'.replace('%s', qid);
 	            self.setState({
 	                last: undefined
 	            });
+	            self.bus = (0, _bus.SocketBus)(wsurl).bus;
 	        }
 	    }, {
 	        key: 'getLast',
@@ -50934,7 +50936,7 @@
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	exports.updatedSteam = exports.socketStream = exports.clickStream = exports.keyUpStream = undefined;
+	exports.SocketBus = exports.socketStream = exports.clickStream = exports.keyUpStream = undefined;
 
 	var _jquery = __webpack_require__(35);
 
@@ -50946,8 +50948,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	var ws = new WebSocket("ws://" + window.location.host + "/qubit/subscribe/1234/");
-	var reader = new FileReader();
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	_jquery2.default.fn.asEventStream = _baconjs2.default.$.asEventStream;
 	var keyUpStream = exports.keyUpStream = (0, _jquery2.default)(document).asEventStream('keyup').map(function (e) {
@@ -50957,24 +50958,20 @@
 	    return e.target.className;
 	});
 	var socketStream = exports.socketStream = new _baconjs2.default.Bus();
-	var updatedSteam = exports.updatedSteam = socketStream.map(function (msg) {
-	    if (msg && msg.startsWith('qubit::updated::')) {
-	        var splited = msg.split('::');
-	        return {
-	            'qid': splited[2],
-	            'datum': JSON.parse(splited[3])
-	        };
-	    }
-	});
 
-	ws.onmessage = function (msg) {
-	    reader.addEventListener("loadend", function () {
-	        socketStream.push(reader.result);
+	var SocketBus = exports.SocketBus = function SocketBus(uri) {
+	    _classCallCheck(this, SocketBus);
+
+	    var self = this;
+	    self.reader = new FileReader();
+	    self.ws = new WebSocket(uri);
+	    self.bus = new _baconjs2.default.Bus();
+	    self.ws.onmessage = function (msg) {
+	        self.reader.readAsText(msg.data);
+	    };
+	    self.reader.addEventListener('loadend', function () {
+	        self.bus.push(reader.result);
 	    });
-	    reader.readAsText(msg.data);
-	};
-	window.onbeforeunload = function (e) {
-	    ws.close();
 	};
 
 /***/ },

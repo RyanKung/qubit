@@ -2,15 +2,17 @@ import React from 'react'
 import $ from 'jquery'
 import ReactDOM from 'react-dom'
 import Modal from 'react-modal'
-import { socketStream, updatedSteam } from 'bus'
+import { SocketBus } from 'bus'
 import { TSChart } from 'views/vision'
 
 export class QubitCell extends React.Component {
     componentWillMount() {
         var self = this
+        var wsurl = '/qubit/subscribe/%s/'.replace('%s', qid)
         self.setState({
             last: undefined
         })
+        self.bus = SocketBus(wsurl).bus
     }
     getLast(e) {
         var self = this
@@ -52,7 +54,14 @@ export class QubitCell extends React.Component {
             </table>
         )
     }
+    detailRender(lst) {
+        var self = this
+        return lst.map(function(d, i) {
+            return (<li key={i}><label>{d}</lavel><span>{self.props.data[d].toString()}</span></li>)
+        })
+    }
     render() {
+        var self = this
         return (
             <div className="qubit cell">
               <div className="hd">
@@ -60,11 +69,7 @@ export class QubitCell extends React.Component {
               </div>
               <div className='bd'>
                 <ul>
-                  <li><label>flying: </label><span>{this.props.data.flying.toString()}</span></li>
-                  <li><label>is_spout: </label><span>{this.props.data.is_spout.toString()}</span></li>
-                  <li><label>is_stem: </label><span>{this.props.data.is_stem.toString()}</span></li>
-                  <li><label>entangle: </label><span>{this.props.data.entangle}</span></li>
-                  <li><label>created at: </label><span>{this.props.data.created_at}</span></li>
+                  {this.detailRender(['flying', 'is_spout', 'is_stem', 'entangle', 'created_at'])}
                 </ul>
                 <pre>{this.props.data.monad}</pre>
               </div>
