@@ -1,9 +1,7 @@
 import React from 'react'
-import $ from 'jquery'
-import ReactDOM from 'react-dom'
 import Modal from 'react-modal'
+import $ from 'jquery'
 import { SocketBus } from 'bus'
-import { TSChart } from 'views/vision'
 
 export class QubitCell extends React.Component {
     componentWillMount() {
@@ -14,29 +12,48 @@ export class QubitCell extends React.Component {
         }
         var self = this
         self.setState({
-            last: undefined
+            last: undefined,
+            data: [],
+            showCode: false
         })
         self.socketBus = new SocketBus(genUrl(self.props.qid))
-        self.bus = self.SocketBus.bus
+        self.bus = self.socketBus.bus
+        self.getPeriod()
     }
-    getLast(e) {
+    getPeriod() {
         var self = this
-        var qid = $(e.target).data('qid')
+        var qid = self.props.qid
+        $.getJSON('/qubit/' + qid + '/period/days/30/', {}, function(data) {
+            self.setState({
+                data: data
+            })
+        })
+    }
+    getLast() {
+        var self = this
+        var qid = self.props.qid
         $.getJSON('/qubit/' + qid + '/last/', {}, function(data) {
             self.setState({
                 last: data
             })
         })
     }
-    delete(e) {
+    triggerCode() {
         var self = this
-        var qid = $(e.target).data('qid')
-        $.ajax({url: '/qubit/' + name + '/',
-                data: {},
-                method: 'delete',
-                success: function(data) {
-                    this.props.afterDeleted(qid)
-                }})
+        self.setState({
+            showCode: !this.state.showCode
+        })
+    }
+    delete() {
+        var self = this
+        var qid = self.props.qid
+        $.ajax({
+            url: '/qubit/' + name + '/',
+            data: {},
+            method: 'delete',
+            success: function() {
+                this.props.afterDeleted(qid)
+            }})
     }
     showData(qid) {
         var self = this
@@ -45,52 +62,54 @@ export class QubitCell extends React.Component {
         return (
             <table>
               <tbody>
-              <tr>
-                {Object.keys(data).map(function(d, i) {
-                    return (<th key={i}>{d}</th>)
-                })}
-              </tr>
-              <tr>
-                {Object.keys(data).map(function(d, i) {
-                    return (<td key={i}>{JSON.stringify(data[d])}</td>)
-                })}
-            </tr>
-                </tbody>
+                <tr>
+                  {Object.keys(data).map(function(d, i) {
+                      return (<th key={i}>{d}</th>)
+                  })}
+                </tr>
+                <tr>
+                  {Object.keys(data).map(function(d, i) {
+                      return (<td key={i}>{JSON.stringify(data[d])}</td>)
+                  })}
+                </tr>
+              </tbody>
             </table>
         )
     }
     detailRender(lst) {
         var self = this
         return lst.map(function(d, i) {
-            return (<li key={i}><label>{d}</label><span>{self.props.data[d].toString()}</span></li>)
+            return (<li key={i}><label>{d}: </label><span>{self.props.data[d].toString()}</span></li>)
         })
     }
     render() {
-        var self = this
         return (
             <div className="qubit cell">
               <div className="hd">
                 <label>{this.props.data.name}<span>id: {this.props.data.id}</span></label>
+                <nav>
+                  <ul></ul>
+                </nav>
               </div>
               <div className='bd'>
                 <ul>
-                  {this.detailRender(['flying', 'is_spout', 'is_stem', 'entangle', 'created_at'])}
+                  {this.detailRender(['flying', 'is_spout', 'is_stem', 'entangle', 'store'])}
                 </ul>
-                <pre>{this.props.data.monad}</pre>
               </div>
               <div className='ft'>
                 <button data-name={this.props.data.name} data-qid={this.props.data.id}
                         onClick={this.getLast.bind(this)}>get last</button>
                 <button data-name={this.props.data.name} data-qid={this.props.data.id}
                         onClick={this.delete.bind(this)}>delete</button>
-                <div className="last">
-                  {this.showData(this.props.data.id)}
-                </div>
-                <div className="chart">
-                  <TSChart width='500' height='200'></TSChart>
-                </div>
+                <button data-name={this.props.data.name} data-qid={this.props.data.id}
+                        onClick={this.triggerCode.bind(this)}>monad</button>
+
               </div>
+              <Modal isOpen={this.state.showCode}>
+                <pre>{this.props.data.monad}</pre>
+                <button onClick={this.triggerCode.bind(this)}>close</button>
+              </Modal>
             </div>
-        ) 
+        )
     }
 }

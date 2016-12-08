@@ -12,11 +12,11 @@ export class SocketBus {
         self.reader = new FileReader()
         self.ws = new WebSocket(uri)
         self.bus = new Bacon.Bus()
-        self.ws.onmessage = function(msg) {
+        self.ws.onmessage = (msg) => {
             self.reader.readAsText(msg.data)
         }
-        self.reader.addEventListener('loadend', function() {
-            self.bus.push(reader.result)
+        self.reader.addEventListener('loadend', () => {
+            self.bus.push(self.reader.result)
         })
     }
 }

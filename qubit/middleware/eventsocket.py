@@ -11,7 +11,6 @@ class WebSocketRouter(ws.WebSocket):
     def qubit(self, request):
         qid = list(filter(bool, (request.path.split('/'))))[-1]
         request.qid = qid
-        self.protocol_class.request = request
         return super().get(request)
 
 
@@ -25,7 +24,7 @@ class PubSubWS(ws.WS):
         self.channel = channel
 
     def on_open(self, websocket):
-        qid = websocket.request.qid
+        qid = websocket.handshake.qid
         channel = self.channel % qid
         self.pubsub.add_client(self.client(websocket, channel))
         ensure_future(self.pubsub.subscribe(channel))
@@ -35,4 +34,3 @@ class PubSubWS(ws.WS):
 
 
 QubitSocket = WebSocketRouter('/qubit/subscribe', PubSubWS(pubsub, 'qubitsocket::%s'))
-#EventSocket = ws.WebSocket('/qubit/events/', ws.PubSubWS(pubsub, 'eventsocket'))

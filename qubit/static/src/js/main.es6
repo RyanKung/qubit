@@ -1,7 +1,6 @@
 import { QubitView } from 'views/qubit'
 import React from 'react'
-import ReactDOM from 'react-dom';
-import { bus } from 'bus'
+import ReactDOM from 'react-dom'
 
 export class MainView extends React.Component {
     componentWillMount() {

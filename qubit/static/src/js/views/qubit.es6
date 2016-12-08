@@ -1,6 +1,4 @@
 import React from 'react'
-import $ from 'jquery'
-import ReactDOM from 'react-dom'
 import Modal from 'react-modal'
 import { QubitForm } from 'views/qubitform'
 import { QubitList } from 'views/qubitlist'
@@ -13,7 +11,7 @@ export class QubitView extends React.Component {
     }
     render () {
         return (
-            <section className="qubit">
+            <section>
               <div className="hd">
                 <button className='new' onClick={this.openForm.bind(this)}>+</button>
              </div>

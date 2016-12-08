@@ -7,7 +7,7 @@ def jsonize(fn):
     @wraps(fn)
     def handler(*args, **kwargs):
         data = fn(*args, **kwargs)
-        return json.dumps(data, ensure_ascii=False)
+        return json.dumps(data, ensure_ascii=False, default=str)
     return handler
 
 

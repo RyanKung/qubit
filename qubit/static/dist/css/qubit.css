@@ -7,21 +7,16 @@ body {
   padding: 50px 100px;
   background: #eee; }
 
-section.card {
-  padding: 20px 50px;
+div.qubit {
+  padding: 5px;
   background: #fff;
   display: block;
-  width: 900px;
-  margin: 0 auto 10px auto;
+  width: 300px;
   border-radius: 5px; }
-  section.card .hd {
+  div.qubit .hd {
     font-size: 20px;
     padding-bottom: 10px;
-    text-align: center;
     font-weight: 400; }
-  section.card .ft {
-    padding: 10px;
-    margin-bottom: 50px; }
 
 fieldset.block {
   display: block; }
