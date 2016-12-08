@@ -7,12 +7,17 @@ import { TSChart } from 'views/vision'
 
 export class QubitCell extends React.Component {
     componentWillMount() {
+        var genUrl = (qid) => {
+            let host = window.location.host
+            let url = `ws://${ host }/qubit/subscribe/${ qid }/`
+            return url
+        }
         var self = this
-        var wsurl = '/qubit/subscribe/%s/'.replace('%s', qid)
         self.setState({
             last: undefined
         })
-        self.bus = SocketBus(wsurl).bus
+        self.socketBus = new SocketBus(genUrl(self.props.qid))
+        self.bus = self.SocketBus.bus
     }
     getLast(e) {
         var self = this
@@ -57,7 +62,7 @@ export class QubitCell extends React.Component {
     detailRender(lst) {
         var self = this
         return lst.map(function(d, i) {
-            return (<li key={i}><label>{d}</lavel><span>{self.props.data[d].toString()}</span></li>)
+            return (<li key={i}><label>{d}</label><span>{self.props.data[d].toString()}</span></li>)
         })
     }
     render() {

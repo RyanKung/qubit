@@ -50565,8 +50565,6 @@
 
 	var _qubitcell = __webpack_require__(199);
 
-	var _bus = __webpack_require__(200);
-
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -50588,18 +50586,6 @@
 	        key: 'componentWillMount',
 	        value: function componentWillMount() {
 	            var self = this;
-	            _bus.socketStream.onValue(function (value) {
-	                if (value == 'new_stem') {
-	                    self.getData();
-	                }
-	            });
-	            _bus.updatedSteam.onValue(function (data) {
-	                var last = self.state && self.state.last || {};
-	                last[data.qid] = data.datum;
-	                self.setState({
-	                    last: last
-	                });
-	            });
 	            this.setState({
 	                last: {},
 	                data: []
@@ -50721,12 +50707,17 @@
 	    _createClass(QubitCell, [{
 	        key: 'componentWillMount',
 	        value: function componentWillMount() {
+	            var genUrl = function genUrl(qid) {
+	                var host = window.location.host;
+	                var url = 'ws://' + host + '/qubit/subscribe/' + qid + '/';
+	                return url;
+	            };
 	            var self = this;
-	            var wsurl = '/qubit/subscribe/%s/'.replace('%s', qid);
 	            self.setState({
 	                last: undefined
 	            });
-	            self.bus = (0, _bus.SocketBus)(wsurl).bus;
+	            self.socketBus = new _bus.SocketBus(genUrl(self.props.qid));
+	            self.bus = self.SocketBus.bus;
 	        }
 	    }, {
 	        key: 'getLast',
@@ -50791,8 +50782,30 @@
 	            );
 	        }
 	    }, {
+	        key: 'detailRender',
+	        value: function detailRender(lst) {
+	            var self = this;
+	            return lst.map(function (d, i) {
+	                return _react2.default.createElement(
+	                    'li',
+	                    { key: i },
+	                    _react2.default.createElement(
+	                        'label',
+	                        null,
+	                        d
+	                    ),
+	                    _react2.default.createElement(
+	                        'span',
+	                        null,
+	                        self.props.data[d].toString()
+	                    )
+	                );
+	            });
+	        }
+	    }, {
 	        key: 'render',
 	        value: function render() {
+	            var self = this;
 	            return _react2.default.createElement(
 	                'div',
 	                { className: 'qubit cell' },
@@ -50817,76 +50830,7 @@
 	                    _react2.default.createElement(
 	                        'ul',
 	                        null,
-	                        _react2.default.createElement(
-	                            'li',
-	                            null,
-	                            _react2.default.createElement(
-	                                'label',
-	                                null,
-	                                'flying: '
-	                            ),
-	                            _react2.default.createElement(
-	                                'span',
-	                                null,
-	                                this.props.data.flying.toString()
-	                            )
-	                        ),
-	                        _react2.default.createElement(
-	                            'li',
-	                            null,
-	                            _react2.default.createElement(
-	                                'label',
-	                                null,
-	                                'is_spout: '
-	                            ),
-	                            _react2.default.createElement(
-	                                'span',
-	                                null,
-	                                this.props.data.is_spout.toString()
-	                            )
-	                        ),
-	                        _react2.default.createElement(
-	                            'li',
-	                            null,
-	                            _react2.default.createElement(
-	                                'label',
-	                                null,
-	                                'is_stem: '
-	                            ),
-	                            _react2.default.createElement(
-	                                'span',
-	                                null,
-	                                this.props.data.is_stem.toString()
-	                            )
-	                        ),
-	                        _react2.default.createElement(
-	                            'li',
-	                            null,
-	                            _react2.default.createElement(
-	                                'label',
-	                                null,
-	                                'entangle: '
-	                            ),
-	                            _react2.default.createElement(
-	                                'span',
-	                                null,
-	                                this.props.data.entangle
-	                            )
-	                        ),
-	                        _react2.default.createElement(
-	                            'li',
-	                            null,
-	                            _react2.default.createElement(
-	                                'label',
-	                                null,
-	                                'created at: '
-	                            ),
-	                            _react2.default.createElement(
-	                                'span',
-	                                null,
-	                                this.props.data.created_at
-	                            )
-	                        )
+	                        this.detailRender(['flying', 'is_spout', 'is_stem', 'entangle', 'created_at'])
 	                    ),
 	                    _react2.default.createElement(
 	                        'pre',
