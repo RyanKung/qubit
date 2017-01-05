@@ -137,6 +137,8 @@
 
 	var _qubitlist = __webpack_require__(198);
 
+	var _measurelist = __webpack_require__(205);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -175,7 +177,8 @@
 	                    )
 	                ),
 	                _react2.default.createElement('div', { className: 'bd' }),
-	                _react2.default.createElement(_qubitlist.QubitList, null),
+	                _react2.default.createElement(_measurelist.MeasureList, null),
+	                _react2.default.createElement(_qubitlist.StemList, null),
 	                _react2.default.createElement(
 	                    _reactModal2.default,
 	                    { isOpen: this.state.modal_open },
@@ -34039,7 +34042,9 @@
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	exports.TSChart = undefined;
+	exports.TSChart = exports.DataSeries = exports.Line = exports.Axis = undefined;
+
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -34065,73 +34070,265 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var n = 40,
-	    random = d3.randomNormal(0, .2),
-	    data = d3.range(n).map(random);
+	var Axis = exports.Axis = function (_React$Component) {
+	    _inherits(Axis, _React$Component);
 
-	var TSChart = exports.TSChart = function (_React$Component) {
-	    _inherits(TSChart, _React$Component);
+	    function Axis(props) {
+	        _classCallCheck(this, Axis);
 
-	    function TSChart() {
-	        _classCallCheck(this, TSChart);
-
-	        return _possibleConstructorReturn(this, (TSChart.__proto__ || Object.getPrototypeOf(TSChart)).apply(this, arguments));
+	        return _possibleConstructorReturn(this, (Axis.__proto__ || Object.getPrototypeOf(Axis)).call(this, props));
 	    }
 
-	    _createClass(TSChart, [{
-	        key: 'componentWillMount',
-	        value: function componentWillMount() {
-	            var margin = { top: 20, right: 20, bottom: 20, left: 40 };
-	            var width = +this.props.width - margin.left - margin.right;
-	            var height = +this.props.height - margin.top - margin.bottom;
-	            var transform = 'translate(' + margin.left + ',' + margin.top + ')';
-	            var x = d3.scaleLinear().domain([0, n - 1]).range([0, width]);
-	            var y = d3.scaleLinear().domain([-1, 1]).range([height, 0]);
-	            var line = d3.line().x(function (d, i) {
-	                return x(i);
-	            }).y(function (d, i) {
-	                return y(d);
-	            });
-
-	            this.setState({
-	                width: width,
-	                height: height,
-	                transform: transform,
-	                x: x,
-	                y: y,
-	                line: line
-	            });
+	    _createClass(Axis, [{
+	        key: 'componentDidMount',
+	        value: function componentDidMount() {
+	            this.renderAxis();
 	        }
 	    }, {
-	        key: 'renderChart',
-	        value: function renderChart() {
-	            var svg = d3.select(this.getDOMNode());
+	        key: 'componentDidUpdate',
+	        value: function componentDidUpdate() {
+	            this.renderAxis();
+	        }
+	    }, {
+	        key: 'renderAxis',
+	        value: function renderAxis() {
+	            d3.select(this.refs.axis).call(this.props.axis);
 	        }
 	    }, {
 	        key: 'render',
 	        value: function render() {
+	            return _react2.default.createElement('g', { className: 'axis', ref: 'axis', transform: this.props.transform });
+	        }
+	    }]);
+
+	    return Axis;
+	}(_react2.default.Component);
+
+	Axis.propTypes = {
+	    axis: _react2.default.PropTypes.func.isRequired,
+	    transform: _react2.default.PropTypes.string
+	};
+	Axis.defaultProps = {
+	    tranform: 'translate(0 100)'
+	};
+
+	var Line = exports.Line = function (_React$Component2) {
+	    _inherits(Line, _React$Component2);
+
+	    function Line(props) {
+	        _classCallCheck(this, Line);
+
+	        return _possibleConstructorReturn(this, (Line.__proto__ || Object.getPrototypeOf(Line)).call(this, props));
+	    }
+
+	    _createClass(Line, [{
+	        key: 'render',
+	        value: function render() {
+	            var _props = this.props,
+	                path = _props.path,
+	                stroke = _props.stroke,
+	                fill = _props.fill,
+	                strokeWidth = _props.strokeWidth;
+
+	            return _react2.default.createElement('path', {
+	                ref: 'path',
+	                d: path,
+	                fill: fill,
+	                stroke: stroke,
+	                strokeWidth: strokeWidth
+	            });
+	        }
+	    }]);
+
+	    return Line;
+	}(_react2.default.Component);
+
+	Line.propTypes = {
+	    colors: _react2.default.PropTypes.func,
+	    data: _react2.default.PropTypes.object,
+	    interpolationType: _react2.default.PropTypes.string
+	};
+	Line.defaultProps = {
+	    stroke: 'blue',
+	    fill: 'none',
+	    strokeWidth: 1
+	};
+
+	var DataSeries = exports.DataSeries = function (_React$Component3) {
+	    _inherits(DataSeries, _React$Component3);
+
+	    function DataSeries(props) {
+	        _classCallCheck(this, DataSeries);
+
+	        return _possibleConstructorReturn(this, (DataSeries.__proto__ || Object.getPrototypeOf(DataSeries)).call(this, props));
+	    }
+
+	    _createClass(DataSeries, [{
+	        key: 'render',
+	        value: function render() {
+	            var _props2 = this.props,
+	                data = _props2.data,
+	                colors = _props2.colors,
+	                interpolationType = _props2.interpolationType,
+	                xScale = _props2.xScale,
+	                yScale = _props2.yScale,
+	                getValue = _props2.getValue,
+	                metris = _props2.metris;
+
+	            var genLine = function genLine(key) {
+	                return d3.line().curve(interpolationType).x(function (d) {
+	                    return xScale(new Date(d[0]));
+	                }).y(function (d) {
+	                    return yScale(getValue(d[1][key]));
+	                });
+	            };
+	            var lines = metris.map(function (series, id) {
+	                return _react2.default.createElement(
+	                    'g',
+	                    { key: id },
+	                    _react2.default.createElement(Line, { path: genLine(series)(data),
+	                        stroke: colors(id),
+	                        key: id
+	                    })
+	                );
+	            });
 	            return _react2.default.createElement(
-	                'svg',
-	                { width: this.props.width, height: this.props.height },
+	                'g',
+	                null,
 	                _react2.default.createElement(
 	                    'g',
-	                    { transform: this.state.transform },
-	                    _react2.default.createElement(
-	                        'defs',
-	                        null,
-	                        _react2.default.createElement(
-	                            'chilpPath',
-	                            { id: 'chip' },
-	                            _react2.default.createElement('rect', { width: this.state.width, height: this.state.height })
-	                        )
-	                    )
+	                    null,
+	                    lines
 	                )
+	            );
+	        }
+	    }]);
+
+	    return DataSeries;
+	}(_react2.default.Component);
+
+	DataSeries.propTypes = {
+	    colors: _react2.default.PropTypes.func,
+	    data: _react2.default.PropTypes.array.isRequired,
+	    interpolationType: _react2.default.PropTypes.func,
+	    xScale: _react2.default.PropTypes.func,
+	    yScale: _react2.default.PropTypes.func,
+	    getValue: _react2.default.PropTypes.func
+	};
+	DataSeries.defaultProps = {
+	    data: [],
+	    interpolationType: d3.curveCardinal,
+	    colors: d3.scaleOrdinal(d3.schemeCategory10),
+	    getValue: function getValue(x) {
+	        return x.raw;
+	    },
+	    metris: ['mean']
+	};
+
+	var TSChart = exports.TSChart = function (_React$Component4) {
+	    _inherits(TSChart, _React$Component4);
+
+	    function TSChart(props) {
+	        _classCallCheck(this, TSChart);
+
+	        return _possibleConstructorReturn(this, (TSChart.__proto__ || Object.getPrototypeOf(TSChart)).call(this, props));
+	    }
+
+	    _createClass(TSChart, [{
+	        key: 'render',
+	        value: function render() {
+	            // let self = this
+	            /** 
+	            [[ts1, {k1: v1, k2: v2}], [ts2, {k1: v1, k2: v2}], ..]
+	            **/
+	            var getYMaxMin = function getYMaxMin(fn) {
+	                return function (data) {
+	                    var judgeValue = function judgeValue(data) {
+	                        var res;
+	                        return fn(Object.keys(data).map(function (i) {
+	                            // {k1:v1, k2:v2, ..}
+	                            if (data[i] !== null && data[i] !== undefined && _typeof(data[i]) == 'object') {
+	                                res = fn([judgeValue(data[i])]);
+	                            } else {
+	                                res = data[i]; // [v1, v2, ..]
+	                            }
+	                            return res;
+	                        }));
+	                    };
+	                    return judgeValue(data[1]);
+	                };
+	            };
+	            var _props3 = this.props,
+	                width = _props3.width,
+	                height = _props3.height,
+	                data = _props3.data,
+	                paddingLeft = _props3.paddingLeft,
+	                paddingTop = _props3.paddingTop,
+	                xMapper = _props3.xMapper,
+	                yMapper = _props3.yMapper;
+
+	            data = data.map(function (d, i) {
+	                return [xMapper(d[0]), yMapper(d[1])];
+	            });
+	            var yMinMax = [d3.min(data, getYMaxMin(d3.min)), d3.max(data, getYMaxMin(d3.max))];
+	            var xMaxMin = [d3.min(data.map(function (d) {
+	                return new Date(d[0]);
+	            })), // [t1, t2, .., tn]
+	            d3.max(data.map(function (d) {
+	                return new Date(d[0]);
+	            }))];
+
+	            var xScale = d3.scaleTime().domain(xMaxMin).range([10, width]);
+
+	            var yScale = d3.scaleLinear().domain(yMinMax).range([height, 10]);
+	            console.log(yMinMax, xMaxMin);
+
+	            var xAxis = d3.axisBottom(xScale);
+	            var yAxis = d3.axisRight(yScale);
+	            var xTrans = 'translate(0, ' + height + ')';
+	            var yTrans = 'translate(' + width + ', 0)';
+	            return _react2.default.createElement(
+	                'svg',
+	                { width: width + paddingLeft, height: height + paddingTop },
+	                _react2.default.createElement(Axis, { axis: xAxis, transform: xTrans }),
+	                _react2.default.createElement(Axis, { axis: yAxis, transform: yTrans }),
+	                _react2.default.createElement(DataSeries, {
+	                    xScale: xScale,
+	                    yScale: yScale,
+	                    xAxis: xAxis,
+	                    yAxis: yAxis,
+	                    xTrans: xTrans,
+	                    yTrans: yTrans,
+	                    data: data,
+	                    width: width,
+	                    height: height
+	                })
 	            );
 	        }
 	    }]);
 
 	    return TSChart;
 	}(_react2.default.Component);
+
+	TSChart.propTypes = {
+	    width: _react2.default.PropTypes.number,
+	    height: _react2.default.PropTypes.number,
+	    paddingTop: _react2.default.PropTypes.number,
+	    paddingLeft: _react2.default.PropTypes.number,
+	    data: _react2.default.PropTypes.array.isRequired
+	};
+	TSChart.defaultProps = {
+	    paddingTop: 50,
+	    paddingLeft: 50,
+	    width: 300,
+	    height: 300,
+	    xMapper: function xMapper(d) {
+	        return new Date(d);
+	    },
+	    yMapper: function yMapper(d) {
+	        return d['min']['raw'];
+	    }
+	};
 
 /***/ },
 /* 197 */
@@ -50531,7 +50728,7 @@
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	exports.QubitList = undefined;
+	exports.StemList = undefined;
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -50563,16 +50760,16 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var QubitList = exports.QubitList = function (_React$Component) {
-	    _inherits(QubitList, _React$Component);
+	var StemList = exports.StemList = function (_React$Component) {
+	    _inherits(StemList, _React$Component);
 
-	    function QubitList() {
-	        _classCallCheck(this, QubitList);
+	    function StemList() {
+	        _classCallCheck(this, StemList);
 
-	        return _possibleConstructorReturn(this, (QubitList.__proto__ || Object.getPrototypeOf(QubitList)).apply(this, arguments));
+	        return _possibleConstructorReturn(this, (StemList.__proto__ || Object.getPrototypeOf(StemList)).apply(this, arguments));
 	    }
 
-	    _createClass(QubitList, [{
+	    _createClass(StemList, [{
 	        key: 'componentWillMount',
 	        value: function componentWillMount() {
 	            this.setState({
@@ -50633,14 +50830,17 @@
 	                    'div',
 	                    { className: 'bd' },
 	                    this.state && this.state.data.map(function (data, i) {
-	                        return _react2.default.createElement(_qubitcell.QubitCell, { key: i, data: data, qid: data.id, afterDeleted: self.refresh });
+	                        return _react2.default.createElement(_qubitcell.QubitCell, {
+	                            key: i, data: data,
+	                            style: { width: 250 },
+	                            qid: data.id, afterDeleted: self.refresh });
 	                    })
 	                )
 	            );
 	        }
 	    }]);
 
-	    return QubitList;
+	    return StemList;
 	}(_react2.default.Component);
 
 /***/ },
@@ -50669,6 +50869,8 @@
 	var _jquery2 = _interopRequireDefault(_jquery);
 
 	var _bus = __webpack_require__(200);
+
+	var _vision = __webpack_require__(196);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -50704,16 +50906,26 @@
 	            self.socketBus = new _bus.SocketBus(genUrl(self.props.qid));
 	            self.bus = self.socketBus.bus;
 	            self.getPeriod();
+	            self.bus.map(function (data) {
+	                var origin = self.state.data;
+	                origin.shift().push(data);
+	            });
 	        }
 	    }, {
 	        key: 'getPeriod',
 	        value: function getPeriod() {
 	            var self = this;
 	            var qid = self.props.qid;
-	            _jquery2.default.getJSON('/qubit/' + qid + '/period/days/30/', {}, function (data) {
-	                self.setState({
-	                    data: data
-	                });
+	            if (!self.props.data.store) {
+	                return;
+	            }
+	            _jquery2.default.getJSON('/qubit/' + qid + '/period/seconds/120/', {}, function (resp) {
+	                console.log(resp);
+	                if (resp.data.length > 0) {
+	                    self.setState({
+	                        data: resp.data
+	                    });
+	                }
 	            });
 	        }
 	    }, {
@@ -50721,7 +50933,7 @@
 	        value: function getLast() {
 	            var self = this;
 	            var qid = self.props.qid;
-	            _jquery2.default.getJSON('/qubit/' + qid + '/last/', {}, function (data) {
+	            _jquery2.default.getJSON('/qubit/' + qid + '/period/seconds/1/', {}, function (data) {
 	                self.setState({
 	                    last: data
 	                });
@@ -50749,8 +50961,8 @@
 	                } });
 	        }
 	    }, {
-	        key: 'showData',
-	        value: function showData(qid) {
+	        key: 'showLastData',
+	        value: function showLastData(qid) {
 	            var self = this;
 	            var data = self.state && self.state.last && self.state.last[qid];
 	            if (!data) {
@@ -50788,6 +51000,25 @@
 	            );
 	        }
 	    }, {
+	        key: 'showDataChart',
+	        value: function showDataChart(data) {
+	            var style = {
+	                padding: 50
+	            };
+	            if (!data.length > 0) {
+	                return;
+	            }
+	            return _react2.default.createElement(
+	                'div',
+	                { className: 'extras', style: style },
+	                _react2.default.createElement(_vision.TSChart, {
+	                    data: data,
+	                    width: 400,
+	                    height: 200
+	                })
+	            );
+	        }
+	    }, {
 	        key: 'detailRender',
 	        value: function detailRender(lst) {
 	            var self = this;
@@ -50812,9 +51043,10 @@
 	    }, {
 	        key: 'render',
 	        value: function render() {
+	            var self = this;
 	            return _react2.default.createElement(
 	                'div',
-	                { className: 'qubit cell' },
+	                { className: 'qubit cell', style: this.props.style || {} },
 	                _react2.default.createElement(
 	                    'div',
 	                    { className: 'hd' },
@@ -50841,7 +51073,7 @@
 	                    _react2.default.createElement(
 	                        'ul',
 	                        null,
-	                        this.detailRender(['flying', 'is_spout', 'is_stem', 'entangle', 'store'])
+	                        this.detailRender(['flying', 'is_spout', 'is_stem', 'entangle', 'store', 'rate'])
 	                    )
 	                ),
 	                _react2.default.createElement(
@@ -50866,6 +51098,7 @@
 	                        'monad'
 	                    )
 	                ),
+	                self.state.data && self.showDataChart(self.state.data),
 	                _react2.default.createElement(
 	                    _reactModal2.default,
 	                    { isOpen: this.state.showCode },
@@ -50929,9 +51162,9 @@
 	    self.ws.onmessage = function (msg) {
 	        self.reader.readAsText(msg.data);
 	    };
-	    self.reader.addEventListener('loadend', function () {
+	    self.reader.onload = function () {
 	        self.bus.push(self.reader.result);
-	    });
+	    };
 	};
 
 /***/ },
@@ -54359,6 +54592,117 @@
 	/* WEBPACK VAR INJECTION */(function(__webpack_amd_options__) {module.exports = __webpack_amd_options__;
 
 	/* WEBPACK VAR INJECTION */}.call(exports, {}))
+
+/***/ },
+/* 205 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.MeasureList = undefined;
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _react = __webpack_require__(2);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _jquery = __webpack_require__(194);
+
+	var _jquery2 = _interopRequireDefault(_jquery);
+
+	var _qubitcell = __webpack_require__(199);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var MeasureList = exports.MeasureList = function (_React$Component) {
+	    _inherits(MeasureList, _React$Component);
+
+	    function MeasureList() {
+	        _classCallCheck(this, MeasureList);
+
+	        return _possibleConstructorReturn(this, (MeasureList.__proto__ || Object.getPrototypeOf(MeasureList)).apply(this, arguments));
+	    }
+
+	    _createClass(MeasureList, [{
+	        key: 'componentWillMount',
+	        value: function componentWillMount() {
+	            this.setState({
+	                measureOn: 'Stem:1',
+	                qubits: []
+	            });
+	        }
+	    }, {
+	        key: 'componentDidMount',
+	        value: function componentDidMount() {
+	            this.getQubitList();
+	        }
+	    }, {
+	        key: 'getQubitList',
+	        value: function getQubitList() {
+	            var self = this;
+	            var entangle = self.state.measureOn;
+	            _jquery2.default.getJSON('/qubit/entangle/' + entangle + '/tree/', {}, function (data) {
+	                return self.setState({
+	                    qubits: data.data
+	                });
+	            });
+	        }
+	    }, {
+	        key: 'renderQubitLayer',
+	        value: function renderQubitLayer(layer, i) {
+	            var self = this;
+	            return _react2.default.createElement(
+	                'div',
+	                { key: i, className: 'QubitLayer layer' },
+	                layer.map(function (q, i) {
+	                    return _react2.default.createElement(_qubitcell.QubitCell, { data: q,
+	                        qid: q.id,
+	                        key: i,
+	                        style: self.qubitStyle() });
+	                })
+	            );
+	        }
+	    }, {
+	        key: 'style',
+	        value: function style() {
+	            return {
+	                float: 'right',
+	                marginTop: '60px'
+	            };
+	        }
+	    }, {
+	        key: 'qubitStyle',
+	        value: function qubitStyle() {
+	            return {
+	                width: '500px'
+	            };
+	        }
+	    }, {
+	        key: 'render',
+	        value: function render() {
+	            var self = this;
+	            return _react2.default.createElement(
+	                'div',
+	                { style: self.style() },
+	                this.state.qubits.map(function (d, i) {
+	                    return self.renderQubitLayer(d, i);
+	                })
+	            );
+	        }
+	    }]);
+
+	    return MeasureList;
+	}(_react2.default.Component);
 
 /***/ }
 /******/ ]);

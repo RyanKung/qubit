@@ -2,6 +2,7 @@ from pulsar.apps import ws
 from pulsar.apps.wsgi import route
 from pulsar import ensure_future
 from qubit.io.redis import pubsub
+import logging
 
 __all___ = ['QubitSocket']
 
@@ -28,6 +29,9 @@ class PubSubWS(ws.WS):
         channel = self.channel % qid
         self.pubsub.add_client(self.client(websocket, channel))
         ensure_future(self.pubsub.subscribe(channel))
+        logging.info(
+            'New websocket opened. Add client to %s on "%s" channel',
+            self.pubsub, self.channel)
 
     def write(self, websocket, message):
         websocket.write(message)

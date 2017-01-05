@@ -5,7 +5,7 @@ import Modal from 'react-modal'
 import { QubitForm } from 'views/qubitform'
 import { QubitCell } from 'views/qubitcell'
 
-export class QubitList extends React.Component {
+export class StemList extends React.Component {
     componentWillMount() {
         this.setState({
             last: {},
@@ -47,7 +47,10 @@ export class QubitList extends React.Component {
               <div className="bd">
                 {this.state && this.state.data.map(function(data, i) {
                     return (
-                        <QubitCell key={i} data={data} qid={data.id} afterDeleted={self.refresh}></QubitCell>
+                        <QubitCell
+                          key={i} data={data}
+                          style={{width: 250}}
+                          qid={data.id} afterDeleted={self.refresh}></QubitCell>
                     )
                 })}
             </div>

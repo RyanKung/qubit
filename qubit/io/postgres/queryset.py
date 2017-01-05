@@ -1,7 +1,7 @@
 from . import utils
 from .postgres import pool
 
-__all__ = ['QuerySet']
+__all__ = ['QuerySet', 'LazyQuery']
 
 
 def query(sql):
@@ -11,7 +11,6 @@ def query(sql):
     cur = conn.cursor()
     cur.execute(sql)
     res = cur.fetchall()
-    print('res', res)
     pool.putconn(conn)
     return res
 
@@ -25,7 +24,6 @@ def update(sql):
     res = cur.fetchall()
     if not res:
         return False
-    print('res', res)
     pool.putconn(conn)
     return res if len(res) > 1 else res[0]
 
@@ -39,9 +37,36 @@ def insert(sql):
     res = cur.fetchone()
     if not res:
         return False
-    print('res', res)
     pool.putconn(conn)
     return res if len(res) > 1 else res[0]
+
+
+class LazyQuery():
+    def __init__(self, sql, fields=None):
+        self.sql = sql
+        self.conn = pool.getconn()
+        self.conn.set_session(autocommit=True)
+        self.cur = self.conn.cursor()
+        self.cur.execute(self.sql)
+        self.fields = fields
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        res = self.cur.fetchone()
+        if res:
+            yield dict(zip(self.fields, res[0])) if self.fields else res
+
+        else:
+            pool.putconn(self.conn)
+            raise StopIteration
+
+    def read(self, n=0):  # for pandas
+        try:
+            return next(','.join(self.g))
+        except StopIteration:
+            return ''
 
 
 class QuerySet(object):
@@ -58,6 +83,7 @@ class QuerySet(object):
         'filter_in': "SELECT {fields} FROM {table} WHERE {key} IN ({targets});",
         'filter_in_range': "SELECT {fields} FROM {table} WHERE {rule} and {key} <= {end} and {key} >= {start};",
         'find_in_range': "SELECT {fields} FROM {table} WHERE {key} <= {end} and {key} >= {start};",
+        'find_near': "SELECT {fields} FROM {table} WHERE {key} >= {start};",
         'insert': 'INSERT INTO {table} ({keys}) VALUES ({values}) RETURNING id;',
         'replace': 'REPLACE INTO {table} ({keys}) VALUES ({values})',
         'delete': "DELETE FROM {table} WHERE {rules} RETURNING id",
@@ -154,6 +180,40 @@ class QuerySet(object):
             'key': key,
             'targets': utils.concat(map(utils.wrap_value, targets))
         }))
+
+    def find_in_range_lazy(self, key, start, end, fields=[], *args, **kwargs) -> dict:
+        data = self.format(kwargs)
+        return LazyQuery(self._sql['filter_in_range'].format(**{
+            'table': self.tablename,
+            'fields': utils.concat(map(utils.wrap_key, fields or self.fields)),
+            'key': key,
+            'rule': utils.get_and_seg(data),
+            'start': utils.wrap_value(start),
+            'end': utils.wrap_value(end)
+        }), self.fields)
+
+    def find_near_lazy(self, key, start, end, fields=[], *args, **kwargs) -> dict:
+        data = self.format(kwargs)
+        return LazyQuery(self._sql['find_near'].format(**{
+            'table': self.tablename,
+            'fields': utils.concat(map(utils.wrap_key, fields or self.fields)),
+            'key': key,
+            'rule': utils.get_and_seg(data),
+            'start': utils.wrap_value(start),
+            'end': utils.wrap_value(end)
+        }), self.fields)
+
+    def find_near(self, key, start, end, fields=[], *args, **kwargs) -> dict:
+        data = self.format(kwargs)
+        res = query(self._sql['find_near'].format(**{
+            'table': self.tablename,
+            'fields': utils.concat(map(utils.wrap_key, fields or self.fields)),
+            'key': key,
+            'rule': utils.get_and_seg(data),
+            'start': utils.wrap_value(start),
+            'end': utils.wrap_value(end)
+        }))
+        return [dict(zip(self.fields, r)) for r in res]
 
     def find_in_range(self, key, start, end, fields=[], *args, **kwargs) -> dict:
         data = self.format(kwargs)

@@ -15,8 +15,8 @@ export class SocketBus {
         self.ws.onmessage = (msg) => {
             self.reader.readAsText(msg.data)
         }
-        self.reader.addEventListener('loadend', () => {
+        self.reader.onload = () => {
             self.bus.push(self.reader.result)
-        })
+        }
     }
 }

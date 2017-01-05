@@ -1,4 +1,4 @@
-import json
+import simplejson as json
 from functools import wraps
 __all__ = ['jsonize', 'resp_wrapper']
 
@@ -7,7 +7,9 @@ def jsonize(fn):
     @wraps(fn)
     def handler(*args, **kwargs):
         data = fn(*args, **kwargs)
-        return json.dumps(data, ensure_ascii=False, default=str)
+        return json.dumps(data, ensure_ascii=False,
+                          ignore_nan=True, namedtuple_as_object=True,
+                          default=str)
     return handler
 
 

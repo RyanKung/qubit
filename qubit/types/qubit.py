@@ -2,7 +2,6 @@ import json
 import runpy
 from types import ModuleType
 from functools import partial
-from datetime import datetime
 from qubit.io.pulsar import async
 from qubit.io.postgres import types
 from qubit.io.postgres import QuerySet
@@ -12,8 +11,9 @@ from qubit.io.celery import task_method
 from qubit.io.celery import period_task
 from qubit.io.redis import client, cache
 from qubit.types.utils import ts_data, empty_ts_data
+from qubit.types.states import States
 
-__all__ = ['Qubit', 'States']
+__all__ = ['Qubit']
 
 
 tell_client = partial(client.publish, 'eventsocket')
@@ -75,6 +75,12 @@ class Qubit(object):
         return __import__(name, *args, **kwargs)
 
     @classmethod
+    def send_data(cls, qid: str, data: str):
+        assert isinstance(data, str)
+        sck_name = 'qubitsocket::%s' % str(qid)
+        client.publish(sck_name, data)
+
+    @classmethod
     def update(cls, qid, data):
         return cls.manager.update(qid, **data)
 
@@ -89,8 +95,13 @@ class Qubit(object):
         builtins = dict(__builtins__,
                         require=Qubit.require,
                         __import__=Qubit.__import__)
-        glo = {'datum': data.datum, '__builtins__': builtins}
-        loc = {}
+        glo = {
+            'datum': data.datum,
+            '__builtins__': builtins
+        }
+        loc = {
+            'qubit': qubit
+        }
         exec(qubit.monad, glo, loc)
         datum = loc['datum']
         if not isinstance(datum, dict):
@@ -116,7 +127,7 @@ class Qubit(object):
     @classmethod
     def activate_all(cls):
         return list(map(
-            cls.measure, cls.get_spouts()))
+            cls.entanglement_trigger, cls.get_spouts()))
 
     @classmethod
     @cache(ttl=5000, flag='spout')
@@ -126,7 +137,7 @@ class Qubit(object):
             flying=True)
         if not qubits:
             return []
-        return list(map(lambda x: cls.prototype(**x), qubits))
+        return list(map(lambda x: cls.prototype(**x)._asdict(), qubits))
 
     @classmethod
     def get_spouts(cls):
@@ -143,7 +154,8 @@ class Qubit(object):
 
     @classmethod
     def delete(cls, qubit_id):
-        return cls.manager.delete(qubit_id) and States.manager.delete_by(qubit=qubit_id)
+        return (cls.manager.delete(qubit_id) and
+                States.manager.delete_by(qubit=qubit_id))
 
     @classmethod
     def get_spem(cls, qid):
@@ -162,8 +174,7 @@ class Qubit(object):
     @classmethod
     def set_current(cls, qid, ts_data):
         data = json.dumps(ts_data._asdict())
-        spem = cls.get_spem(qid)
-        tell_client('qubit::updated::%s::%s' % (spem, data))
+        cls.send_data(qid, data)
         key = 'qubit:%s:state' % qid
         client.set(key, data)
         return True
@@ -183,7 +194,8 @@ class Qubit(object):
 
     @staticmethod
     def format(qubit, data):
-        return Qubit.format_qubit(qubit), Qubit.format_data(data)
+        return (Qubit.format_qubit(qubit),
+                Qubit.format_data(data))
 
     @staticmethod
     def format_qubit(qubit):
@@ -207,9 +219,13 @@ class Qubit(object):
         return data
 
     @staticmethod
-    def measure(qubit, data={}):    # S_q1(t1) = MR(S_q1(t0), S_q0(t1))
+    def entanglement_trigger(qubit, data={}):
         Qubit.activate.task.delay(
             qubit=qubit, data=data)
+
+    @staticmethod
+    def measure(qubit, depth):
+        States.get_history(qubit.id, depth)
 
     @classmethod
     def trigger(cls, qubit, data):
@@ -220,7 +236,7 @@ class Qubit(object):
         if not qubits:
             return False
         res = list(map(partial(
-            Qubit.measure,
+            Qubit.entanglement_trigger,
             data=isinstance(data, dict) and data or data._asdict()), qubits))
         return res
 
@@ -238,43 +254,3 @@ class Qubit(object):
     @classmethod
     def pick_status(cls, qid, ts):
         return States.pick(qid, ts)
-
-
-class States(object):
-    prototype = types.Table('states', [
-        ('qubit', types.integer),
-        ('datum', types.json),
-        ('tags', types.text),
-        ('ts', types.timestamp)
-    ])
-
-    manager = QuerySet(prototype)
-
-    @classmethod
-    def create(cls, qubit, datum, ts=datetime.now(), tags=[]):
-        return dict(id=cls.manager.insert(
-            qubit=qubit, datum=datum,
-            ts=ts, tags=tags))
-
-    @classmethod
-    def format(cls, s: dict):
-        return cls.prototype(
-            qubit=s['qubit'],
-            datum=s['datum'],
-            tags=s.get('tags'),
-            ts=s['ts'])
-
-    @classmethod
-    def select(cls, qid, start, end):
-        res = cls.manager.find_in_range(
-            qubit=qid, key='ts', start=start, end=end)
-        return list(map(cls.format, res))
-
-    @classmethod
-    def pick(cls, sid, ts):
-        return cls.manager.nearby(
-            column='ts', value=ts, qubit=sid)[0]
-
-    @classmethod
-    def get_via_qid(cls, qid):
-        return cls.manager.get_by(qubit=qid)

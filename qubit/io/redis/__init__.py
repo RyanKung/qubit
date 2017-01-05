@@ -30,7 +30,6 @@ def cache(ttl=100, flag=None):
             })
             cached_data = client.get(key)
             if cached_data:
-                print('fuck', cached_data)
                 return json.loads(cached_data.decode())['data']
             else:
                 res = fn(*args, **kwargs)

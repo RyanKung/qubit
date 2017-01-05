@@ -24,13 +24,5 @@ def states_api(id, start, end):
 def states_period_api(id, period, cycle=1):
 
     def handler():
-        now = datetime.datetime.now()
-        print(period, cycle)
-        delta_start = datetime.timedelta(**{period: int(cycle)})
-        start = now - delta_start
-        data = [{k: list(v) for k, v in g}
-                for g in groupby(States.select(id, start, now),
-                                 lambda x: getattr(x, period[:-1]))]
-        return data
-
+        return States.get_period(id, period, cycle)
     return handler()

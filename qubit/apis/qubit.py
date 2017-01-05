@@ -58,9 +58,29 @@ def last(qid):
     return Qubit.get_current(qid)
 
 
+@app.route('/qubit/entangle/<entangle>/', methods=['GET'])
 @app.route('/qubit/entangle/<qid>/', methods=['POST'])
 @jsonize
 @wrapper
-def entangle(qid):
-    data = request.json
-    return Qubit.entangle(qid, data['id'])
+def entangle(qid=None, entangle=None):
+    def set_entangle():
+        data = request.json
+        return Qubit.entangle(qid, data['id'])
+
+    def get_entangle():
+        return list(map(lambda x: x, Qubit.get_flying(entangle)))
+
+    return {
+        'GET': get_entangle,
+        'POST': set_entangle
+    }.get(request.method)()
+
+
+@app.route('/qubit/entangle/<entangle>/tree/', methods=['GET'])
+@jsonize
+@wrapper
+def entangle_tree(entangle):
+    def get_entangle_tree(entangle):
+        res = [list(map(lambda x: x, Qubit.get_flying(entangle)))]
+        return res or res + list(map(get_entangle_tree, res))
+    return get_entangle_tree(entangle)

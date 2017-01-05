@@ -1,8 +1,8 @@
 import React from 'react'
 import Modal from 'react-modal'
 import { QubitForm } from 'views/qubitform'
-import { QubitList } from 'views/qubitlist'
-
+import { StemList } from 'views/qubitlist'
+import { MeasureList } from 'views/measurelist'
 
 export class QubitView extends React.Component {
     componentWillMount() {
@@ -16,7 +16,8 @@ export class QubitView extends React.Component {
                 <button className='new' onClick={this.openForm.bind(this)}>+</button>
              </div>
               <div className="bd"></div>
-              <QubitList></QubitList>
+              <MeasureList></MeasureList>
+              <StemList></StemList>
               <Modal isOpen={this.state.modal_open}>
                 <QubitForm cancel={this.closeForm.bind(this)}
                            submit={this.closeForm.bind(this)}></QubitForm>

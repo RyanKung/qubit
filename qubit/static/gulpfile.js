@@ -29,7 +29,11 @@ gulp.task('css', function(done) {
 gulp.task('babel', function () {
     return gulp.src(paths.es6_src)
         .pipe(babel({
-            presets: ['es2015', 'react']
+            presets: ['latest', 'react'],
+            env: {
+                'browsers': ['last 2 versions', 'firefox >= 40']
+            },
+            plugins: ['transform-class-properties']
         }))
         .pipe(gulp.dest('compiled/js'))
 })
