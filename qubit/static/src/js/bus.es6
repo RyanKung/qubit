@@ -16,7 +16,7 @@ export class SocketBus {
             self.reader.readAsText(msg.data)
         }
         self.reader.onload = () => {
-            self.bus.push(self.reader.result)
+            self.bus.push(JSON.parse(self.reader.result))
         }
     }
 }

@@ -137,6 +137,7 @@ class Qubit(object):
             flying=True)
         if not qubits:
             return []
+        print(qubits)
         return list(map(lambda x: cls.prototype(**x)._asdict(), qubits))
 
     @classmethod
@@ -200,6 +201,7 @@ class Qubit(object):
     @staticmethod
     def format_qubit(qubit):
         if isinstance(qubit, dict):
+            print(qubit)
             qubit = Qubit.prototype(**qubit)
         if isinstance(qubit, list):
             qubit = Qubit.prototype(

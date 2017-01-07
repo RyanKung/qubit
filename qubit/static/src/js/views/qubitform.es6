@@ -12,9 +12,8 @@ export class QubitForm extends React.Component {
             hint: ''
         })
     }
-    success(res, e, cb) {
-        if (res.result == "ok") {
-            console.log(res.data)
+    success(res) {
+        if (res.result == 'ok') {
             this.setState({
                 result: 'successed! qubit id: ' + res.data
             })
@@ -26,8 +25,22 @@ export class QubitForm extends React.Component {
     cancel() {
         this.props.cancel && this.props.cancel()
     }
+    testMonad(e) {
+        let content = e.target.value
+        let url = '/qubit/monad/'
+        $.ajax({
+            'url': url,
+            'type': 'POST',
+            'data': {'monad': content},
+            'dataType': 'json',
+            'contentType': 'application/json',
+            'success': (data) => {
+                console.log(data)
+            }
+        })
+    }
     toDict(data) {
-        return data.reduce(function(x, y, i) {
+        return data.reduce(function(x, y) {
             x[y.name] = y.value
             return x
         }, {})
@@ -64,14 +77,13 @@ export class QubitForm extends React.Component {
                     <input name='is_stem' type='checkbox' />
                   </label>
                   <label>
-                    <span>store?</span>
+                    <span>store</span>
                     <input name='store' type='checkbox' />
                     </label>
-
                 </fieldset>
                 <fieldset className="long">
                   <label>monad</label>
-                  <textarea name="monad" placeholder="monad"></textarea>
+                  <textarea onBlur={this.testMonad.bind(this)} name="monad" placeholder="monad"></textarea>
                 </fieldset>
                 <fieldset className="long">
                   <label>comment</label>

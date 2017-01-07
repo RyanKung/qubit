@@ -114,9 +114,7 @@ export class TSChart extends React.Component {
         paddingTop: 50,
         paddingLeft: 50,
         width:  300,
-        height: 300,
-        xMapper: (d) => {return new Date(d)},
-        yMapper: (d) => {return d['min']['raw']}
+        height: 300
     }
     constructor(props) {
         super(props)
@@ -142,10 +140,7 @@ export class TSChart extends React.Component {
                 return judgeValue(data[1])
             }
         }
-        let { width, height, data, paddingLeft, paddingTop, xMapper, yMapper } = this.props
-        data = data.map((d, i) => {
-            return [xMapper(d[0]), yMapper(d[1])]
-        })
+        let { width, height, data, paddingLeft, paddingTop } = this.props
         let yMinMax = [
             d3.min(data, getYMaxMin(d3.min)),
             d3.max(data, getYMaxMin(d3.max))
@@ -162,7 +157,6 @@ export class TSChart extends React.Component {
         let yScale = d3.scaleLinear()
             .domain(yMinMax)
             .range([height, 10])
-        console.log(yMinMax, xMaxMin)
 
         let xAxis = d3.axisBottom(xScale)
         let yAxis = d3.axisRight(yScale)

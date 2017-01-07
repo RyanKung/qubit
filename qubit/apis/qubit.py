@@ -6,7 +6,7 @@ from .utils import resp_wrapper as wrapper
 from .utils import jsonize
 
 
-__all__ = ['qubit_api', 'entangle', 'stem_api']
+__all__ = ['qubit_api', 'entangle', 'stem_api', 'monad_tester']
 
 
 @app.route('/qubit/<qid>/', methods=['GET', 'DELETE'])
@@ -37,6 +37,13 @@ def qubit_api(qid=None):
         'DELETE': delete,
         'POST': create
     }.get(request.method)()
+
+
+@app.route('/qubit/monad', methods=['POST'])
+@jsonize
+@wrapper
+def monad_tester():
+    return Qubit.exec(request.json['monad'])
 
 
 @app.route('/qubit/stem/', methods=['GET', 'POST'])

@@ -1,5 +1,5 @@
 import redis
-import json
+import simplejson as json
 from functools import wraps
 from pulsar.apps.data import create_store
 from pulsar import ensure_future
@@ -33,7 +33,7 @@ def cache(ttl=100, flag=None):
                 return json.loads(cached_data.decode())['data']
             else:
                 res = fn(*args, **kwargs)
-                client.set(key, json.dumps(dict(data=res)))
+                client.set(key, json.dumps(dict(data=res), namedtuple_as_object=True))
                 client.expire(key, ttl)
                 return res
         return handler

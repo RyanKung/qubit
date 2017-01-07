@@ -5,7 +5,7 @@ all:
 debug:
 	celery -A qubit.wsgiapp.queue worker -l info --workdir ./ -E -c 1 -B -l info
 worker:
-	celery -A qubit.wsgiapp.queue worker -l error --workdir ./ -E -c 1
+	celery -A qubit.wsgiapp.queue worker -l info --workdir ./ -E -c 10
 beat:
 	celery -A qubit.wsgiapp.queue beat -l error --workdir ./
 purge:

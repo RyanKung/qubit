@@ -1,43 +1,46 @@
 from . import utils
-from .postgres import pool
+from .postgres import pool, connection
+import time
 
 __all__ = ['QuerySet', 'LazyQuery']
+
+key = str(time.time())
 
 
 def query(sql):
     print('sql', sql)
-    conn = pool.getconn()
+    conn = connection()
     conn.set_session(autocommit=True)
     cur = conn.cursor()
     cur.execute(sql)
     res = cur.fetchall()
-    pool.putconn(conn)
+    cur.close()
     return res
 
 
 def update(sql):
     print('sql', sql)
-    conn = pool.getconn()
+    conn = connection()
     conn.set_session(autocommit=True)
     cur = conn.cursor()
     cur.execute(sql)
     res = cur.fetchall()
     if not res:
         return False
-    pool.putconn(conn)
+    cur.close()
     return res if len(res) > 1 else res[0]
 
 
 def insert(sql):
     print('sql', sql)
-    conn = pool.getconn()
+    conn = connection()
     conn.set_session(autocommit=True)
     cur = conn.cursor()
     cur.execute(sql)
     res = cur.fetchone()
     if not res:
         return False
-    pool.putconn(conn)
+    cur.close()
     return res if len(res) > 1 else res[0]
 
 

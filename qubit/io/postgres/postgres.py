@@ -10,6 +10,10 @@ from qubit.config import PGSQL_PARAM
 
 __all__ = ['connection', 'pool']
 
-connection = psycopg2.connect(**PGSQL_PARAM)
+
+def connection():
+    if not getattr(connection, '_conn', None):
+        connection._conn = psycopg2.connect(**PGSQL_PARAM)
+    return connection._conn
 # for creat a new connection
-pool = psycopg2.pool.ThreadedConnectionPool(1, 50, **PGSQL_PARAM)
+pool = psycopg2.pool.SimpleConnectionPool(1, 500, **PGSQL_PARAM)

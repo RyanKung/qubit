@@ -23599,9 +23599,8 @@
 	        }
 	    }, {
 	        key: 'success',
-	        value: function success(res, e, cb) {
-	            if (res.result == "ok") {
-	                console.log(res.data);
+	        value: function success(res) {
+	            if (res.result == 'ok') {
 	                this.setState({
 	                    result: 'successed! qubit id: ' + res.data
 	                });
@@ -23616,9 +23615,25 @@
 	            this.props.cancel && this.props.cancel();
 	        }
 	    }, {
+	        key: 'testMonad',
+	        value: function testMonad(e) {
+	            var content = e.target.value;
+	            var url = '/qubit/monad/';
+	            _jquery2.default.ajax({
+	                'url': url,
+	                'type': 'POST',
+	                'data': { 'monad': content },
+	                'dataType': 'json',
+	                'contentType': 'application/json',
+	                'success': function success(data) {
+	                    console.log(data);
+	                }
+	            });
+	        }
+	    }, {
 	        key: 'toDict',
 	        value: function toDict(data) {
-	            return data.reduce(function (x, y, i) {
+	            return data.reduce(function (x, y) {
 	                x[y.name] = y.value;
 	                return x;
 	            }, {});
@@ -23697,7 +23712,7 @@
 	                            _react2.default.createElement(
 	                                'span',
 	                                null,
-	                                'store?'
+	                                'store'
 	                            ),
 	                            _react2.default.createElement('input', { name: 'store', type: 'checkbox' })
 	                        )
@@ -23710,7 +23725,7 @@
 	                            null,
 	                            'monad'
 	                        ),
-	                        _react2.default.createElement('textarea', { name: 'monad', placeholder: 'monad' })
+	                        _react2.default.createElement('textarea', { onBlur: this.testMonad.bind(this), name: 'monad', placeholder: 'monad' })
 	                    ),
 	                    _react2.default.createElement(
 	                        'fieldset',
@@ -34263,13 +34278,8 @@
 	                height = _props3.height,
 	                data = _props3.data,
 	                paddingLeft = _props3.paddingLeft,
-	                paddingTop = _props3.paddingTop,
-	                xMapper = _props3.xMapper,
-	                yMapper = _props3.yMapper;
+	                paddingTop = _props3.paddingTop;
 
-	            data = data.map(function (d, i) {
-	                return [xMapper(d[0]), yMapper(d[1])];
-	            });
 	            var yMinMax = [d3.min(data, getYMaxMin(d3.min)), d3.max(data, getYMaxMin(d3.max))];
 	            var xMaxMin = [d3.min(data.map(function (d) {
 	                return new Date(d[0]);
@@ -34281,7 +34291,6 @@
 	            var xScale = d3.scaleTime().domain(xMaxMin).range([10, width]);
 
 	            var yScale = d3.scaleLinear().domain(yMinMax).range([height, 10]);
-	            console.log(yMinMax, xMaxMin);
 
 	            var xAxis = d3.axisBottom(xScale);
 	            var yAxis = d3.axisRight(yScale);
@@ -34321,13 +34330,7 @@
 	    paddingTop: 50,
 	    paddingLeft: 50,
 	    width: 300,
-	    height: 300,
-	    xMapper: function xMapper(d) {
-	        return new Date(d);
-	    },
-	    yMapper: function yMapper(d) {
-	        return d['min']['raw'];
-	    }
+	    height: 300
 	};
 
 /***/ },
@@ -50899,16 +50902,39 @@
 	            };
 	            var self = this;
 	            self.setState({
-	                last: undefined,
+	                last: [],
 	                data: [],
 	                showCode: false
 	            });
 	            self.socketBus = new _bus.SocketBus(genUrl(self.props.qid));
 	            self.bus = self.socketBus.bus;
 	            self.getPeriod();
-	            self.bus.map(function (data) {
-	                var origin = self.state.data;
-	                origin.shift().push(data);
+	        }
+	    }, {
+	        key: 'componentDidMount',
+	        value: function componentDidMount() {
+	            this.listenBus();
+	        }
+	    }, {
+	        key: 'listenBus',
+	        value: function listenBus() {
+	            var self = this;
+	            if (!self.props.data.store) {
+	                return;
+	            }
+	            self.bus.onValue(function (data) {
+	                var origin = self.state.last;
+	                if (origin.length > 0 && new Date(origin[origin.length - 1][0]).getTime() >= new Date(data.ts).getTime()) {
+	                    return;
+	                }
+	                var datum = [data.ts, { mean: data.datum }];
+	                origin.push(datum);
+	                if (origin.length > 100) {
+	                    origin.shift();
+	                }
+	                self.setState({
+	                    last: origin
+	                });
 	            });
 	        }
 	    }, {
@@ -50920,7 +50946,6 @@
 	                return;
 	            }
 	            _jquery2.default.getJSON('/qubit/' + qid + '/period/seconds/120/', {}, function (resp) {
-	                console.log(resp);
 	                if (resp.data.length > 0) {
 	                    self.setState({
 	                        data: resp.data
@@ -50962,9 +50987,7 @@
 	        }
 	    }, {
 	        key: 'showLastData',
-	        value: function showLastData(qid) {
-	            var self = this;
-	            var data = self.state && self.state.last && self.state.last[qid];
+	        value: function showLastData(data) {
 	            if (!data) {
 	                return '';
 	            }
@@ -51010,7 +51033,7 @@
 	            }
 	            return _react2.default.createElement(
 	                'div',
-	                { className: 'extras', style: style },
+	                { className: 'chart', style: style },
 	                _react2.default.createElement(_vision.TSChart, {
 	                    data: data,
 	                    width: 400,
@@ -51099,6 +51122,7 @@
 	                    )
 	                ),
 	                self.state.data && self.showDataChart(self.state.data),
+	                self.state.last && self.showDataChart(self.state.last),
 	                _react2.default.createElement(
 	                    _reactModal2.default,
 	                    { isOpen: this.state.showCode },
@@ -51163,7 +51187,7 @@
 	        self.reader.readAsText(msg.data);
 	    };
 	    self.reader.onload = function () {
-	        self.bus.push(self.reader.result);
+	        self.bus.push(JSON.parse(self.reader.result));
 	    };
 	};
 
@@ -54684,7 +54708,7 @@
 	        key: 'qubitStyle',
 	        value: function qubitStyle() {
 	            return {
-	                width: '500px'
+	                width: '600px'
 	            };
 	        }
 	    }, {

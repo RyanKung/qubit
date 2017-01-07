@@ -13,16 +13,36 @@ export class QubitCell extends React.Component {
         }
         var self = this
         self.setState({
-            last: undefined,
+            last: [],
             data: [],
             showCode: false
         })
         self.socketBus = new SocketBus(genUrl(self.props.qid))
         self.bus = self.socketBus.bus
         self.getPeriod()
-        self.bus.map((data)=>{
-            let origin = self.state.data
-            origin.shift().push(data)
+    }
+    componentDidMount() {
+        this.listenBus()
+    }
+    listenBus() {
+        let self = this
+        if (!self.props.data.store) {
+            return
+        }
+        self.bus.onValue((data)=>{
+            let origin = self.state.last
+            if (origin.length > 0 && ((new Date(origin[origin.length - 1][0])).getTime() >= (new Date(data.ts).getTime()))) {
+                return
+            }
+            let datum = [data.ts, { mean: data.datum }]
+            origin.push(datum)
+            if (origin.length > 100) {
+                origin.shift()
+            }
+            self.setState({
+                last: origin
+            })
+
         })
     }
     getPeriod() {
@@ -32,7 +52,6 @@ export class QubitCell extends React.Component {
             return
         }
         $.getJSON('/qubit/' + qid + '/period/seconds/120/', {}, function(resp) {
-            console.log(resp)
             if (resp.data.length > 0) {
                 self.setState({
                     data: resp.data
@@ -66,9 +85,7 @@ export class QubitCell extends React.Component {
                 this.props.afterDeleted(qid)
             }})
     }
-    showLastData(qid) {
-        var self = this
-        var data = self.state && self.state.last && self.state.last[qid]
+    showLastData(data) {
         if (!data) { return '' }
         return (
             <table>
@@ -95,7 +112,7 @@ export class QubitCell extends React.Component {
             return
         }
         return (
-            <div className='extras' style={style}>
+            <div className='chart' style={style}>
               <TSChart
                 data={data}
                 width={400}
@@ -141,6 +158,9 @@ export class QubitCell extends React.Component {
               </div>
               {
                   self.state.data && self.showDataChart(self.state.data)
+              }
+              {
+                  self.state.last && self.showDataChart(self.state.last)
               }
               <Modal isOpen={this.state.showCode}>
                 <pre>{this.props.data.monad}</pre>

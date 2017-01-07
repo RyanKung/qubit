@@ -34,6 +34,7 @@ class PubSubWS(ws.WS):
             self.pubsub, self.channel)
 
     def write(self, websocket, message):
+        print(message)
         websocket.write(message)
 
 
