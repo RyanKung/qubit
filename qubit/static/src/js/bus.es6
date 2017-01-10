@@ -13,10 +13,7 @@ export class SocketBus {
         self.ws = new WebSocket(uri)
         self.bus = new Bacon.Bus()
         self.ws.onmessage = (msg) => {
-            self.reader.readAsText(msg.data)
-        }
-        self.reader.onload = () => {
-            self.bus.push(JSON.parse(self.reader.result))
+            self.bus.push(JSON.parse(msg.data))
         }
     }
 }

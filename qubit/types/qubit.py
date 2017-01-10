@@ -78,7 +78,7 @@ class Qubit(object):
     def send_data(cls, qid: str, data: str):
         assert isinstance(data, str)
         sck_name = 'qubitsocket::%s' % str(qid)
-        client.publish(sck_name, data)
+        client.publish(sck_name, json.dumps({'qid': qid, 'data': data}))
 
     @classmethod
     def update(cls, qid, data):
@@ -102,11 +102,21 @@ class Qubit(object):
         loc = {
             'qubit': qubit
         }
-        exec(qubit.monad, glo, loc)
+        Qubit.exec_monad(qubit.monad, glo, loc)
         datum = loc['datum']
         if not isinstance(datum, dict):
             datum = dict(raw=datum)
         return datum
+
+    @staticmethod
+    def exec_monad(monad: str, glo={}, loc={}):
+        builtins = dict(__builtins__,
+                        require=Qubit.require,
+                        __import__=Qubit.__import__)
+        glo = glo or {
+            '__builtins__': builtins
+        }
+        exec(monad, glo, loc)
 
     @staticmethod
     @queue.task(filter=task_method, base=QubitEntanglement)

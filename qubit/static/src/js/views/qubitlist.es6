@@ -49,7 +49,7 @@ export class StemList extends React.Component {
                     return (
                         <QubitCell
                           key={i} data={data}
-                          style={{width: 250}}
+                          style={{width: 250, marginTop: 10}}
                           qid={data.id} afterDeleted={self.refresh}></QubitCell>
                     )
                 })}

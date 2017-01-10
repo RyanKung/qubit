@@ -3,6 +3,7 @@ import $ from 'jquery'
 import ReactDOM from 'react-dom'
 import Form from 'libs/ajaxform'
 import { TSChart } from 'views/vision'
+import { DataTable } from 'libs/object2table'
 
 
 export class QubitForm extends React.Component {
@@ -26,18 +27,25 @@ export class QubitForm extends React.Component {
         this.props.cancel && this.props.cancel()
     }
     testMonad(e) {
+        let self = this
         let content = e.target.value
-        let url = '/qubit/monad/'
+        let url = '/qubit/monad/test/'
+        let data = {'monad': content}
         $.ajax({
             'url': url,
             'type': 'POST',
-            'data': {'monad': content},
+            'data': JSON.stringify(data),
             'dataType': 'json',
             'contentType': 'application/json',
-            'success': (data) => {
-                console.log(data)
+            'success': (resp) => {
+                self.setState({
+                    monadInfo: resp.data
+                })
             }
         })
+    }
+    showMonadData() {
+        return (<DataTable data={this.state.monadInfo} />)
     }
     toDict(data) {
         return data.reduce(function(x, y) {
@@ -84,6 +92,7 @@ export class QubitForm extends React.Component {
                 <fieldset className="long">
                   <label>monad</label>
                   <textarea onBlur={this.testMonad.bind(this)} name="monad" placeholder="monad"></textarea>
+                  <em className="monadInfo">{this.state.monadInfo && this.showMonadData()}</em>
                 </fieldset>
                 <fieldset className="long">
                   <label>comment</label>

@@ -39,11 +39,18 @@ def qubit_api(qid=None):
     }.get(request.method)()
 
 
-@app.route('/qubit/monad', methods=['POST'])
+@app.route('/qubit/monad/test/', methods=['POST'])
 @jsonize
 @wrapper
 def monad_tester():
-    return Qubit.exec(request.json['monad'])
+    loc = {}
+    try:
+        Qubit.exec_monad(request.json['monad'], loc=loc)
+        return dict(data=loc)
+    except Exception as e:
+        return {
+            'data': dict(ex=e)
+        }
 
 
 @app.route('/qubit/stem/', methods=['GET', 'POST'])

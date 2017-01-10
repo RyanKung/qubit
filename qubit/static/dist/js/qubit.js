@@ -135,9 +135,9 @@
 
 	var _qubitform = __webpack_require__(193);
 
-	var _qubitlist = __webpack_require__(198);
+	var _qubitlist = __webpack_require__(199);
 
-	var _measurelist = __webpack_require__(205);
+	var _measurelist = __webpack_require__(206);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -23572,6 +23572,8 @@
 
 	var _vision = __webpack_require__(196);
 
+	var _object2table = __webpack_require__(198);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -23617,18 +23619,27 @@
 	    }, {
 	        key: 'testMonad',
 	        value: function testMonad(e) {
+	            var self = this;
 	            var content = e.target.value;
-	            var url = '/qubit/monad/';
+	            var url = '/qubit/monad/test/';
+	            var data = { 'monad': content };
 	            _jquery2.default.ajax({
 	                'url': url,
 	                'type': 'POST',
-	                'data': { 'monad': content },
+	                'data': JSON.stringify(data),
 	                'dataType': 'json',
 	                'contentType': 'application/json',
-	                'success': function success(data) {
-	                    console.log(data);
+	                'success': function success(resp) {
+	                    self.setState({
+	                        monadInfo: resp.data
+	                    });
 	                }
 	            });
+	        }
+	    }, {
+	        key: 'showMonadData',
+	        value: function showMonadData() {
+	            return _react2.default.createElement(_object2table.DataTable, { data: this.state.monadInfo });
 	        }
 	    }, {
 	        key: 'toDict',
@@ -23725,7 +23736,12 @@
 	                            null,
 	                            'monad'
 	                        ),
-	                        _react2.default.createElement('textarea', { onBlur: this.testMonad.bind(this), name: 'monad', placeholder: 'monad' })
+	                        _react2.default.createElement('textarea', { onBlur: this.testMonad.bind(this), name: 'monad', placeholder: 'monad' }),
+	                        _react2.default.createElement(
+	                            'em',
+	                            { className: 'monadInfo' },
+	                            this.state.monadInfo && this.showMonadData()
+	                        )
 	                    ),
 	                    _react2.default.createElement(
 	                        'fieldset',
@@ -34027,7 +34043,6 @@
 	        } else {
 	            var data = $dom.serialize();
 	        }
-	        console.log(data);
 	        _jquery2.default.ajax({
 	            url: $dom.attr('action'),
 	            type: $dom.attr('method'),
@@ -50731,6 +50746,80 @@
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
+	exports.DataTable = undefined;
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _react = __webpack_require__(2);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var DataTable = exports.DataTable = function (_React$Component) {
+	    _inherits(DataTable, _React$Component);
+
+	    function DataTable() {
+	        _classCallCheck(this, DataTable);
+
+	        return _possibleConstructorReturn(this, (DataTable.__proto__ || Object.getPrototypeOf(DataTable)).apply(this, arguments));
+	    }
+
+	    _createClass(DataTable, [{
+	        key: 'render',
+	        value: function render() {
+	            var data = this.props.data;
+	            return _react2.default.createElement(
+	                'table',
+	                null,
+	                _react2.default.createElement(
+	                    'tbody',
+	                    null,
+	                    _react2.default.createElement(
+	                        'tr',
+	                        null,
+	                        Object.keys(data).map(function (d, i) {
+	                            return _react2.default.createElement(
+	                                'th',
+	                                { key: i },
+	                                d
+	                            );
+	                        })
+	                    ),
+	                    _react2.default.createElement(
+	                        'tr',
+	                        null,
+	                        Object.keys(data).map(function (d, i) {
+	                            return _react2.default.createElement(
+	                                'td',
+	                                { key: i },
+	                                JSON.stringify(data[d])
+	                            );
+	                        })
+	                    )
+	                )
+	            );
+	        }
+	    }]);
+
+	    return DataTable;
+	}(_react2.default.Component);
+
+/***/ },
+/* 199 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
 	exports.StemList = undefined;
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -50753,7 +50842,7 @@
 
 	var _qubitform = __webpack_require__(193);
 
-	var _qubitcell = __webpack_require__(199);
+	var _qubitcell = __webpack_require__(200);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -50835,7 +50924,7 @@
 	                    this.state && this.state.data.map(function (data, i) {
 	                        return _react2.default.createElement(_qubitcell.QubitCell, {
 	                            key: i, data: data,
-	                            style: { width: 250 },
+	                            style: { width: 250, marginTop: 10 },
 	                            qid: data.id, afterDeleted: self.refresh });
 	                    })
 	                )
@@ -50847,7 +50936,7 @@
 	}(_react2.default.Component);
 
 /***/ },
-/* 199 */
+/* 200 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -50871,7 +50960,7 @@
 
 	var _jquery2 = _interopRequireDefault(_jquery);
 
-	var _bus = __webpack_require__(200);
+	var _bus = __webpack_require__(201);
 
 	var _vision = __webpack_require__(196);
 
@@ -50886,10 +50975,10 @@
 	var QubitCell = exports.QubitCell = function (_React$Component) {
 	    _inherits(QubitCell, _React$Component);
 
-	    function QubitCell() {
+	    function QubitCell(props) {
 	        _classCallCheck(this, QubitCell);
 
-	        return _possibleConstructorReturn(this, (QubitCell.__proto__ || Object.getPrototypeOf(QubitCell)).apply(this, arguments));
+	        return _possibleConstructorReturn(this, (QubitCell.__proto__ || Object.getPrototypeOf(QubitCell)).call(this, props));
 	    }
 
 	    _createClass(QubitCell, [{
@@ -50933,7 +51022,8 @@
 	                    origin.shift();
 	                }
 	                self.setState({
-	                    last: origin
+	                    last: origin,
+	                    lastValue: data.datum
 	                });
 	            });
 	        }
@@ -51026,7 +51116,7 @@
 	        key: 'showDataChart',
 	        value: function showDataChart(data) {
 	            var style = {
-	                padding: 50
+	                padding: 0
 	            };
 	            if (!data.length > 0) {
 	                return;
@@ -51036,7 +51126,7 @@
 	                { className: 'chart', style: style },
 	                _react2.default.createElement(_vision.TSChart, {
 	                    data: data,
-	                    width: 400,
+	                    width: this.props.style.width - 20 || 400,
 	                    height: 200
 	                })
 	            );
@@ -51121,8 +51211,8 @@
 	                        'monad'
 	                    )
 	                ),
-	                self.state.data && self.showDataChart(self.state.data),
 	                self.state.last && self.showDataChart(self.state.last),
+	                self.state.lastValue && self.showLastData(self.state.lastValue),
 	                _react2.default.createElement(
 	                    _reactModal2.default,
 	                    { isOpen: this.state.showCode },
@@ -51145,7 +51235,7 @@
 	}(_react2.default.Component);
 
 /***/ },
-/* 200 */
+/* 201 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -51159,7 +51249,7 @@
 
 	var _jquery2 = _interopRequireDefault(_jquery);
 
-	var _baconjs = __webpack_require__(201);
+	var _baconjs = __webpack_require__(202);
 
 	var _baconjs2 = _interopRequireDefault(_baconjs);
 
@@ -51184,15 +51274,12 @@
 	    self.ws = new WebSocket(uri);
 	    self.bus = new _baconjs2.default.Bus();
 	    self.ws.onmessage = function (msg) {
-	        self.reader.readAsText(msg.data);
-	    };
-	    self.reader.onload = function () {
-	        self.bus.push(JSON.parse(self.reader.result));
+	        self.bus.push(JSON.parse(msg.data));
 	    };
 	};
 
 /***/ },
-/* 201 */
+/* 202 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(global, module) {(function() {
@@ -54569,7 +54656,7 @@
 	  return withDesc(new Bacon.Desc(this, "zip", [other]), Bacon.zipWith([this, other], f || Array));
 	};
 
-	if ("function" !== "undefined" && __webpack_require__(203) !== null && __webpack_require__(204) != null) {
+	if ("function" !== "undefined" && __webpack_require__(204) !== null && __webpack_require__(205) != null) {
 	  !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_RESULT__ = function () {
 	    return Bacon;
 	  }.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
@@ -54584,10 +54671,10 @@
 	  }
 	}).call(this);
 
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(202)(module)))
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(203)(module)))
 
 /***/ },
-/* 202 */
+/* 203 */
 /***/ function(module, exports) {
 
 	module.exports = function(module) {
@@ -54603,14 +54690,14 @@
 
 
 /***/ },
-/* 203 */
+/* 204 */
 /***/ function(module, exports) {
 
 	module.exports = function() { throw new Error("define cannot be used indirect"); };
 
 
 /***/ },
-/* 204 */
+/* 205 */
 /***/ function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(__webpack_amd_options__) {module.exports = __webpack_amd_options__;
@@ -54618,7 +54705,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, {}))
 
 /***/ },
-/* 205 */
+/* 206 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -54638,7 +54725,7 @@
 
 	var _jquery2 = _interopRequireDefault(_jquery);
 
-	var _qubitcell = __webpack_require__(199);
+	var _qubitcell = __webpack_require__(200);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -54701,14 +54788,15 @@
 	        value: function style() {
 	            return {
 	                float: 'right',
-	                marginTop: '60px'
+	                marginTop: 50
 	            };
 	        }
 	    }, {
 	        key: 'qubitStyle',
 	        value: function qubitStyle() {
 	            return {
-	                width: '600px'
+	                width: '600px',
+	                marginTop: 10
 	            };
 	        }
 	    }, {

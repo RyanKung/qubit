@@ -5,6 +5,9 @@ import { SocketBus } from 'bus'
 import {TSChart } from 'views/vision'
 
 export class QubitCell extends React.Component {
+    constructor(props) {
+        super(props)
+    }
     componentWillMount() {
         var genUrl = (qid) => {
             let host = window.location.host
@@ -40,7 +43,8 @@ export class QubitCell extends React.Component {
                 origin.shift()
             }
             self.setState({
-                last: origin
+                last: origin,
+                lastValue: data.datum
             })
 
         })
@@ -106,7 +110,7 @@ export class QubitCell extends React.Component {
     }
     showDataChart(data) {
         let style = {
-            padding: 50
+            padding: 0
         }
         if (!data.length > 0) {
             return
@@ -115,8 +119,8 @@ export class QubitCell extends React.Component {
             <div className='chart' style={style}>
               <TSChart
                 data={data}
-                width={400}
-                height={200}
+                width={this.props.style.width - 20 || 400 }
+                height={ 200 }
                 />
             </div>
         )
@@ -156,12 +160,8 @@ export class QubitCell extends React.Component {
                         onClick={this.triggerCode.bind(this)}>monad</button>
 
               </div>
-              {
-                  self.state.data && self.showDataChart(self.state.data)
-              }
-              {
-                  self.state.last && self.showDataChart(self.state.last)
-              }
+              { self.state.last && self.showDataChart(self.state.last) }
+              { self.state.lastValue && self.showLastData(self.state.lastValue) }
               <Modal isOpen={this.state.showCode}>
                 <pre>{this.props.data.monad}</pre>
                 <button onClick={this.triggerCode.bind(this)}>close</button>

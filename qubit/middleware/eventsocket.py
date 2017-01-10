@@ -1,3 +1,4 @@
+import simplejson as json
 from pulsar.apps import ws
 from pulsar.apps.wsgi import route
 from pulsar import ensure_future
@@ -34,8 +35,11 @@ class PubSubWS(ws.WS):
             self.pubsub, self.channel)
 
     def write(self, websocket, message):
-        print(message)
-        websocket.write(message)
+        data = json.loads(message)
+        if not str(data['qid']) == str(websocket.handshake.qid):
+            return
+        logging.info('qid: %s, data %s' % (websocket.handshake.qid, data))
+        websocket.write(data['data'])
 
 
 QubitSocket = WebSocketRouter('/qubit/subscribe', PubSubWS(pubsub, 'qubitsocket::%s'))

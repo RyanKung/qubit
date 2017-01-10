@@ -12,7 +12,6 @@ export default React.createClass({
         } else {
             var data = $dom.serialize()
         }
-        console.log(data)
         $.ajax({
             url: $dom.attr('action'),
             type: $dom.attr('method'),
