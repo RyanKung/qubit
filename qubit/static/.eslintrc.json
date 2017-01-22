@@ -4,9 +4,10 @@
         "commonjs": true,
         "node": true
     },
+    "parser": "babel-eslint",
     "extends": "eslint:recommended",
 "parserOptions": {
-    "ecmaVersion": 7,
+    "ecmaVersion": 8,
     "ecmaFeatures": {
             "experimentalObjectRestSpread": true,
             "jsx": true

@@ -15,3 +15,11 @@ upload:
 run:
 	pwsgi -a qubit -m qubit -w . -b 127.0.0.1:8060
 
+# for static
+watch:
+	cd ./qubit/static ; gulp watch
+gulp:
+	cd ./qubit/static ; gulp
+
+
+

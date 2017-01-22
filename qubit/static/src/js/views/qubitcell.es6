@@ -3,6 +3,7 @@ import Modal from 'react-modal'
 import $ from 'jquery'
 import { SocketBus } from 'bus'
 import {TSChart } from 'views/vision'
+import { qubitModalBus } from 'views/qubitModalForm'
 
 export class QubitCell extends React.Component {
     constructor(props) {
@@ -77,6 +78,10 @@ export class QubitCell extends React.Component {
         self.setState({
             showCode: !this.state.showCode
         })
+    }
+    edit() {
+        let self = this
+        let qid = self.props.qid
     }
     delete() {
         var self = this
@@ -158,6 +163,8 @@ export class QubitCell extends React.Component {
                         onClick={this.delete.bind(this)}>delete</button>
                 <button data-name={this.props.data.name} data-qid={this.props.data.id}
                         onClick={this.triggerCode.bind(this)}>monad</button>
+                <button data-name={this.props.data.name} data-qid={this.props.data.id}
+                        onClick={this.edit.bind(this)}>eidt</button>
 
               </div>
               { self.state.last && self.showDataChart(self.state.last) }

@@ -133,11 +133,11 @@
 
 	var _reactModal2 = _interopRequireDefault(_reactModal);
 
-	var _qubitform = __webpack_require__(193);
+	var _qubitModalForm = __webpack_require__(193);
 
-	var _qubitlist = __webpack_require__(199);
+	var _qubitlist = __webpack_require__(206);
 
-	var _measurelist = __webpack_require__(206);
+	var _measurelist = __webpack_require__(208);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -150,16 +150,24 @@
 	var QubitView = exports.QubitView = function (_React$Component) {
 	    _inherits(QubitView, _React$Component);
 
-	    function QubitView() {
+	    function QubitView(props) {
 	        _classCallCheck(this, QubitView);
 
-	        return _possibleConstructorReturn(this, (QubitView.__proto__ || Object.getPrototypeOf(QubitView)).apply(this, arguments));
+	        var _this = _possibleConstructorReturn(this, (QubitView.__proto__ || Object.getPrototypeOf(QubitView)).call(this, props));
+
+	        _this.modalBus = _qubitModalForm.qubitModalBus;
+	        return _this;
 	    }
 
 	    _createClass(QubitView, [{
 	        key: 'componentWillMount',
 	        value: function componentWillMount() {
 	            this.setState({});
+	        }
+	    }, {
+	        key: 'openForm',
+	        value: function openForm() {
+	            this.modalBus.push({ cmd: 'open', value: {} });
 	        }
 	    }, {
 	        key: 'render',
@@ -172,39 +180,16 @@
 	                    { className: 'hd' },
 	                    _react2.default.createElement(
 	                        'button',
-	                        { className: 'new', onClick: this.openForm.bind(this) },
+	                        { className: 'new',
+	                            onClick: this.openForm.bind(this) },
 	                        '+'
 	                    )
 	                ),
 	                _react2.default.createElement('div', { className: 'bd' }),
 	                _react2.default.createElement(_measurelist.MeasureList, null),
 	                _react2.default.createElement(_qubitlist.StemList, null),
-	                _react2.default.createElement(
-	                    _reactModal2.default,
-	                    { isOpen: this.state.modal_open },
-	                    _react2.default.createElement(_qubitform.QubitForm, { cancel: this.closeForm.bind(this),
-	                        submit: this.closeForm.bind(this) })
-	                )
+	                _react2.default.createElement(_qubitModalForm.QubitModalForm, null)
 	            );
-	        }
-	    }, {
-	        key: 'openForm',
-	        value: function openForm() {
-	            this.setState({
-	                modal_open: true
-	            });
-	        }
-	    }, {
-	        key: 'onSuccessAdded',
-	        value: function onSuccessAdded() {
-	            this.closeForm();
-	        }
-	    }, {
-	        key: 'closeForm',
-	        value: function closeForm() {
-	            this.setState({
-	                modal_open: false
-	            });
 	        }
 	    }]);
 
@@ -23550,6 +23535,118 @@
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
+	exports.QubitModalForm = exports.qubitModalBus = undefined;
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _react = __webpack_require__(2);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _reactModal = __webpack_require__(35);
+
+	var _reactModal2 = _interopRequireDefault(_reactModal);
+
+	var _qubitform = __webpack_require__(194);
+
+	var _bus = __webpack_require__(201);
+
+	var _baconjs = __webpack_require__(202);
+
+	var _baconjs2 = _interopRequireDefault(_baconjs);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var qubitModalBus = exports.qubitModalBus = new _baconjs2.default.Bus();
+
+	var QubitModalForm = exports.QubitModalForm = function (_React$Component) {
+	    _inherits(QubitModalForm, _React$Component);
+
+	    function QubitModalForm(props) {
+	        _classCallCheck(this, QubitModalForm);
+
+	        var _this = _possibleConstructorReturn(this, (QubitModalForm.__proto__ || Object.getPrototypeOf(QubitModalForm)).call(this, props));
+
+	        _this.bus = qubitModalBus;
+	        return _this;
+	    }
+
+	    _createClass(QubitModalForm, [{
+	        key: 'componentWillMount',
+	        value: function componentWillMount() {
+	            this.setState({
+	                'open': false,
+	                'data': {}
+	            });
+	        }
+	    }, {
+	        key: 'componentDidMount',
+	        value: function componentDidMount() {
+	            var self = this;
+	            self.bus.onValue(function (msg) {
+	                var cmd = msg.cmd,
+	                    value = msg.value;
+
+	                return {
+	                    'open': self.open.bind(self),
+	                    'close': self.close.bind(self)
+	                }[cmd](value);
+	            });
+	        }
+	    }, {
+	        key: 'close',
+	        value: function close() {
+	            this.setState({
+	                'open': false
+	            });
+	        }
+	    }, {
+	        key: 'open',
+	        value: function open(data) {
+	            this.setState({
+	                'open': true,
+	                'data': data || {}
+	            });
+	        }
+	    }, {
+	        key: 'setData',
+	        value: function setData(data) {
+	            this.setState({
+	                'data': data
+	            });
+	        }
+	    }, {
+	        key: 'render',
+	        value: function render() {
+	            return _react2.default.createElement(
+	                _reactModal2.default,
+	                { isOpen: this.state.open },
+	                _react2.default.createElement(_qubitform.QubitForm, { data: this.state.data,
+	                    cancel: this.close.bind(this),
+	                    submit: this.close.bind(this)
+	                })
+	            );
+	        }
+	    }]);
+
+	    return QubitModalForm;
+	}(_react2.default.Component);
+
+/***/ },
+/* 194 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
 	exports.QubitForm = undefined;
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -23558,7 +23655,7 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _jquery = __webpack_require__(194);
+	var _jquery = __webpack_require__(195);
 
 	var _jquery2 = _interopRequireDefault(_jquery);
 
@@ -23566,13 +23663,15 @@
 
 	var _reactDom2 = _interopRequireDefault(_reactDom);
 
-	var _ajaxform = __webpack_require__(195);
+	var _ajaxform = __webpack_require__(196);
 
 	var _ajaxform2 = _interopRequireDefault(_ajaxform);
 
-	var _vision = __webpack_require__(196);
+	var _fn = __webpack_require__(197);
 
-	var _object2table = __webpack_require__(198);
+	var _vision = __webpack_require__(198);
+
+	var _object2table = __webpack_require__(200);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -23658,6 +23757,7 @@
 	    }, {
 	        key: 'render',
 	        value: function render() {
+	            var data = this.props.data;
 	            return _react2.default.createElement(
 	                'section',
 	                { className: 'card' },
@@ -23680,9 +23780,16 @@
 	                    _react2.default.createElement(
 	                        'fieldset',
 	                        null,
-	                        _react2.default.createElement('input', { placeholder: 'name', name: 'name', required: true }),
-	                        _react2.default.createElement('input', { placeholder: 'rate (ms)', name: 'rate', type: 'number' }),
-	                        _react2.default.createElement('input', { placeholder: 'Qubit:%s', name: 'entangle', type: 'text' })
+	                        _react2.default.createElement('input', { placeholder: 'name', name: 'name',
+	                            required: true,
+	                            defaultValue: (0, _fn.bool)((0, _fn.getattr)(data, 'name', '')) }),
+	                        _react2.default.createElement('input', { placeholder: 'rate (ms)', name: 'rate',
+	                            type: 'number',
+	                            defaultValue: (0, _fn.getattr)(data, 'rate', '') }),
+	                        _react2.default.createElement('input', { placeholder: 'Qubit:%s',
+	                            name: 'entangle',
+	                            defaultValue: (0, _fn.bool)((0, _fn.getattr)(data, 'rate', '')),
+	                            type: 'text' })
 	                    ),
 	                    _react2.default.createElement(
 	                        'fieldset',
@@ -23695,7 +23802,10 @@
 	                                null,
 	                                'flying'
 	                            ),
-	                            _react2.default.createElement('input', { placeholder: 'flying', name: 'flying', type: 'checkbox' })
+	                            _react2.default.createElement('input', { placeholder: 'flying',
+	                                defaultChecked: (0, _fn.bool)((0, _fn.getattr)(data, 'flying', '')),
+	                                name: 'flying',
+	                                type: 'checkbox' })
 	                        ),
 	                        _react2.default.createElement(
 	                            'label',
@@ -23705,7 +23815,9 @@
 	                                null,
 	                                'is spout'
 	                            ),
-	                            _react2.default.createElement('input', { name: 'is_spout', type: 'checkbox' })
+	                            _react2.default.createElement('input', { name: 'is_spout',
+	                                defaultChecked: (0, _fn.bool)((0, _fn.getattr)(data, 'is_spout', '')),
+	                                type: 'checkbox' })
 	                        ),
 	                        _react2.default.createElement(
 	                            'label',
@@ -23715,7 +23827,9 @@
 	                                null,
 	                                'is stem'
 	                            ),
-	                            _react2.default.createElement('input', { name: 'is_stem', type: 'checkbox' })
+	                            _react2.default.createElement('input', { name: 'is_stem',
+	                                defaultChecked: (0, _fn.bool)((0, _fn.getattr)(data, 'is_stem', '')),
+	                                type: 'checkbox' })
 	                        ),
 	                        _react2.default.createElement(
 	                            'label',
@@ -23725,7 +23839,9 @@
 	                                null,
 	                                'store'
 	                            ),
-	                            _react2.default.createElement('input', { name: 'store', type: 'checkbox' })
+	                            _react2.default.createElement('input', { name: 'store',
+	                                defaultChecked: (0, _fn.bool)((0, _fn.getattr)(data, 'store', '')),
+	                                type: 'checkbox' })
 	                        )
 	                    ),
 	                    _react2.default.createElement(
@@ -23736,7 +23852,9 @@
 	                            null,
 	                            'monad'
 	                        ),
-	                        _react2.default.createElement('textarea', { onBlur: this.testMonad.bind(this), name: 'monad', placeholder: 'monad' }),
+	                        _react2.default.createElement('textarea', { onBlur: this.testMonad.bind(this),
+	                            name: 'monad', placeholder: 'monad',
+	                            defaultValue: (0, _fn.getattr)(data, 'monad', '') }),
 	                        _react2.default.createElement(
 	                            'em',
 	                            { className: 'monadInfo' },
@@ -23751,13 +23869,19 @@
 	                            null,
 	                            'comment'
 	                        ),
-	                        _react2.default.createElement('textarea', { name: 'comment', placeholder: 'coment' })
+	                        _react2.default.createElement('textarea', { name: 'comment',
+	                            defaultValue: (0, _fn.getattr)(data, 'comment', ''),
+	                            placeholder: 'coment' })
 	                    ),
 	                    _react2.default.createElement(
 	                        'fieldset',
 	                        { className: 'submit block' },
-	                        _react2.default.createElement('input', { name: 'submit', type: 'submit', value: 'submmit' }),
-	                        _react2.default.createElement('input', { name: 'cancel', type: 'button', onClick: this.cancel.bind(this), value: 'cancel' })
+	                        _react2.default.createElement('input', { name: 'submit',
+	                            type: 'submit',
+	                            value: 'submmit' }),
+	                        _react2.default.createElement('input', { name: 'cancel', type: 'button',
+	                            onClick: this.cancel.bind(this),
+	                            value: 'cancel' })
 	                    )
 	                ),
 	                _react2.default.createElement(
@@ -23782,7 +23906,7 @@
 	}(_react2.default.Component);
 
 /***/ },
-/* 194 */
+/* 195 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -34008,7 +34132,7 @@
 
 
 /***/ },
-/* 195 */
+/* 196 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -34025,7 +34149,7 @@
 
 	var _reactDom2 = _interopRequireDefault(_reactDom);
 
-	var _jquery = __webpack_require__(194);
+	var _jquery = __webpack_require__(195);
 
 	var _jquery2 = _interopRequireDefault(_jquery);
 
@@ -34064,7 +34188,39 @@
 	});
 
 /***/ },
-/* 196 */
+/* 197 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.getattr = getattr;
+	exports.partial = partial;
+	exports.bool = bool;
+	exports.str = str;
+	function getattr(obj, key, defaultVal) {
+	    return obj && obj[key] || defaultVal;
+	}
+
+	function partial(fn, args) {
+	    var self = this;
+	    return function () {
+	        return fn.call(self, args.concat(this.Arguments, args));
+	    };
+	}
+
+	function bool(a) {
+	    return a !== false && a !== undefined && a !== 0 && a !== null && a !== '' && a !== {};
+	}
+
+	function str(a) {
+	    return a.toString();
+	}
+
+/***/ },
+/* 198 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -34078,7 +34234,7 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _d = __webpack_require__(197);
+	var _d = __webpack_require__(199);
 
 	var d3 = _interopRequireWildcard(_d);
 
@@ -34349,7 +34505,7 @@
 	};
 
 /***/ },
-/* 197 */
+/* 199 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// https://d3js.org Version 4.3.0. Copyright 2016 Mike Bostock.
@@ -50738,7 +50894,7 @@
 
 
 /***/ },
-/* 198 */
+/* 200 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -50812,429 +50968,6 @@
 	}(_react2.default.Component);
 
 /***/ },
-/* 199 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.StemList = undefined;
-
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-	var _react = __webpack_require__(2);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _jquery = __webpack_require__(194);
-
-	var _jquery2 = _interopRequireDefault(_jquery);
-
-	var _reactDom = __webpack_require__(37);
-
-	var _reactDom2 = _interopRequireDefault(_reactDom);
-
-	var _reactModal = __webpack_require__(35);
-
-	var _reactModal2 = _interopRequireDefault(_reactModal);
-
-	var _qubitform = __webpack_require__(193);
-
-	var _qubitcell = __webpack_require__(200);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-	var StemList = exports.StemList = function (_React$Component) {
-	    _inherits(StemList, _React$Component);
-
-	    function StemList() {
-	        _classCallCheck(this, StemList);
-
-	        return _possibleConstructorReturn(this, (StemList.__proto__ || Object.getPrototypeOf(StemList)).apply(this, arguments));
-	    }
-
-	    _createClass(StemList, [{
-	        key: 'componentWillMount',
-	        value: function componentWillMount() {
-	            this.setState({
-	                last: {},
-	                data: []
-	            });
-	            this.getData();
-	        }
-	    }, {
-	        key: 'getStates',
-	        value: function getStates(qid) {
-	            var now = new Date().getTime();
-	            var from = now - 3600;
-	            _jquery2.default.getJSON('/qubit/state/' + qid, {
-	                from: from, now: now }, function () {});
-	        }
-	    }, {
-	        key: 'getData',
-	        value: function getData() {
-	            var self = this;
-	            _jquery2.default.getJSON('/qubit/stem/', {}, function (data) {
-	                self.setState({
-	                    data: data.data
-	                });
-	            });
-	        }
-	    }, {
-	        key: 'renderForm',
-	        value: function renderForm() {
-	            return _react2.default.createElement(
-	                _reactModal2.default,
-	                null,
-	                _react2.default.createElement(_qubitform.QubitForm, null)
-	            );
-	        }
-	    }, {
-	        key: 'refresh',
-	        value: function refresh() {
-	            this.getData();
-	        }
-	    }, {
-	        key: 'render',
-	        value: function render() {
-	            var self = this;
-	            return _react2.default.createElement(
-	                'section',
-	                { className: 'qubitlist' },
-	                _react2.default.createElement(
-	                    'div',
-	                    { className: 'hd' },
-	                    _react2.default.createElement(
-	                        'h1',
-	                        null,
-	                        'Qubits'
-	                    )
-	                ),
-	                _react2.default.createElement(
-	                    'div',
-	                    { className: 'bd' },
-	                    this.state && this.state.data.map(function (data, i) {
-	                        return _react2.default.createElement(_qubitcell.QubitCell, {
-	                            key: i, data: data,
-	                            style: { width: 250, marginTop: 10 },
-	                            qid: data.id, afterDeleted: self.refresh });
-	                    })
-	                )
-	            );
-	        }
-	    }]);
-
-	    return StemList;
-	}(_react2.default.Component);
-
-/***/ },
-/* 200 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.QubitCell = undefined;
-
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-	var _react = __webpack_require__(2);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	var _reactModal = __webpack_require__(35);
-
-	var _reactModal2 = _interopRequireDefault(_reactModal);
-
-	var _jquery = __webpack_require__(194);
-
-	var _jquery2 = _interopRequireDefault(_jquery);
-
-	var _bus = __webpack_require__(201);
-
-	var _vision = __webpack_require__(196);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-	var QubitCell = exports.QubitCell = function (_React$Component) {
-	    _inherits(QubitCell, _React$Component);
-
-	    function QubitCell(props) {
-	        _classCallCheck(this, QubitCell);
-
-	        return _possibleConstructorReturn(this, (QubitCell.__proto__ || Object.getPrototypeOf(QubitCell)).call(this, props));
-	    }
-
-	    _createClass(QubitCell, [{
-	        key: 'componentWillMount',
-	        value: function componentWillMount() {
-	            var genUrl = function genUrl(qid) {
-	                var host = window.location.host;
-	                var url = 'ws://' + host + '/qubit/subscribe/' + qid + '/';
-	                return url;
-	            };
-	            var self = this;
-	            self.setState({
-	                last: [],
-	                data: [],
-	                showCode: false
-	            });
-	            self.socketBus = new _bus.SocketBus(genUrl(self.props.qid));
-	            self.bus = self.socketBus.bus;
-	            self.getPeriod();
-	        }
-	    }, {
-	        key: 'componentDidMount',
-	        value: function componentDidMount() {
-	            this.listenBus();
-	        }
-	    }, {
-	        key: 'listenBus',
-	        value: function listenBus() {
-	            var self = this;
-	            if (!self.props.data.store) {
-	                return;
-	            }
-	            self.bus.onValue(function (data) {
-	                var origin = self.state.last;
-	                if (origin.length > 0 && new Date(origin[origin.length - 1][0]).getTime() >= new Date(data.ts).getTime()) {
-	                    return;
-	                }
-	                var datum = [data.ts, { mean: data.datum }];
-	                origin.push(datum);
-	                if (origin.length > 100) {
-	                    origin.shift();
-	                }
-	                self.setState({
-	                    last: origin,
-	                    lastValue: data.datum
-	                });
-	            });
-	        }
-	    }, {
-	        key: 'getPeriod',
-	        value: function getPeriod() {
-	            var self = this;
-	            var qid = self.props.qid;
-	            if (!self.props.data.store) {
-	                return;
-	            }
-	            _jquery2.default.getJSON('/qubit/' + qid + '/period/seconds/120/', {}, function (resp) {
-	                if (resp.data.length > 0) {
-	                    self.setState({
-	                        data: resp.data
-	                    });
-	                }
-	            });
-	        }
-	    }, {
-	        key: 'getLast',
-	        value: function getLast() {
-	            var self = this;
-	            var qid = self.props.qid;
-	            _jquery2.default.getJSON('/qubit/' + qid + '/period/seconds/1/', {}, function (data) {
-	                self.setState({
-	                    last: data
-	                });
-	            });
-	        }
-	    }, {
-	        key: 'triggerCode',
-	        value: function triggerCode() {
-	            var self = this;
-	            self.setState({
-	                showCode: !this.state.showCode
-	            });
-	        }
-	    }, {
-	        key: 'delete',
-	        value: function _delete() {
-	            var self = this;
-	            var qid = self.props.qid;
-	            _jquery2.default.ajax({
-	                url: '/qubit/' + name + '/',
-	                data: {},
-	                method: 'delete',
-	                success: function success() {
-	                    this.props.afterDeleted(qid);
-	                } });
-	        }
-	    }, {
-	        key: 'showLastData',
-	        value: function showLastData(data) {
-	            if (!data) {
-	                return '';
-	            }
-	            return _react2.default.createElement(
-	                'table',
-	                null,
-	                _react2.default.createElement(
-	                    'tbody',
-	                    null,
-	                    _react2.default.createElement(
-	                        'tr',
-	                        null,
-	                        Object.keys(data).map(function (d, i) {
-	                            return _react2.default.createElement(
-	                                'th',
-	                                { key: i },
-	                                d
-	                            );
-	                        })
-	                    ),
-	                    _react2.default.createElement(
-	                        'tr',
-	                        null,
-	                        Object.keys(data).map(function (d, i) {
-	                            return _react2.default.createElement(
-	                                'td',
-	                                { key: i },
-	                                JSON.stringify(data[d])
-	                            );
-	                        })
-	                    )
-	                )
-	            );
-	        }
-	    }, {
-	        key: 'showDataChart',
-	        value: function showDataChart(data) {
-	            var style = {
-	                padding: 0
-	            };
-	            if (!data.length > 0) {
-	                return;
-	            }
-	            return _react2.default.createElement(
-	                'div',
-	                { className: 'chart', style: style },
-	                _react2.default.createElement(_vision.TSChart, {
-	                    data: data,
-	                    width: this.props.style.width - 20 || 400,
-	                    height: 200
-	                })
-	            );
-	        }
-	    }, {
-	        key: 'detailRender',
-	        value: function detailRender(lst) {
-	            var self = this;
-	            return lst.map(function (d, i) {
-	                return _react2.default.createElement(
-	                    'li',
-	                    { key: i },
-	                    _react2.default.createElement(
-	                        'label',
-	                        null,
-	                        d,
-	                        ': '
-	                    ),
-	                    _react2.default.createElement(
-	                        'span',
-	                        null,
-	                        self.props.data[d].toString()
-	                    )
-	                );
-	            });
-	        }
-	    }, {
-	        key: 'render',
-	        value: function render() {
-	            var self = this;
-	            return _react2.default.createElement(
-	                'div',
-	                { className: 'qubit cell', style: this.props.style || {} },
-	                _react2.default.createElement(
-	                    'div',
-	                    { className: 'hd' },
-	                    _react2.default.createElement(
-	                        'label',
-	                        null,
-	                        this.props.data.name,
-	                        _react2.default.createElement(
-	                            'span',
-	                            null,
-	                            'id: ',
-	                            this.props.data.id
-	                        )
-	                    ),
-	                    _react2.default.createElement(
-	                        'nav',
-	                        null,
-	                        _react2.default.createElement('ul', null)
-	                    )
-	                ),
-	                _react2.default.createElement(
-	                    'div',
-	                    { className: 'bd' },
-	                    _react2.default.createElement(
-	                        'ul',
-	                        null,
-	                        this.detailRender(['flying', 'is_spout', 'is_stem', 'entangle', 'store', 'rate'])
-	                    )
-	                ),
-	                _react2.default.createElement(
-	                    'div',
-	                    { className: 'ft' },
-	                    _react2.default.createElement(
-	                        'button',
-	                        { 'data-name': this.props.data.name, 'data-qid': this.props.data.id,
-	                            onClick: this.getLast.bind(this) },
-	                        'get last'
-	                    ),
-	                    _react2.default.createElement(
-	                        'button',
-	                        { 'data-name': this.props.data.name, 'data-qid': this.props.data.id,
-	                            onClick: this.delete.bind(this) },
-	                        'delete'
-	                    ),
-	                    _react2.default.createElement(
-	                        'button',
-	                        { 'data-name': this.props.data.name, 'data-qid': this.props.data.id,
-	                            onClick: this.triggerCode.bind(this) },
-	                        'monad'
-	                    )
-	                ),
-	                self.state.last && self.showDataChart(self.state.last),
-	                self.state.lastValue && self.showLastData(self.state.lastValue),
-	                _react2.default.createElement(
-	                    _reactModal2.default,
-	                    { isOpen: this.state.showCode },
-	                    _react2.default.createElement(
-	                        'pre',
-	                        null,
-	                        this.props.data.monad
-	                    ),
-	                    _react2.default.createElement(
-	                        'button',
-	                        { onClick: this.triggerCode.bind(this) },
-	                        'close'
-	                    )
-	                )
-	            );
-	        }
-	    }]);
-
-	    return QubitCell;
-	}(_react2.default.Component);
-
-/***/ },
 /* 201 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -51243,9 +50976,9 @@
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	exports.SocketBus = exports.socketStream = exports.clickStream = exports.keyUpStream = undefined;
+	exports.SocketBus = exports.bus = exports.clickStream = exports.keyUpStream = undefined;
 
-	var _jquery = __webpack_require__(194);
+	var _jquery = __webpack_require__(195);
 
 	var _jquery2 = _interopRequireDefault(_jquery);
 
@@ -51264,7 +50997,7 @@
 	var clickStream = exports.clickStream = (0, _jquery2.default)(document).asEventStream('click').map(function (e) {
 	    return e.target.className;
 	});
-	var socketStream = exports.socketStream = new _baconjs2.default.Bus();
+	var bus = exports.bus = new _baconjs2.default.Bus();
 
 	var SocketBus = exports.SocketBus = function SocketBus(uri) {
 	    _classCallCheck(this, SocketBus);
@@ -54713,6 +54446,443 @@
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
+	exports.StemList = undefined;
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _react = __webpack_require__(2);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _jquery = __webpack_require__(195);
+
+	var _jquery2 = _interopRequireDefault(_jquery);
+
+	var _reactDom = __webpack_require__(37);
+
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+
+	var _reactModal = __webpack_require__(35);
+
+	var _reactModal2 = _interopRequireDefault(_reactModal);
+
+	var _qubitform = __webpack_require__(194);
+
+	var _qubitcell = __webpack_require__(207);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var StemList = exports.StemList = function (_React$Component) {
+	    _inherits(StemList, _React$Component);
+
+	    function StemList() {
+	        _classCallCheck(this, StemList);
+
+	        return _possibleConstructorReturn(this, (StemList.__proto__ || Object.getPrototypeOf(StemList)).apply(this, arguments));
+	    }
+
+	    _createClass(StemList, [{
+	        key: 'componentWillMount',
+	        value: function componentWillMount() {
+	            this.setState({
+	                last: {},
+	                data: []
+	            });
+	            this.getData();
+	        }
+	    }, {
+	        key: 'getStates',
+	        value: function getStates(qid) {
+	            var now = new Date().getTime();
+	            var from = now - 3600;
+	            _jquery2.default.getJSON('/qubit/state/' + qid, {
+	                from: from, now: now }, function () {});
+	        }
+	    }, {
+	        key: 'getData',
+	        value: function getData() {
+	            var self = this;
+	            _jquery2.default.getJSON('/qubit/stem/', {}, function (data) {
+	                self.setState({
+	                    data: data.data
+	                });
+	            });
+	        }
+	    }, {
+	        key: 'renderForm',
+	        value: function renderForm() {
+	            return _react2.default.createElement(
+	                _reactModal2.default,
+	                null,
+	                _react2.default.createElement(_qubitform.QubitForm, null)
+	            );
+	        }
+	    }, {
+	        key: 'refresh',
+	        value: function refresh() {
+	            this.getData();
+	        }
+	    }, {
+	        key: 'render',
+	        value: function render() {
+	            var self = this;
+	            return _react2.default.createElement(
+	                'section',
+	                { className: 'qubitlist' },
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: 'hd' },
+	                    _react2.default.createElement(
+	                        'h1',
+	                        null,
+	                        'Qubits'
+	                    )
+	                ),
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: 'bd' },
+	                    this.state && this.state.data.map(function (data, i) {
+	                        return _react2.default.createElement(_qubitcell.QubitCell, {
+	                            key: i, data: data,
+	                            style: { width: 250, marginTop: 10 },
+	                            qid: data.id, afterDeleted: self.refresh });
+	                    })
+	                )
+	            );
+	        }
+	    }]);
+
+	    return StemList;
+	}(_react2.default.Component);
+
+/***/ },
+/* 207 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.QubitCell = undefined;
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _react = __webpack_require__(2);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _reactModal = __webpack_require__(35);
+
+	var _reactModal2 = _interopRequireDefault(_reactModal);
+
+	var _jquery = __webpack_require__(195);
+
+	var _jquery2 = _interopRequireDefault(_jquery);
+
+	var _bus = __webpack_require__(201);
+
+	var _vision = __webpack_require__(198);
+
+	var _qubitModalForm = __webpack_require__(193);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var QubitCell = exports.QubitCell = function (_React$Component) {
+	    _inherits(QubitCell, _React$Component);
+
+	    function QubitCell(props) {
+	        _classCallCheck(this, QubitCell);
+
+	        return _possibleConstructorReturn(this, (QubitCell.__proto__ || Object.getPrototypeOf(QubitCell)).call(this, props));
+	    }
+
+	    _createClass(QubitCell, [{
+	        key: 'componentWillMount',
+	        value: function componentWillMount() {
+	            var genUrl = function genUrl(qid) {
+	                var host = window.location.host;
+	                var url = 'ws://' + host + '/qubit/subscribe/' + qid + '/';
+	                return url;
+	            };
+	            var self = this;
+	            self.setState({
+	                last: [],
+	                data: [],
+	                showCode: false
+	            });
+	            self.socketBus = new _bus.SocketBus(genUrl(self.props.qid));
+	            self.bus = self.socketBus.bus;
+	            self.getPeriod();
+	        }
+	    }, {
+	        key: 'componentDidMount',
+	        value: function componentDidMount() {
+	            this.listenBus();
+	        }
+	    }, {
+	        key: 'listenBus',
+	        value: function listenBus() {
+	            var self = this;
+	            if (!self.props.data.store) {
+	                return;
+	            }
+	            self.bus.onValue(function (data) {
+	                var origin = self.state.last;
+	                if (origin.length > 0 && new Date(origin[origin.length - 1][0]).getTime() >= new Date(data.ts).getTime()) {
+	                    return;
+	                }
+	                var datum = [data.ts, { mean: data.datum }];
+	                origin.push(datum);
+	                if (origin.length > 100) {
+	                    origin.shift();
+	                }
+	                self.setState({
+	                    last: origin,
+	                    lastValue: data.datum
+	                });
+	            });
+	        }
+	    }, {
+	        key: 'getPeriod',
+	        value: function getPeriod() {
+	            var self = this;
+	            var qid = self.props.qid;
+	            if (!self.props.data.store) {
+	                return;
+	            }
+	            _jquery2.default.getJSON('/qubit/' + qid + '/period/seconds/120/', {}, function (resp) {
+	                if (resp.data.length > 0) {
+	                    self.setState({
+	                        data: resp.data
+	                    });
+	                }
+	            });
+	        }
+	    }, {
+	        key: 'getLast',
+	        value: function getLast() {
+	            var self = this;
+	            var qid = self.props.qid;
+	            _jquery2.default.getJSON('/qubit/' + qid + '/period/seconds/1/', {}, function (data) {
+	                self.setState({
+	                    last: data
+	                });
+	            });
+	        }
+	    }, {
+	        key: 'triggerCode',
+	        value: function triggerCode() {
+	            var self = this;
+	            self.setState({
+	                showCode: !this.state.showCode
+	            });
+	        }
+	    }, {
+	        key: 'edit',
+	        value: function edit() {
+	            var self = this;
+	            var qid = self.props.qid;
+	        }
+	    }, {
+	        key: 'delete',
+	        value: function _delete() {
+	            var self = this;
+	            var qid = self.props.qid;
+	            _jquery2.default.ajax({
+	                url: '/qubit/' + name + '/',
+	                data: {},
+	                method: 'delete',
+	                success: function success() {
+	                    this.props.afterDeleted(qid);
+	                } });
+	        }
+	    }, {
+	        key: 'showLastData',
+	        value: function showLastData(data) {
+	            if (!data) {
+	                return '';
+	            }
+	            return _react2.default.createElement(
+	                'table',
+	                null,
+	                _react2.default.createElement(
+	                    'tbody',
+	                    null,
+	                    _react2.default.createElement(
+	                        'tr',
+	                        null,
+	                        Object.keys(data).map(function (d, i) {
+	                            return _react2.default.createElement(
+	                                'th',
+	                                { key: i },
+	                                d
+	                            );
+	                        })
+	                    ),
+	                    _react2.default.createElement(
+	                        'tr',
+	                        null,
+	                        Object.keys(data).map(function (d, i) {
+	                            return _react2.default.createElement(
+	                                'td',
+	                                { key: i },
+	                                JSON.stringify(data[d])
+	                            );
+	                        })
+	                    )
+	                )
+	            );
+	        }
+	    }, {
+	        key: 'showDataChart',
+	        value: function showDataChart(data) {
+	            var style = {
+	                padding: 0
+	            };
+	            if (!data.length > 0) {
+	                return;
+	            }
+	            return _react2.default.createElement(
+	                'div',
+	                { className: 'chart', style: style },
+	                _react2.default.createElement(_vision.TSChart, {
+	                    data: data,
+	                    width: this.props.style.width - 20 || 400,
+	                    height: 200
+	                })
+	            );
+	        }
+	    }, {
+	        key: 'detailRender',
+	        value: function detailRender(lst) {
+	            var self = this;
+	            return lst.map(function (d, i) {
+	                return _react2.default.createElement(
+	                    'li',
+	                    { key: i },
+	                    _react2.default.createElement(
+	                        'label',
+	                        null,
+	                        d,
+	                        ': '
+	                    ),
+	                    _react2.default.createElement(
+	                        'span',
+	                        null,
+	                        self.props.data[d].toString()
+	                    )
+	                );
+	            });
+	        }
+	    }, {
+	        key: 'render',
+	        value: function render() {
+	            var self = this;
+	            return _react2.default.createElement(
+	                'div',
+	                { className: 'qubit cell', style: this.props.style || {} },
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: 'hd' },
+	                    _react2.default.createElement(
+	                        'label',
+	                        null,
+	                        this.props.data.name,
+	                        _react2.default.createElement(
+	                            'span',
+	                            null,
+	                            'id: ',
+	                            this.props.data.id
+	                        )
+	                    ),
+	                    _react2.default.createElement(
+	                        'nav',
+	                        null,
+	                        _react2.default.createElement('ul', null)
+	                    )
+	                ),
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: 'bd' },
+	                    _react2.default.createElement(
+	                        'ul',
+	                        null,
+	                        this.detailRender(['flying', 'is_spout', 'is_stem', 'entangle', 'store', 'rate'])
+	                    )
+	                ),
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: 'ft' },
+	                    _react2.default.createElement(
+	                        'button',
+	                        { 'data-name': this.props.data.name, 'data-qid': this.props.data.id,
+	                            onClick: this.getLast.bind(this) },
+	                        'get last'
+	                    ),
+	                    _react2.default.createElement(
+	                        'button',
+	                        { 'data-name': this.props.data.name, 'data-qid': this.props.data.id,
+	                            onClick: this.delete.bind(this) },
+	                        'delete'
+	                    ),
+	                    _react2.default.createElement(
+	                        'button',
+	                        { 'data-name': this.props.data.name, 'data-qid': this.props.data.id,
+	                            onClick: this.triggerCode.bind(this) },
+	                        'monad'
+	                    ),
+	                    _react2.default.createElement(
+	                        'button',
+	                        { 'data-name': this.props.data.name, 'data-qid': this.props.data.id,
+	                            onClick: this.edit.bind(this) },
+	                        'eidt'
+	                    )
+	                ),
+	                self.state.last && self.showDataChart(self.state.last),
+	                self.state.lastValue && self.showLastData(self.state.lastValue),
+	                _react2.default.createElement(
+	                    _reactModal2.default,
+	                    { isOpen: this.state.showCode },
+	                    _react2.default.createElement(
+	                        'pre',
+	                        null,
+	                        this.props.data.monad
+	                    ),
+	                    _react2.default.createElement(
+	                        'button',
+	                        { onClick: this.triggerCode.bind(this) },
+	                        'close'
+	                    )
+	                )
+	            );
+	        }
+	    }]);
+
+	    return QubitCell;
+	}(_react2.default.Component);
+
+/***/ },
+/* 208 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
 	exports.MeasureList = undefined;
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -54721,11 +54891,11 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _jquery = __webpack_require__(194);
+	var _jquery = __webpack_require__(195);
 
 	var _jquery2 = _interopRequireDefault(_jquery);
 
-	var _qubitcell = __webpack_require__(200);
+	var _qubitcell = __webpack_require__(207);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
