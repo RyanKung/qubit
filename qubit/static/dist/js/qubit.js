@@ -54502,7 +54502,9 @@
 	            var now = new Date().getTime();
 	            var from = now - 3600;
 	            _jquery2.default.getJSON('/qubit/state/' + qid, {
-	                from: from, now: now }, function () {});
+	                from: from,
+	                now: now
+	            }, function () {});
 	        }
 	    }, {
 	        key: 'getData',
@@ -54693,8 +54695,10 @@
 	    }, {
 	        key: 'edit',
 	        value: function edit() {
-	            var self = this;
-	            var qid = self.props.qid;
+	            _qubitModalForm.qubitModalBus.push({
+	                'cmd': 'open',
+	                'value': this.props.data
+	            });
 	        }
 	    }, {
 	        key: 'delete',
@@ -54702,7 +54706,7 @@
 	            var self = this;
 	            var qid = self.props.qid;
 	            _jquery2.default.ajax({
-	                url: '/qubit/' + name + '/',
+	                url: '/qubit/' + qid + '/',
 	                data: {},
 	                method: 'delete',
 	                success: function success() {

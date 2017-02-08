@@ -17,9 +17,11 @@ export class StemList extends React.Component {
         var now = (new Date()).getTime()
         var from = now - 3600
         $.getJSON('/qubit/state/' + qid, {
-            from: from, now: now}, function() {
+            from: from,
+            now: now
+        }, function() {
 
-            })
+        })
     }
     getData() {
         var self = this

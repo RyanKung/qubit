@@ -80,14 +80,16 @@ export class QubitCell extends React.Component {
         })
     }
     edit() {
-        let self = this
-        let qid = self.props.qid
+        qubitModalBus.push({
+            'cmd': 'open',
+            'value': this.props.data
+        })
     }
     delete() {
         var self = this
         var qid = self.props.qid
         $.ajax({
-            url: '/qubit/' + name + '/',
+            url: '/qubit/' + qid + '/',
             data: {},
             method: 'delete',
             success: function() {
