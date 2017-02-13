@@ -54535,7 +54535,8 @@
 	        value: function componentWillMount() {
 	            this.setState({
 	                last: {},
-	                data: []
+	                data: [],
+	                selected: undefined
 	            });
 	            this.getData();
 	        }
@@ -54584,6 +54585,17 @@
 	            this.getData();
 	        }
 	    }, {
+	        key: 'selected',
+	        value: function selected(qid) {
+	            console.log('click!!!!!');
+	            this.setState({
+	                selected: qid
+	            });
+	            _bus.updateBus.push({
+	                measureOn: 'Stem:' + qid
+	            });
+	        }
+	    }, {
 	        key: 'render',
 	        value: function render() {
 	            var self = this;
@@ -54602,9 +54614,11 @@
 	                _react2.default.createElement(
 	                    'div',
 	                    { className: 'bd' },
-	                    this.state && this.state.data.map(function (data, i) {
+	                    self.state && self.state.data.map(function (data, i) {
 	                        return _react2.default.createElement(_qubitcell.QubitCell, {
+	                            onClick: self.selected.bind(self, data.id),
 	                            key: i, data: data,
+	                            selected: data.id === self.state.selected,
 	                            style: { width: '100%', marginTop: 10 },
 	                            qid: data.id,
 	                            afterDeleted: self.refresh.bind(self) });
@@ -54860,14 +54874,15 @@
 	            var self = this;
 	            return _react2.default.createElement(
 	                'div',
-	                { className: 'qubit cell', style: this.props.style || {} },
+	                { className: 'qubit cell', style: self.props.style || {},
+	                    onClick: self.props.onClick || function (e) {} },
 	                _react2.default.createElement(
 	                    'div',
 	                    { className: 'hd' },
 	                    _react2.default.createElement(
 	                        'label',
 	                        null,
-	                        this.props.data.name,
+	                        self.props.data.name,
 	                        _react2.default.createElement(
 	                            'span',
 	                            null,
@@ -54993,21 +55008,32 @@
 	        key: 'componentWillMount',
 	        value: function componentWillMount() {
 	            this.setState({
-	                measureOn: 'Stem:1',
 	                qubits: []
 	            });
 	        }
 	    }, {
 	        key: 'componentDidMount',
 	        value: function componentDidMount() {
+	            var _this2 = this;
+
 	            var self = this;
-	            self.getQubitList();
 	            _bus.updateBus.onValue(function (v) {
-	                console.log('recieved', v);
 	                if (v.stem !== true) {
 	                    self.getQubitList();
 	                }
+	                if (v.measureOn !== undefined) {
+	                    _this2.setState({
+	                        measureOn: v.measureOn
+	                    });
+	                }
 	            });
+	        }
+	    }, {
+	        key: 'componentWillUpdate',
+	        value: function componentWillUpdate() {
+	            if (this.state.measureOn) {
+	                this.getQubitList();
+	            }
 	        }
 	    }, {
 	        key: 'getQubitList',
@@ -55059,7 +55085,7 @@
 	            return _react2.default.createElement(
 	                'div',
 	                { style: self.style() },
-	                this.state.qubits.map(function (d, i) {
+	                self.state.qubits.map(function (d, i) {
 	                    return self.renderQubitLayer(d, i);
 	                })
 	            );

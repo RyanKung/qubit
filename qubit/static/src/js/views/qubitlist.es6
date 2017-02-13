@@ -10,7 +10,8 @@ export class StemList extends React.Component {
     componentWillMount() {
         this.setState({
             last: {},
-            data: []
+            data: [],
+            selected: undefined
         })
         this.getData()
     }
@@ -50,16 +51,26 @@ export class StemList extends React.Component {
     refresh() {
         this.getData()
     }
+    selected(qid) {
+        this.setState({
+            selected: qid
+        })
+        updateBus.push({
+            measureOn: 'Stem:' + qid
+        })
+    }
     render () {
         var self = this
         return (
             <section className="qubitlist" style={{width: '20%'}}>
               <div className="hd"><h1>Qubits</h1></div>
               <div className="bd">
-                {this.state && this.state.data.map(function(data, i) {
+                {self.state && self.state.data.map(function(data, i) {
                     return (
                         <QubitCell
+                          onClick={self.selected.bind(self, data.id)}
                           key={i} data={data}
+                          selected={ data.id===self.state.selected }
                           style={{width: '100%', marginTop: 10}}
                           qid={data.id}
                           afterDeleted={self.refresh.bind(self)}></QubitCell>

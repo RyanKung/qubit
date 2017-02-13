@@ -148,9 +148,10 @@ export class QubitCell extends React.Component {
     render() {
         let self = this
         return (
-            <div className="qubit cell" style={this.props.style || {}}>
+            <div className="qubit cell" style={self.props.style || {}}
+                 onClick={ self.props.onClick || ((e) => {})}>
               <div className="hd">
-                <label>{this.props.data.name}<span>id: {this.props.data.id}</span></label>
+                <label>{self.props.data.name}<span>id: {this.props.data.id}</span></label>
                 <nav>
                   <ul></ul>
                 </nav>
