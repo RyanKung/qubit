@@ -9,7 +9,7 @@ from .utils import jsonize
 __all__ = ['qubit_api', 'entangle', 'stem_api', 'monad_tester']
 
 
-@app.route('/qubit/<qid>/', methods=['GET', 'DELETE'])
+@app.route('/qubit/<qid>/', methods=['GET', 'DELETE', 'PATCH'])
 @app.route('/qubit/', methods=['POST'])
 @jsonize
 @wrapper
@@ -27,13 +27,15 @@ def qubit_api(qid=None):
         return res and res._asdict()
 
     def update():
-        return Qubit.update(qid, **request.json)
+        return Qubit.update(qid, request.json)
 
     def delete():
         return Qubit.manager.delete(qid)
+
     return {
         'GET': fetch,
         'PUT': push,
+        'PATCH': update,
         'DELETE': delete,
         'POST': create
     }.get(request.method)()

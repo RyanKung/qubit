@@ -81,7 +81,7 @@ class Qubit(object):
         client.publish(sck_name, json.dumps({'qid': qid, 'data': data}))
 
     @classmethod
-    def update(cls, qid, data):
+    def update(cls, qid: str, data: dict):
         return cls.manager.update(qid, **data)
 
     @classmethod

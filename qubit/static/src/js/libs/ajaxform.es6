@@ -19,12 +19,14 @@ export default React.createClass({
             dataType: 'json',
             contentType: self.props.contentType || 'application/x-www-form-urlencoded',
             success: function(res) {
-                self.props.success && self.props.success(res, e)
+                self.props.success && self.props.success(res, data)
             }
         })
     },
     render: function() {
-        return (<form onSubmit={this.submit} method={this.props.method} action={this.props.action}>
+        return (<form onSubmit={this.submit}
+                method={this.props.method}
+                action={this.props.action}>
                 {this.props.children}
                 </form>)
     }

@@ -23574,6 +23574,7 @@
 	        var _this = _possibleConstructorReturn(this, (QubitModalForm.__proto__ || Object.getPrototypeOf(QubitModalForm)).call(this, props));
 
 	        _this.bus = qubitModalBus;
+	        _this.globalBus = _bus.bus;
 	        return _this;
 	    }
 
@@ -23591,12 +23592,13 @@
 	            var self = this;
 	            self.bus.onValue(function (msg) {
 	                var cmd = msg.cmd,
-	                    value = msg.value;
+	                    value = msg.value,
+	                    method = msg.method;
 
 	                return {
 	                    'open': self.open.bind(self),
 	                    'close': self.close.bind(self)
-	                }[cmd](value);
+	                }[cmd](value, method);
 	            });
 	        }
 	    }, {
@@ -23607,11 +23609,18 @@
 	            });
 	        }
 	    }, {
+	        key: 'afterSubmit',
+	        value: function afterSubmit() {
+	            this.close();
+	            this.props.afterSubmit && this.props.afterSubmit();
+	        }
+	    }, {
 	        key: 'open',
-	        value: function open(data) {
+	        value: function open(data, method) {
 	            this.setState({
 	                'open': true,
-	                'data': data || {}
+	                'data': data || {},
+	                'method': method
 	            });
 	        }
 	    }, {
@@ -23628,8 +23637,9 @@
 	                _reactModal2.default,
 	                { isOpen: this.state.open },
 	                _react2.default.createElement(_qubitform.QubitForm, { data: this.state.data,
+	                    method: this.state.method || 'post',
 	                    cancel: this.close.bind(this),
-	                    submit: this.close.bind(this)
+	                    submit: this.afterSubmit.bind(this)
 	                })
 	            );
 	        }
@@ -23673,6 +23683,8 @@
 
 	var _object2table = __webpack_require__(200);
 
+	var _bus = __webpack_require__(201);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -23700,15 +23712,27 @@
 	        }
 	    }, {
 	        key: 'success',
-	        value: function success(res) {
+	        value: function success(res, data) {
+	            // response and request data
 	            if (res.result == 'ok') {
 	                this.setState({
 	                    result: 'successed! qubit id: ' + res.data
 	                });
-	                this.props.submit && this.props.submit(this.data);
+	                this.props.submit && this.props.submit(data);
+	                this.broadcastUpdated(data);
 	            } else {
 	                window.alert('failed to post data');
 	            }
+	        }
+	    }, {
+	        key: 'broadcastUpdated',
+	        value: function broadcastUpdated(data) {
+	            var is_stem = data.is_stem;
+
+	            console.log('pushed');
+	            _bus.updateBus.push({
+	                'stem': is_stem
+	            });
 	        }
 	    }, {
 	        key: 'cancel',
@@ -23755,9 +23779,22 @@
 	            return JSON.stringify(resp);
 	        }
 	    }, {
+	        key: 'getURL',
+	        value: function getURL() {
+	            var method = this.props.method;
+	            var data = this.props.data;
+	            if (method == undefined || method == 'POST' || method === 'post') {
+	                return '/qubit/';
+	            } else {
+	                return '/qubit/' + data.id + '/';
+	            }
+	        }
+	    }, {
 	        key: 'render',
 	        value: function render() {
-	            var data = this.props.data;
+	            var self = this;
+	            var data = self.props.data;
+	            var method = self.props.method;
 	            return _react2.default.createElement(
 	                'section',
 	                { className: 'card' },
@@ -23772,23 +23809,24 @@
 	                ),
 	                _react2.default.createElement(
 	                    _ajaxform2.default,
-	                    { className: 'bd', action: '/qubit/',
+	                    { className: 'bd',
+	                        action: this.getURL(),
 	                        series: this.series.bind(this),
 	                        contentType: 'application/json',
 	                        success: this.success.bind(this),
-	                        method: 'post' },
+	                        method: method || 'post' },
 	                    _react2.default.createElement(
 	                        'fieldset',
 	                        null,
 	                        _react2.default.createElement('input', { placeholder: 'name', name: 'name',
 	                            required: true,
-	                            defaultValue: (0, _fn.bool)((0, _fn.getattr)(data, 'name', '')) }),
+	                            defaultValue: (0, _fn.getattr)(data, 'name', '') }),
 	                        _react2.default.createElement('input', { placeholder: 'rate (ms)', name: 'rate',
 	                            type: 'number',
 	                            defaultValue: (0, _fn.getattr)(data, 'rate', '') }),
 	                        _react2.default.createElement('input', { placeholder: 'Qubit:%s',
 	                            name: 'entangle',
-	                            defaultValue: (0, _fn.bool)((0, _fn.getattr)(data, 'rate', '')),
+	                            defaultValue: (0, _fn.getattr)(data, 'entangle', ''),
 	                            type: 'text' })
 	                    ),
 	                    _react2.default.createElement(
@@ -34174,14 +34212,16 @@
 	            dataType: 'json',
 	            contentType: self.props.contentType || 'application/x-www-form-urlencoded',
 	            success: function success(res) {
-	                self.props.success && self.props.success(res, e);
+	                self.props.success && self.props.success(res, data);
 	            }
 	        });
 	    },
 	    render: function render() {
 	        return _react2.default.createElement(
 	            'form',
-	            { onSubmit: this.submit, method: this.props.method, action: this.props.action },
+	            { onSubmit: this.submit,
+	                method: this.props.method,
+	                action: this.props.action },
 	            this.props.children
 	        );
 	    }
@@ -50976,7 +51016,7 @@
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	exports.SocketBus = exports.bus = exports.clickStream = exports.keyUpStream = undefined;
+	exports.SocketBus = exports.updateBus = exports.bus = exports.clickStream = exports.keyUpStream = undefined;
 
 	var _jquery = __webpack_require__(195);
 
@@ -50998,6 +51038,7 @@
 	    return e.target.className;
 	});
 	var bus = exports.bus = new _baconjs2.default.Bus();
+	var updateBus = exports.updateBus = new _baconjs2.default.Bus();
 
 	var SocketBus = exports.SocketBus = function SocketBus(uri) {
 	    _classCallCheck(this, SocketBus);
@@ -54470,6 +54511,8 @@
 
 	var _qubitcell = __webpack_require__(207);
 
+	var _bus = __webpack_require__(201);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -54495,6 +54538,16 @@
 	                data: []
 	            });
 	            this.getData();
+	        }
+	    }, {
+	        key: 'componentDidMount',
+	        value: function componentDidMount() {
+	            var self = this;
+	            _bus.updateBus.onValue(function (v) {
+	                if (v.stem === true) {
+	                    self.getData();
+	                }
+	            });
 	        }
 	    }, {
 	        key: 'getStates',
@@ -54536,7 +54589,7 @@
 	            var self = this;
 	            return _react2.default.createElement(
 	                'section',
-	                { className: 'qubitlist' },
+	                { className: 'qubitlist', style: { width: '20%' } },
 	                _react2.default.createElement(
 	                    'div',
 	                    { className: 'hd' },
@@ -54552,8 +54605,9 @@
 	                    this.state && this.state.data.map(function (data, i) {
 	                        return _react2.default.createElement(_qubitcell.QubitCell, {
 	                            key: i, data: data,
-	                            style: { width: 250, marginTop: 10 },
-	                            qid: data.id, afterDeleted: self.refresh });
+	                            style: { width: '100%', marginTop: 10 },
+	                            qid: data.id,
+	                            afterDeleted: self.refresh.bind(self) });
 	                    })
 	                )
 	            );
@@ -54616,8 +54670,7 @@
 	        value: function componentWillMount() {
 	            var genUrl = function genUrl(qid) {
 	                var host = window.location.host;
-	                var url = 'ws://' + host + '/qubit/subscribe/' + qid + '/';
-	                return url;
+	                return 'ws://' + host + '/qubit/subscribe/' + qid + '/';
 	            };
 	            var self = this;
 	            self.setState({
@@ -54697,6 +54750,16 @@
 	        value: function edit() {
 	            _qubitModalForm.qubitModalBus.push({
 	                'cmd': 'open',
+	                'method': 'patch',
+	                'value': this.props.data
+	            });
+	        }
+	    }, {
+	        key: 'duplicate',
+	        value: function duplicate() {
+	            _qubitModalForm.qubitModalBus.push({
+	                'cmd': 'open',
+	                'method': 'post',
 	                'value': this.props.data
 	            });
 	        }
@@ -54710,7 +54773,7 @@
 	                data: {},
 	                method: 'delete',
 	                success: function success() {
-	                    this.props.afterDeleted(qid);
+	                    self.props.afterDeleted(qid);
 	                } });
 	        }
 	    }, {
@@ -54852,7 +54915,13 @@
 	                        'button',
 	                        { 'data-name': this.props.data.name, 'data-qid': this.props.data.id,
 	                            onClick: this.edit.bind(this) },
-	                        'eidt'
+	                        'edit'
+	                    ),
+	                    _react2.default.createElement(
+	                        'button',
+	                        { 'data-name': this.props.data.name, 'data-qid': this.props.data.id,
+	                            onClick: this.duplicate.bind(this) },
+	                        'duplicate'
 	                    )
 	                ),
 	                self.state.last && self.showDataChart(self.state.last),
@@ -54901,6 +54970,8 @@
 
 	var _qubitcell = __webpack_require__(207);
 
+	var _bus = __webpack_require__(201);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -54929,7 +55000,14 @@
 	    }, {
 	        key: 'componentDidMount',
 	        value: function componentDidMount() {
-	            this.getQubitList();
+	            var self = this;
+	            self.getQubitList();
+	            _bus.updateBus.onValue(function (v) {
+	                console.log('recieved', v);
+	                if (v.stem !== true) {
+	                    self.getQubitList();
+	                }
+	            });
 	        }
 	    }, {
 	        key: 'getQubitList',
@@ -54962,14 +55040,15 @@
 	        value: function style() {
 	            return {
 	                float: 'right',
-	                marginTop: 50
+	                marginTop: 50,
+	                width: '78%'
 	            };
 	        }
 	    }, {
 	        key: 'qubitStyle',
 	        value: function qubitStyle() {
 	            return {
-	                width: '600px',
+	                width: '100%',
 	                marginTop: 10
 	            };
 	        }

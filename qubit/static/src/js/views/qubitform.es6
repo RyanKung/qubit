@@ -5,6 +5,7 @@ import Form from 'libs/ajaxform'
 import { str, getattr, bool } from 'libs/fn'
 import { TSChart } from 'views/vision'
 import { DataTable } from 'libs/object2table'
+import { updateBus } from 'bus'
 
 
 export class QubitForm extends React.Component {
@@ -14,15 +15,24 @@ export class QubitForm extends React.Component {
             hint: ''
         })
     }
-    success(res) {
+    success(res, data) { // response and request data
         if (res.result == 'ok') {
             this.setState({
                 result: 'successed! qubit id: ' + res.data
             })
-            this.props.submit && this.props.submit(this.data)
+            this.props.submit && this.props.submit(data)
+            this.broadcastUpdated(data)
         } else {
             window.alert('failed to post data')
         }
+    }
+    broadcastUpdated(data) {
+        let { is_stem } = data
+        console.log('pushed')
+        updateBus.push({
+            'stem': is_stem
+        })
+        
     }
     cancel() {
         this.props.cancel && this.props.cancel()
@@ -58,26 +68,39 @@ export class QubitForm extends React.Component {
         let resp = this.toDict($dom.serializeArray())
         return JSON.stringify(resp)
     }
-    render() {
+    getURL() {
+        let method = this.props.method
         let data = this.props.data
+        if (method == undefined || method == 'POST' || method === 'post') {
+            return '/qubit/'
+        } else {
+            return '/qubit/' + data.id + '/'
+        }
+    }
+    
+    render() {
+        let self = this
+        let data = self.props.data
+        let method = self.props.method
         return (
             <section className="card">
               <div className="hd"><h1>New Qubit</h1></div>
-              <Form className="bd" action="/qubit/"
+              <Form className="bd"
+                    action={this.getURL()}
                     series={this.series.bind(this)}
                     contentType='application/json'
                     success={this.success.bind(this)}
-                    method='post'>
+                    method={method || 'post'}>
                 <fieldset>
                   <input placeholder="name" name="name"
                          required
-                         defaultValue={bool(getattr(data, 'name', ''))}/>
+                         defaultValue={getattr(data, 'name', '')}/>
                   <input placeholder='rate (ms)' name='rate'
                          type='number'
                          defaultValue={getattr(data, 'rate', '')}/>
                   <input placeholder='Qubit:%s'
                          name='entangle'
-                         defaultValue={bool(getattr(data, 'rate', ''))}
+                         defaultValue={getattr(data, 'entangle', '')}
                          type='text' />
                 </fieldset>
                 <fieldset>

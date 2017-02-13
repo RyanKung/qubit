@@ -12,8 +12,7 @@ export class QubitCell extends React.Component {
     componentWillMount() {
         var genUrl = (qid) => {
             let host = window.location.host
-            let url = `ws://${ host }/qubit/subscribe/${ qid }/`
-            return url
+            return `ws://${ host }/qubit/subscribe/${ qid }/`
         }
         var self = this
         self.setState({
@@ -82,6 +81,14 @@ export class QubitCell extends React.Component {
     edit() {
         qubitModalBus.push({
             'cmd': 'open',
+            'method': 'patch',
+            'value': this.props.data
+        })
+    }
+    duplicate() {
+        qubitModalBus.push({
+            'cmd': 'open',
+            'method': 'post',
             'value': this.props.data
         })
     }
@@ -93,7 +100,7 @@ export class QubitCell extends React.Component {
             data: {},
             method: 'delete',
             success: function() {
-                this.props.afterDeleted(qid)
+                self.props.afterDeleted(qid)
             }})
     }
     showLastData(data) {
@@ -166,7 +173,9 @@ export class QubitCell extends React.Component {
                 <button data-name={this.props.data.name} data-qid={this.props.data.id}
                         onClick={this.triggerCode.bind(this)}>monad</button>
                 <button data-name={this.props.data.name} data-qid={this.props.data.id}
-                        onClick={this.edit.bind(this)}>eidt</button>
+                        onClick={this.edit.bind(this)}>edit</button>
+                <button data-name={this.props.data.name} data-qid={this.props.data.id}
+                        onClick={this.duplicate.bind(this)}>duplicate</button>
 
               </div>
               { self.state.last && self.showDataChart(self.state.last) }
