@@ -182,3 +182,8 @@ export class TSChart extends React.Component {
         )
     }
 }
+
+
+export class CandlestickChart extends React.Component {
+    
+}

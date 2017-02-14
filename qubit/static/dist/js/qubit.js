@@ -34268,7 +34268,7 @@
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	exports.TSChart = exports.DataSeries = exports.Line = exports.Axis = undefined;
+	exports.CandlestickChart = exports.TSChart = exports.DataSeries = exports.Line = exports.Axis = undefined;
 
 	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
@@ -34543,6 +34543,18 @@
 	    width: 300,
 	    height: 300
 	};
+
+	var CandlestickChart = exports.CandlestickChart = function (_React$Component5) {
+	    _inherits(CandlestickChart, _React$Component5);
+
+	    function CandlestickChart() {
+	        _classCallCheck(this, CandlestickChart);
+
+	        return _possibleConstructorReturn(this, (CandlestickChart.__proto__ || Object.getPrototypeOf(CandlestickChart)).apply(this, arguments));
+	    }
+
+	    return CandlestickChart;
+	}(_react2.default.Component);
 
 /***/ },
 /* 199 */
@@ -54587,7 +54599,6 @@
 	    }, {
 	        key: 'selected',
 	        value: function selected(qid) {
-	            console.log('click!!!!!');
 	            this.setState({
 	                selected: qid
 	            });
@@ -55010,36 +55021,28 @@
 	            this.setState({
 	                qubits: []
 	            });
+	            this.measureOn = undefined;
 	        }
 	    }, {
 	        key: 'componentDidMount',
 	        value: function componentDidMount() {
-	            var _this2 = this;
-
 	            var self = this;
 	            _bus.updateBus.onValue(function (v) {
-	                if (v.stem !== true) {
+	                if (v.stem === false) {
+	                    // for refresh
 	                    self.getQubitList();
 	                }
-	                if (v.measureOn !== undefined) {
-	                    _this2.setState({
-	                        measureOn: v.measureOn
-	                    });
+	                if (v.measureOn !== undefined && v.measureOn !== self.state.measureOn) {
+	                    self.measureOn = v.measureOn;
+	                    self.getQubitList();
 	                }
 	            });
-	        }
-	    }, {
-	        key: 'componentWillUpdate',
-	        value: function componentWillUpdate() {
-	            if (this.state.measureOn) {
-	                this.getQubitList();
-	            }
 	        }
 	    }, {
 	        key: 'getQubitList',
 	        value: function getQubitList() {
 	            var self = this;
-	            var entangle = self.state.measureOn;
+	            var entangle = self.measureOn;
 	            _jquery2.default.getJSON('/qubit/entangle/' + entangle + '/tree/', {}, function (data) {
 	                return self.setState({
 	                    qubits: data.data
