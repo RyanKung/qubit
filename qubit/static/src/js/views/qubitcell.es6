@@ -4,6 +4,7 @@ import $ from 'jquery'
 import { SocketBus } from 'bus'
 import {TSChart } from 'views/vision'
 import { qubitModalBus } from 'views/qubitModalForm'
+import { APIs } from 'model'
 
 export class QubitCell extends React.Component {
     constructor(props) {
@@ -55,7 +56,7 @@ export class QubitCell extends React.Component {
         if (!self.props.data.store) {
             return
         }
-        $.getJSON('/qubit/' + qid + '/period/seconds/120/', {}, function(resp) {
+        APIs.period(qid, 'months', 6, function(resp) {
             if (resp.data.length > 0) {
                 self.setState({
                     data: resp.data
@@ -66,9 +67,9 @@ export class QubitCell extends React.Component {
     getLast() {
         var self = this
         var qid = self.props.qid
-        $.getJSON('/qubit/' + qid + '/period/seconds/1/', {}, function(data) {
+        APIs.period(qid, 'seconds', 1, function(resp) {
             self.setState({
-                last: data
+                last: resp
             })
         })
     }
@@ -177,7 +178,6 @@ export class QubitCell extends React.Component {
                         onClick={this.edit.bind(this)}>edit</button>
                 <button data-name={this.props.data.name} data-qid={this.props.data.id}
                         onClick={this.duplicate.bind(this)}>duplicate</button>
-
               </div>
               { self.state.last && self.showDataChart(self.state.last) }
               { self.state.lastValue && self.showLastData(self.state.lastValue) }

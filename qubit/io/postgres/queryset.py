@@ -1,12 +1,14 @@
 from . import utils
 from .postgres import pool, connection
 import time
+from qubit.utils import timer
 
 __all__ = ['QuerySet', 'LazyQuery']
 
 key = str(time.time())
 
 
+@timer
 def query(sql):
     print('sql', sql)
     conn = connection()
@@ -18,6 +20,7 @@ def query(sql):
     return res
 
 
+@timer
 def update(sql):
     print('sql', sql)
     conn = connection()
@@ -31,6 +34,7 @@ def update(sql):
     return res if len(res) > 1 else res[0]
 
 
+@timer
 def insert(sql):
     print('sql', sql)
     conn = connection()

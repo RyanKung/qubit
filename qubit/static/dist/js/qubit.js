@@ -137,7 +137,7 @@
 
 	var _qubitlist = __webpack_require__(206);
 
-	var _measurelist = __webpack_require__(208);
+	var _measurelist = __webpack_require__(209);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -54507,10 +54507,6 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _jquery = __webpack_require__(195);
-
-	var _jquery2 = _interopRequireDefault(_jquery);
-
 	var _reactDom = __webpack_require__(37);
 
 	var _reactDom2 = _interopRequireDefault(_reactDom);
@@ -54524,6 +54520,8 @@
 	var _qubitcell = __webpack_require__(207);
 
 	var _bus = __webpack_require__(201);
+
+	var _model = __webpack_require__(208);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -54567,7 +54565,7 @@
 	        value: function getStates(qid) {
 	            var now = new Date().getTime();
 	            var from = now - 3600;
-	            _jquery2.default.getJSON('/qubit/state/' + qid, {
+	            _model.APIs.state(qid, {
 	                from: from,
 	                now: now
 	            }, function () {});
@@ -54576,7 +54574,7 @@
 	        key: 'getData',
 	        value: function getData() {
 	            var self = this;
-	            _jquery2.default.getJSON('/qubit/stem/', {}, function (data) {
+	            _model.APIs.stem(function (data) {
 	                self.setState({
 	                    data: data.data
 	                });
@@ -54673,6 +54671,8 @@
 
 	var _qubitModalForm = __webpack_require__(193);
 
+	var _model = __webpack_require__(208);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -54743,7 +54743,7 @@
 	            if (!self.props.data.store) {
 	                return;
 	            }
-	            _jquery2.default.getJSON('/qubit/' + qid + '/period/seconds/120/', {}, function (resp) {
+	            _model.APIs.period(qid, 'months', 6, function (resp) {
 	                if (resp.data.length > 0) {
 	                    self.setState({
 	                        data: resp.data
@@ -54756,9 +54756,9 @@
 	        value: function getLast() {
 	            var self = this;
 	            var qid = self.props.qid;
-	            _jquery2.default.getJSON('/qubit/' + qid + '/period/seconds/1/', {}, function (data) {
+	            _model.APIs.period(qid, 'seconds', 1, function (resp) {
 	                self.setState({
-	                    last: data
+	                    last: resp
 	                });
 	            });
 	        }
@@ -54982,6 +54982,47 @@
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
+	exports.APIs = undefined;
+
+	var _jquery = __webpack_require__(195);
+
+	var _jquery2 = _interopRequireDefault(_jquery);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var APIs = exports.APIs = {
+	    qubitList: function qubitList(measure, callback) {
+	        _jquery2.default.getJSON('/qubit/entangle/' + measure + '/tree/', {}, function (resp) {
+	            callback.call(this, resp);
+	        });
+	    },
+	    stem: function stem(callback) {
+	        _jquery2.default.getJSON('/qubit/stem/', {}, function (resp) {
+	            callback.call(this, resp);
+	        });
+	    },
+	    state: function state(qid, data, callback) {
+	        _jquery2.default.getJSON('/qubit/state/' + qid, data, function (resp) {
+	            callback.call(this, resp);
+	        });
+	    },
+	    period: function period(qid, _period, range, callback) {
+	        _jquery2.default.getJSON('/qubit/' + qid + '/period/' + _period + '/' + range + '/', {}, function (data) {
+	            callback.call(this, data);
+	        });
+	    }
+
+	};
+
+/***/ },
+/* 209 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
 	exports.MeasureList = undefined;
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -54990,13 +55031,11 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _jquery = __webpack_require__(195);
-
-	var _jquery2 = _interopRequireDefault(_jquery);
-
 	var _qubitcell = __webpack_require__(207);
 
 	var _bus = __webpack_require__(201);
+
+	var _model = __webpack_require__(208);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -55042,8 +55081,7 @@
 	        key: 'getQubitList',
 	        value: function getQubitList() {
 	            var self = this;
-	            var entangle = self.measureOn;
-	            _jquery2.default.getJSON('/qubit/entangle/' + entangle + '/tree/', {}, function (data) {
+	            _model.APIs.qubitList(self.measureOn, function (data) {
 	                return self.setState({
 	                    qubits: data.data
 	                });

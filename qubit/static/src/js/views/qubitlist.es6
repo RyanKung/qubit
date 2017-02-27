@@ -1,10 +1,10 @@
 import React from 'react'
-import $ from 'jquery'
 import ReactDOM from 'react-dom'
 import Modal from 'react-modal'
 import { QubitForm } from 'views/qubitform'
 import { QubitCell } from 'views/qubitcell'
 import { updateBus } from 'bus'
+import { APIs } from 'model'
 
 export class StemList extends React.Component {
     componentWillMount() {
@@ -26,16 +26,16 @@ export class StemList extends React.Component {
     getStates(qid) {
         var now = (new Date()).getTime()
         var from = now - 3600
-        $.getJSON('/qubit/state/' + qid, {
+        APIs.state(qid, {
             from: from,
             now: now
         }, function() {
-
+            
         })
     }
     getData() {
         var self = this
-        $.getJSON('/qubit/stem/', {}, function(data) {
+        APIs.stem(function(data) {
             self.setState({
                 data: data.data
             })

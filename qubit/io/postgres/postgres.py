@@ -16,4 +16,4 @@ def connection():
         connection._conn = psycopg2.connect(**PGSQL_PARAM)
     return connection._conn
 # for creat a new connection
-pool = psycopg2.pool.SimpleConnectionPool(1, 500, **PGSQL_PARAM)
+pool = psycopg2.pool.SimpleConnectionPool(1, 60 * 1000, **PGSQL_PARAM)
