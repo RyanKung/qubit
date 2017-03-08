@@ -244,7 +244,8 @@ class Qubit(object):
         qubit, data = cls.format(qubit, data)
         name = qubit.is_stem and 'Stem' or 'Qubit'
         sig_name = '%s:%s' % (name, qubit.id)
-        qubits = map(lambda x: cls.format_qubit(x)._asdict(), Qubit.get_flying(sig_name))
+        qubits = map(lambda x: cls.format_qubit(
+            x)._asdict(), Qubit.get_flying(sig_name))
         if not qubits:
             return False
         res = list(map(partial(
