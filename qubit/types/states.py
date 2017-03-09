@@ -75,30 +75,36 @@ class States(object):
     def get_period(cls, qid: str, period: str,
                    cycle: int, group_by=None) -> list:
 
-        if int(cycle) > 12:  # refuse large data querying
+        cycle = int(cycle)
+
+        if cycle > 12:  # refuse large data querying
             return []
 
         period_group_method = {
             'days': lambda d: d.day,
             'weeks': lambda d: d.isocalendar()[1],
             'months': lambda d: d.month,
-            'years': lambda d: d.year
+            'years': lambda d: d.year,
+            'seconds': lambda d: d.second,
+            'mintues': lambda d: d.timetuple().tm_mn,
+            'hours': lambda d: d.timetuple().tm_hour
         }[period]
 
         period_delta = {
-            'months': {'days': 30},
-            'days': {'days': 1},
-            'weeks': {'days': 1},
-            'years': {'years': 1}
+            'months': {'days': 30 * cycle},
+            'days': {'days': 1 * cycle},
+            'weeks': {'days': 1 * cycle},
+            'years': {'years': 1 * cycle},
+            'seconds': {'seconds': 1 * cycle},
+            'minutes': {'seconds': 60 * cycle},
+            'hours': {'hours': 1 * cycle}
         }[period]
 
         def handler() -> [list]:
             now = datetime.datetime.now()
             delta_start = datetime.timedelta(**period_delta)
             start = now - delta_start
-            grouped = groupby(cls.select(qid, start, now),
-                              lambda x: getattr(
-                                  x.ts, group_by or period_group_method))
+            grouped = groupby(cls.select(qid, start, now), period_group_method)
 
             def calcu(data: dict) -> dict:
                 ts = max(data.keys())
