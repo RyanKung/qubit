@@ -13,7 +13,7 @@ purge:
 upload:
 	python3 setup.py sdist --formats=gztar register upload
 run:
-	pwsgi -a qubit -m qubit -p . -b 127.0.0.1:8060 -w 4
+	pwsgi -a qubit -m qubit -p . -b 127.0.0.1:8060 -w 4 --keep-alive 600
 
 # for static
 watch:

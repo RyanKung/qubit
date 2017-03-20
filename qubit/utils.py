@@ -10,7 +10,7 @@ def timer(fn):
         start = time.time()
         res = fn(*args, **kwargs)
         end = time.time()
-        cost = str(end - start)
+        cost = str((end - start) * 1000.0)
         print('calling %s cost %s ms' % (fn.__name__, cost))
         return res
     return handler

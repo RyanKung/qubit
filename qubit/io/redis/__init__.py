@@ -2,7 +2,6 @@ import redis
 import simplejson as json
 from functools import wraps
 from pulsar.apps.data import create_store
-from pulsar import ensure_future
 from qubit.config import REDIS_PARMAS, REDIS_BACKEND
 
 __all__ = ['client', 'store', 'pubsub',
@@ -38,6 +37,7 @@ def cache(ttl=100, flag=None):
                 return res
         return handler
     return wrapper
+
 
 pubsub = store.pubsub()
 clear()

@@ -1,11 +1,13 @@
 from . import utils
 from .postgres import pool, connection
 import time
+import pulsar
 from qubit.utils import timer
 
 __all__ = ['QuerySet', 'LazyQuery']
 
 key = str(time.time())
+loop = pulsar.get_event_loop
 
 
 @timer

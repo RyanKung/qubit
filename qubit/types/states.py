@@ -1,5 +1,7 @@
 from itertools import groupby
+import time
 import datetime
+from typing import Callable, Generator
 from qubit.core.utils import tail
 from qubit.measure import pandas
 from qubit.io.postgres import types
@@ -81,29 +83,31 @@ class States(object):
             return []
 
         period_group_method = {
-            'days': lambda d: d.day,
-            'weeks': lambda d: d.isocalendar()[1],
-            'months': lambda d: d.month,
-            'years': lambda d: d.year,
-            'seconds': lambda d: d.second,
-            'mintues': lambda d: d.timetuple().tm_mn,
-            'hours': lambda d: d.timetuple().tm_hour
+            'days': lambda d: d.ts.day,
+            'weeks': lambda d: d.ts.isocalendar()[1],
+            'months': lambda d: d.ts.month,
+            'years': lambda d: d.ts.year,
+            'seconds': lambda d: d.ts.second,
+            'mintues': lambda d: d.ts.timetuple().tm_mn,
+            'hours': lambda d: d.ts.timetuple().tm_hour
         }[period]
 
-        period_delta = {
-            'months': {'days': 30 * cycle},
-            'days': {'days': 1 * cycle},
-            'weeks': {'days': 1 * cycle},
-            'years': {'years': 1 * cycle},
-            'seconds': {'seconds': 1 * cycle},
-            'minutes': {'seconds': 60 * cycle},
-            'hours': {'hours': 1 * cycle}
+        period_delta = lambda x: {
+            'months': {'days': 30 * x},
+            'days': {'days': 1 * x},
+            'weeks': {'days': 1 * x},
+            'years': {'years': 1 * x},
+            'seconds': {'seconds': 1 * x},
+            'minutes': {'seconds': 60 * x},
+            'hours': {'hours': 1 * x}
         }[period]
 
         def handler() -> [list]:
             now = datetime.datetime.now()
-            delta_start = datetime.timedelta(**period_delta)
+            delta_start = datetime.timedelta(**period_delta(cycle))
             start = now - delta_start
+            if cycle > 1:
+                pass
             grouped = groupby(cls.select(qid, start, now), period_group_method)
 
             def calcu(data: dict) -> dict:

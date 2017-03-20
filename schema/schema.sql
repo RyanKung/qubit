@@ -21,3 +21,14 @@ CREATE TABLE states(
        tags text default '',
        primary key (qubit, ts)
 );
+
+
+-- CREATE TABLE daily_states(
+--        id serial,
+--        ts date default now(),
+--        open integer,
+--        close integer,
+--        high integer,
+--        low integer,
+--        mean integer
+-- )
