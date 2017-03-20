@@ -23,12 +23,16 @@ CREATE TABLE states(
 );
 
 
--- CREATE TABLE daily_states(
---        id serial,
---        ts date default now(),
---        open integer,
---        close integer,
---        high integer,
---        low integer,
---        mean integer
--- )
+CREATE TABLE metric(
+       id serial,
+       name varchar(200),
+       tags text default '',
+       ts date default now(),
+       start timestamp,
+       end timestamp,
+       open integer,
+       close integer,
+       high integer,
+       low integer,
+       mean integer
+)
