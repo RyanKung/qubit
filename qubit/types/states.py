@@ -1,13 +1,15 @@
+#! -*- eval: (venv-workon "qubit"); -*-
+
 from itertools import groupby
-import time
 import datetime
-from typing import Callable, Generator
 from qubit.core.utils import tail
 from qubit.measure import pandas
 from qubit.io.postgres import types
 from qubit.io.postgres import QuerySet
 
 __all__ = ['States']
+
+METRIC = ('years', 'months', 'weeks', 'days', 'hours', 'minutes', 'seconds')
 
 
 class States(object):
@@ -73,6 +75,13 @@ class States(object):
         return cls.manager.find_near_lazy(
             qubit=qid, key='ts', start=now - delta)
 
+    @staticmethod
+    def shift(t: datetime.datetime, k: str, v: int):
+        time_tuple = list(t.timetuple())
+        i = dict(years=0, months=1, days=2, hours=3, mins=4, seconds=5).get(k)
+        time_tuple[i] -= v
+        return datetime.datetime(*time_tuple[:6])
+
     @classmethod
     def get_period(cls, qid: str, period: str,
                    cycle: int, group_by=None) -> list:
@@ -92,23 +101,11 @@ class States(object):
             'hours': lambda d: d.ts.timetuple().tm_hour
         }[period]
 
-        period_delta = lambda x: {
-            'months': {'days': 30 * x},
-            'days': {'days': 1 * x},
-            'weeks': {'days': 1 * x},
-            'years': {'years': 1 * x},
-            'seconds': {'seconds': 1 * x},
-            'minutes': {'seconds': 60 * x},
-            'hours': {'hours': 1 * x}
-        }[period]
-
-        def handler() -> [list]:
+        def query_cycle(cycle, is_iterator=True) -> [list]:
             now = datetime.datetime.now()
-            delta_start = datetime.timedelta(**period_delta(cycle))
-            start = now - delta_start
-            if cycle > 1:
-                pass
-            grouped = groupby(cls.select(qid, start, now), period_group_method)
+            start = cls.shift(now, str(period), int(cycle))
+            end = is_iterator and cls.shift(now, str(period), int(cycle - 1)) or now
+            grouped = groupby(cls.select(qid, start, end), period_group_method)
 
             def calcu(data: dict) -> dict:
                 ts = max(data.keys())
@@ -120,4 +117,8 @@ class States(object):
                 return (calcu(dict(tuple(map(lambda x: (x.ts, x.datum), tail(g))))))
 
             return tuple(map(map2df, grouped))
-        return handler()
+
+        if METRIC.index(period) > 3:
+            return query_cycle(cycle, is_iterator=False)
+        else:
+            return tuple(map(query_cycle, range(1, cycle)))  # for cacheable

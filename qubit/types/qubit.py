@@ -1,3 +1,5 @@
+#! -*- eval: (venv-workon "qubit"); -*-
+
 import json
 import runpy
 from types import ModuleType
