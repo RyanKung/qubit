@@ -1,4 +1,4 @@
-#! -*- eval: (venv-workon "qubit"); -*-
+# -*- eval: (venv-workon "qubit"); -*-
 
 from itertools import groupby
 import datetime

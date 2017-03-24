@@ -1,7 +1,6 @@
-import asyncio
+# -*- eval: (venv-workon "qubit"); -*-
+
 import asyncpg
-from pulsar import ensure_future
-from typing import Callable
 
 
 try:
@@ -37,7 +36,7 @@ async def async_call(sql):
     res = await {
         'SELECT': async_call.conn.fetch,
         'INSERT': async_call.conn.fetchval,
-        'UPDATE': async_call.conn.execute
+        'UPDATE': async_call.conn.fetchval
     }.get(method, async_call.conn.execute)(sql)
     return res
 
