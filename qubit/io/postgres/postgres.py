@@ -26,15 +26,19 @@ def connection():
 
 async def async_call(sql):
     method = sql.split(' ')[0]
-    conn = await asyncpg.connect(host=PGSQL_PARAM['host'],
-                                 user=PGSQL_PARAM['user'],
-                                 database=PGSQL_PARAM['database'],
-                                 port=PGSQL_PARAM['port'])
+    if not getattr(async_call, 'conn', None):
+        conn = await asyncpg.connect(
+            host=PGSQL_PARAM['host'],
+            user=PGSQL_PARAM['user'],
+            database=PGSQL_PARAM['database'],
+            port=PGSQL_PARAM['port'])
+        async_call.conn = conn
+
     res = await {
-        'SELECT': conn.fetch,
-        'INSERT': conn.fetchval,
-        'UPDATE': conn.execute
-    }.get(method, conn.execute)(sql)
+        'SELECT': async_call.conn.fetch,
+        'INSERT': async_call.conn.fetchval,
+        'UPDATE': async_call.conn.execute
+    }.get(method, async_call.conn.execute)(sql)
     return res
 
 
