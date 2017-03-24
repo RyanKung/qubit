@@ -1,18 +1,22 @@
 from . import utils
-from .postgres import pool, connection
+import asyncpg
+from .postgres import pool, connection, async_call
 import time
 import pulsar
 from qubit.utils import timer
+from pulsar import ensure_future
+from qubit.config import PGSQL_PARAM
 
 __all__ = ['QuerySet', 'LazyQuery']
 
 key = str(time.time())
-loop = pulsar.get_event_loop
+loop = pulsar.get_event_loop()
 
 
 @timer
 def query(sql):
     print('sql', sql)
+    return loop.run_until_complete(async_call(sql))
     conn = connection()
     conn.set_session(autocommit=True)
     cur = conn.cursor()
@@ -25,6 +29,7 @@ def query(sql):
 @timer
 def update(sql):
     print('sql', sql)
+    return loop.run_until_complete(async_call(sql))
     conn = connection()
     conn.set_session(autocommit=True)
     cur = conn.cursor()
@@ -39,6 +44,7 @@ def update(sql):
 @timer
 def insert(sql):
     print('sql', sql)
+    return loop.run_until_complete(async_call(sql))
     conn = connection()
     conn.set_session(autocommit=True)
     cur = conn.cursor()
