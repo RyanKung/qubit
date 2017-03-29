@@ -1,5 +1,5 @@
-from .postgres import connection, pool
 from . import types
 from .queryset import QuerySet
+from .postgres import PostgresMiddleware, connection
 
-__all__ = ['connection', 'pool', 'types', 'QuerySet']
+__all__ = ['types', 'QuerySet', 'PostgresMiddleware', 'connection']

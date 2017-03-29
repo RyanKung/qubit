@@ -1,7 +1,7 @@
 # -*- eval: (venv-workon "qubit"); -*-
 
 import asyncpg
-
+from flask import request
 
 try:
     import psycopg2
@@ -42,3 +42,28 @@ async def async_call(sql):
 
 
 pool = psycopg2.pool.SimpleConnectionPool(1, 60 * 1000, **PGSQL_PARAM)
+
+
+async def async_call_with_pool(sql, pool):
+    method = sql.split(' ')[0]
+    async with pool:
+        async with pool.acquire() as conn:
+            res = await {
+                'SELECT': conn.fetch,
+                'INSERT': conn.fetchval,
+                'UPDATE': conn.fetchval
+            }.get(method, conn.execute)(sql)
+            return res
+
+
+class PostgresMiddleware():
+    def __init__(self):
+        self.pool = asyncpg.create_pool(
+            host=PGSQL_PARAM['host'],
+            user=PGSQL_PARAM['user'],
+            database=PGSQL_PARAM['database'],
+            port=PGSQL_PARAM['port'])
+
+    def __call__(self, environ, start_response=None):
+        environ['PG_POOL'] = self.pool
+        return None

@@ -1,12 +1,11 @@
 from . import utils
-import asyncpg
-from .postgres import pool, connection, async_call
+from .postgres import async_call
 import time
 import pulsar
 from qubit.utils import timer
 from qubit.io.utils import with_loop
 
-__all__ = ['QuerySet', 'LazyQuery']
+__all__ = ['QuerySet']
 
 key = str(time.time())
 loop = pulsar.get_event_loop()
@@ -32,34 +31,6 @@ def insert(sql):
     print('sql', sql)
     res = with_loop(async_call)(sql)
     return res
-
-
-class LazyQuery():
-    def __init__(self, sql, fields=None):
-        self.sql = sql
-        self.conn = pool.getconn()
-        self.conn.set_session(autocommit=True)
-        self.cur = self.conn.cursor()
-        self.cur.execute(self.sql)
-        self.fields = fields
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        res = self.cur.fetchone()
-        if res:
-            yield dict(zip(self.fields, res[0])) if self.fields else res
-
-        else:
-            pool.putconn(self.conn)
-            raise StopIteration
-
-    def read(self, n=0):  # for pandas
-        try:
-            return next(','.join(self.g))
-        except StopIteration:
-            return ''
 
 
 class QuerySet(object):
