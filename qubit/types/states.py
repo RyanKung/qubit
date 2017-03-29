@@ -1,11 +1,13 @@
 #! -*- eval: (venv-workon "qubit"); -*-
 
-from itertools import groupby
+from itertools import groupby, starmap
 import datetime
+from dateutil.relativedelta import relativedelta
 from qubit.core.utils import tail
 from qubit.measure import pandas
 from qubit.io.postgres import types
 from qubit.io.postgres import QuerySet
+from qubit.types.utils import DateRange
 
 __all__ = ['States']
 
@@ -77,10 +79,7 @@ class States(object):
 
     @staticmethod
     def shift(t: datetime.datetime, k: str, v: int):
-        time_tuple = list(t.timetuple())
-        i = dict(years=0, months=1, days=2, hours=3, mins=4, seconds=5).get(k)
-        time_tuple[i] -= v
-        return datetime.datetime(*time_tuple[:6])
+        return t - relativedelta(**{k: v})
 
     @classmethod
     def get_period(cls, qid: str, period: str,
@@ -101,10 +100,7 @@ class States(object):
             'hours': lambda d: d.ts.timetuple().tm_hour
         }[period]
 
-        def query_cycle(cycle, is_iterator=True) -> [list]:
-            now = datetime.datetime.now()
-            start = cls.shift(now, str(period), int(cycle))
-            end = is_iterator and cls.shift(now, str(period), int(cycle - 1)) or now
+        def query(start, end) -> [list]:
             grouped = groupby(cls.select(qid, start, end), period_group_method)
 
             def calcu(data: dict) -> dict:
@@ -119,6 +115,8 @@ class States(object):
             return tuple(map(map2df, grouped))
 
         if METRIC.index(period) > 3:
-            return query_cycle(cycle, is_iterator=False)
+            end = datetime.datetime.now()
+            start = cls.shift(end, str(period), int(cycle))
+            return query(start, end)
         else:
-            return tuple(map(query_cycle, range(1, cycle)))  # for cacheable
+            return tuple(starmap(query, DateRange(period, cycle)))
