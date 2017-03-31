@@ -21,12 +21,17 @@ export class QubitCell extends React.Component {
             data: [],
             showCode: false
         })
-        self.socketBus = new SocketBus(genUrl(self.props.qid))
-        self.bus = self.socketBus.bus
+        if (!self.props.data.is_spout) {
+            self.socketBus = new SocketBus(genUrl(self.props.qid))
+            self.bus = self.socketBus.bus
+        }
         self.getPeriod()
     }
     componentDidMount() {
-        this.listenBus()
+        var self = this
+        if (!self.props.data.is_spout) {
+            this.listenBus()
+        }
     }
     listenBus() {
         let self = this
@@ -47,7 +52,6 @@ export class QubitCell extends React.Component {
                 last: origin,
                 lastValue: data.datum
             })
-
         })
     }
     getPeriod() {

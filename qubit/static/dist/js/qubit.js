@@ -54703,14 +54703,19 @@
 	                data: [],
 	                showCode: false
 	            });
-	            self.socketBus = new _bus.SocketBus(genUrl(self.props.qid));
-	            self.bus = self.socketBus.bus;
+	            if (!self.props.data.is_spout) {
+	                self.socketBus = new _bus.SocketBus(genUrl(self.props.qid));
+	                self.bus = self.socketBus.bus;
+	            }
 	            self.getPeriod();
 	        }
 	    }, {
 	        key: 'componentDidMount',
 	        value: function componentDidMount() {
-	            this.listenBus();
+	            var self = this;
+	            if (!self.props.data.is_spout) {
+	                this.listenBus();
+	            }
 	        }
 	    }, {
 	        key: 'listenBus',

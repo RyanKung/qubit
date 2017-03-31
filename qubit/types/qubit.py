@@ -261,7 +261,7 @@ class Qubit(object):
         return cls.manager.update(qid1, entangle=sig_name)
 
     @staticmethod
-    @partial(period_task, name='spout', period=1000)
+    @partial(period_task, name='spout', period=300)
     @queue.task(filter=task_method)
     def activate_period_task():
         return Qubit.activate_all()

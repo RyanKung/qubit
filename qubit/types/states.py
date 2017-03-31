@@ -7,6 +7,7 @@ from qubit.core.utils import tail
 from qubit.measure import pandas
 from qubit.io.postgres import types
 from qubit.io.postgres import QuerySet
+from qubit.io.redis import cache
 from qubit.types.utils import DateRange
 
 __all__ = ['States']
@@ -119,4 +120,5 @@ class States(object):
             start = cls.shift(end, str(period), int(cycle))
             return query(start, end)
         else:
-            return tuple(starmap(query, DateRange(period, cycle)))
+            dates = list(DateRange(period, cycle))
+            return tuple(starmap(cache()(query), dates[:-1])) + (query(*(dates[-1])), )
