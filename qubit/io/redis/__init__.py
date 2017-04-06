@@ -12,8 +12,12 @@ store = create_store(REDIS_BACKEND)
 pubsub = store.pubsub()
 
 
-def clear():
-    keys = client.keys('qubit::*')
+def clear(flag=None):
+    if not flag:
+        flag = "*"
+    else:
+        flag += ':'
+    keys = client.keys('qubit::%s' % flag)
     for k in keys:
         res = client.delete(k.decode())
         print('deleting %s %s' % (k.decode(), bool(res)))

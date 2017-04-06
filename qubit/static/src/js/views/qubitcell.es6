@@ -138,8 +138,8 @@ export class QubitCell extends React.Component {
             <div className='chart' style={style}>
               <TSChart
                 data={data}
-                width={this.props.style.width - 20 || 400 }
-                height={ 200 }
+                width={ 550 }
+                height={ 150 }
                 />
             </div>
         )

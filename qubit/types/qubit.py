@@ -11,14 +11,19 @@ from qubit.io.celery import Entanglement
 from qubit.io.celery import queue
 from qubit.io.celery import task_method
 from qubit.io.celery import period_task
-from qubit.io.redis import client, cache
+from qubit.io.redis import client, cache, clear
 from qubit.types.utils import ts_data, empty_ts_data
 from qubit.types.states import States
-
+from qubit.signals.signals import clear_flying_qubit_cache
 __all__ = ['Qubit']
 
 
 tell_client = partial(client.publish, 'eventsocket')
+
+
+@clear_flying_qubit_cache.connect
+def clear_flying_cache():
+    clear('flying')
 
 
 class QubitEntanglement(Entanglement):
@@ -56,6 +61,7 @@ class Qubit(object):
             flying=flying, *args, **kwargs)
         if qid and is_stem:
             tell_client('new_stem')
+        clear('flying')
         return qid
 
     @staticmethod

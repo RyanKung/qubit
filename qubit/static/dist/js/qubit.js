@@ -54857,8 +54857,8 @@
 	                { className: 'chart', style: style },
 	                _react2.default.createElement(_vision.TSChart, {
 	                    data: data,
-	                    width: this.props.style.width - 20 || 400,
-	                    height: 200
+	                    width: 550,
+	                    height: 180
 	                })
 	            );
 	        }
