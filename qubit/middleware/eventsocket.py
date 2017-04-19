@@ -1,3 +1,6 @@
+#! -*- eval: (venv-workon "qubit"); -*-
+
+
 import simplejson as json
 from pulsar.apps import ws
 from pulsar.apps.wsgi import route

@@ -173,6 +173,7 @@ class Qubit(object):
 
     @classmethod
     def delete(cls, qubit_id):
+        clear('flying')
         return (cls.manager.delete(qubit_id) and
                 States.manager.delete_by(qubit=qubit_id))
 
